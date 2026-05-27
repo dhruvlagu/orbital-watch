@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import Layout from "./components/Layout";
+import CrisisPage from "./pages/CrisisPage";
 import HomePage from "./pages/HomePage";
 import PlaceholderPage from "./pages/PlaceholderPage";
 
@@ -8,8 +9,10 @@ export default function App() {
     <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={<HomePage />} />
-        <Route path="/the-crisis" element={<PlaceholderPage />} />
-        <Route path="/the-physics" element={<PlaceholderPage />} />
+        <Route path="/crisis" element={<CrisisPage />} />
+        <Route path="/physics" element={<PlaceholderPage />} />
+        <Route path="/the-crisis" element={<Navigate to="/crisis" replace />} />
+        <Route path="/the-physics" element={<Navigate to="/physics" replace />} />
         <Route path="/policy" element={<PlaceholderPage />} />
         <Route path="/solutions" element={<PlaceholderPage />} />
         <Route path="/get-involved" element={<PlaceholderPage />} />

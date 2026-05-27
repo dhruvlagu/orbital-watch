@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import LiveDataSection from "../components/LiveDataSection";
 import StarfieldCanvas from "../components/StarfieldCanvas";
 import { useCountUp } from "../hooks/useCountUp";
 
@@ -57,10 +58,10 @@ export default function HomePage() {
               </div>
 
               <div className="hero__ctas">
-                <Link className="btn btn--primary" to="/the-crisis">
+                <Link className="btn btn--primary" to="/crisis">
                   Explore the Crisis →
                 </Link>
-                <Link className="btn btn--secondary" to="/the-physics">
+                <Link className="btn btn--secondary" to="/physics">
                   The Physics
                 </Link>
               </div>
@@ -98,6 +99,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <LiveDataSection />
     </>
   );
 }
