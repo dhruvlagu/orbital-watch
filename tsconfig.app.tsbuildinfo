@@ -1,1 +1,1 @@
-{"root":["./src/app.tsx","./src/main.tsx","./src/components/footer.tsx","./src/components/layout.tsx","./src/components/navbar.tsx","./src/components/nav.ts","./src/pages/homepage.tsx","./src/pages/placeholderpage.tsx"],"version":"5.9.3"}
+{"root":["./src/app.tsx","./src/main.tsx","./src/components/footer.tsx","./src/components/layout.tsx","./src/components/navbar.tsx","./src/components/starfieldcanvas.tsx","./src/components/nav.ts","./src/hooks/usecountup.ts","./src/pages/homepage.tsx","./src/pages/placeholderpage.tsx"],"version":"5.9.3"}
