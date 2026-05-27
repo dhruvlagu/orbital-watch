@@ -24,5 +24,5 @@ npm install
 npm run dev
 ```
 
-Then open the Vite URL shown in terminal (typically `http://localhost:5173`).
+Then open the Vite URL shown in terminal (typically `http://localhost:5174`).
 
