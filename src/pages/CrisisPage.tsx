@@ -270,7 +270,7 @@ export default function CrisisPage() {
         ) : (
           <div className="crisisChart__skeleton" />
         )}
-        <div className="crisisChart__source">Source: ESA Space Environment Report 2023, NASA ODPO</div>
+        <div className="crisisChart__source">Source: ESA Annual Space Environment Report</div>
       </div>
 
       <div className="container timeline">
