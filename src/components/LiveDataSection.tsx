@@ -10,6 +10,24 @@ function hoursAgo(timestamp: number | null) {
   return `${hours} hour${hours === 1 ? "" : "s"} ago`;
 }
 
+function WarningIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="liveData__warningIcon">
+      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3.05h16.94a2 2 0 0 0 1.71-3.05L13.71 3.86a2 2 0 0 0-3.42 0z" />
+      <line x1="12" y1="9" x2="12" y2="13" />
+      <line x1="12" y1="17" x2="12.01" y2="17" />
+    </svg>
+  );
+}
+
+function Spinner() {
+  return (
+    <div className="liveData__spinner">
+      <div className="liveData__spinnerInner" />
+    </div>
+  );
+}
+
 const FALLBACK: LiveOrbitalResponse = {
   data: {
     totalTracked: 27000,
@@ -93,13 +111,33 @@ export default function LiveDataSection() {
 
         <div className="liveData__grid">
           {loading
-            ? [1, 2, 3, 4].map((idx) => (
-                <div className="card liveDataCard liveDataCard--skeleton" key={idx}>
-                  <div className="liveDataCard__skeletonValue" />
-                  <div className="liveDataCard__skeletonLabel" />
+            ? (
+              <div className="card liveDataCard liveData__loadingState">
+                <Spinner />
+                <p className="liveData__loadingText">
+                  Fetching live orbital data from Space-Track.org...
+                  <br />
+                  This may take 10–15 seconds on first load.
+                </p>
+              </div>
+            )
+            : payload.error
+              ? (
+                <div className="card liveDataCard liveData__errorState">
+                  <div className="liveData__errorHeader">
+                    <WarningIcon />
+                    <p className="liveData__errorText">
+                      Live data unavailable — displaying last cached data.
+                      <br />
+                      Space-Track.org may be temporarily unreachable.
+                    </p>
+                  </div>
+                  {payload.lastUpdatedAt && (
+                    <p className="liveData__errorMeta">Last updated: {hoursAgo(payload.lastUpdatedAt)}</p>
+                  )}
                 </div>
-              ))
-            : metricCards.map((metric) => (
+              )
+              : metricCards.map((metric) => (
                 <div className="card liveDataCard" key={metric.label}>
                   <div className="liveDataCard__value">{metric.value}</div>
                   <div className="liveDataCard__label">{metric.label}</div>
