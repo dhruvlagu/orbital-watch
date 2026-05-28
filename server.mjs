@@ -2,6 +2,9 @@ import http from "node:http";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { config } from "dotenv";
+
+config({ path: "./spacetrack.env" });
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,8 +31,74 @@ function safePath(requestPath) {
   return normalized === "/" ? "/index.html" : normalized;
 }
 
+async function handleSpaceTrackProxy(req, res) {
+  try {
+    const user = process.env.SPACE_TRACK_USER;
+    const pass = process.env.SPACE_TRACK_PASS;
+
+    if (!user || !pass) {
+      res.writeHead(500, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({
+        error: "Missing SPACE_TRACK_USER or SPACE_TRACK_PASS environment variables.",
+      }));
+      return;
+    }
+
+    const loginBody = new URLSearchParams({
+      identity: user,
+      password: pass,
+    }).toString();
+
+    const authResponse = await fetch("https://www.space-track.org/ajaxauth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: loginBody,
+    });
+
+    const setCookies = authResponse.headers.getSetCookie?.();
+    const cookieHeader =
+      setCookies
+        ?.map((cookie) => cookie.split(";")[0])
+        .join("; ")
+        .trim() || authResponse.headers.get("set-cookie")?.split(";")[0];
+
+    if (!authResponse.ok || !cookieHeader) {
+      throw new Error("Space-Track authentication failed.");
+    }
+
+    const dataResponse = await fetch(
+      "https://www.space-track.org/basicspacedata/query/class/satcat/format/json",
+      {
+        headers: {
+          Cookie: cookieHeader,
+        },
+      },
+    );
+
+    if (!dataResponse.ok) {
+      throw new Error(`SATCAT query failed with status ${dataResponse.status}`);
+    }
+
+    const payload = await dataResponse.text();
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(payload);
+  } catch (error) {
+    res.writeHead(500, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({
+      error: error instanceof Error ? error.message : "Unknown Space-Track proxy error",
+    }));
+  }
+}
+
 const server = http.createServer(async (req, res) => {
   try {
+    // Handle Space-Track API endpoint
+    if (req.url?.startsWith("/api/spacetrack/satcat")) {
+      return await handleSpaceTrackProxy(req, res);
+    }
+
     const urlPath = safePath(req.url || "/");
     const filePath = path.join(__dirname, urlPath);
 
