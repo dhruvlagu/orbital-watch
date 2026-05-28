@@ -35,8 +35,8 @@ export default function HomePage() {
               <h1 className="hero__headline">Earth&apos;s Orbit Is Becoming a Graveyard.</h1>
               <p className="hero__subheadline">
                 Decades of Cold War recklessness created 25,000+ trackable debris objects
-                traveling at 17,500 mph. One collision cascade could end the Space Age
-                permanently.
+                traveling at 17,500 mph. One collision cascade is all it takes to end the Space Age
+                forever.
               </p>
 
               <div className="hero__stats">
