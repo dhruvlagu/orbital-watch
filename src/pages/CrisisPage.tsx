@@ -58,7 +58,7 @@ const eventMarkerPlugin: Plugin<"line"> = {
 
     ctx.save();
     markedEvents.forEach((event) => {
-      const x = xScale.getPixelForValue(String(event.year));
+      const x = xScale.getPixelForValue(event.year);
       if (x < chartArea.left || x > chartArea.right) return;
 
       ctx.setLineDash([4, 6]);
@@ -201,7 +201,7 @@ export default function CrisisPage() {
           label: "Trackable objects",
           data: debrisGrowthData.map((point) => point.count),
           borderColor: "#00d4ff",
-          backgroundColor: (ctx: { chart: ChartJS<"line"> }) => {
+          backgroundColor: ((ctx: { chart: ChartJS<"line"> }) => {
             const chart = ctx.chart;
             const area = chart.chartArea;
             if (!area) return "rgba(0,212,255,0.15)";
@@ -209,14 +209,14 @@ export default function CrisisPage() {
             gradient.addColorStop(0, "rgba(0,212,255,0.2)");
             gradient.addColorStop(1, "rgba(0,212,255,0)");
             return gradient;
-          },
+          }) as any,
           fill: true,
           borderWidth: 3,
           tension: 0.25,
           pointRadius: 0,
         },
       ],
-    }),
+    } as any),
     [],
   );
 
