@@ -276,9 +276,8 @@ export default function CrisisPage() {
       <div className="container timeline">
         {crisisEvents.map((event, idx) => (
           <article
-            className={`timelineEvent ${idx % 2 === 0 ? "" : "timelineEvent--flip"} ${
-              event.tone === "amber" ? "timelineEvent--amber" : ""
-            }`}
+            className={`timelineEvent ${idx % 2 === 0 ? "" : "timelineEvent--flip"} ${event.tone === "amber" ? "timelineEvent--amber" : ""
+              }`}
             key={event.year}
           >
             <div className="timelineEvent__text">

@@ -24,6 +24,13 @@ export default function HomePage() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  const handleScrollIndicatorClick = () => {
+    window.scrollTo({
+      top: window.innerHeight,
+      behavior: "smooth",
+    });
+  };
+
   return (
     <>
       <section className="hero">
@@ -74,6 +81,14 @@ export default function HomePage() {
                 ? "heroScrollIndicator heroScrollIndicator--visible"
                 : "heroScrollIndicator"
             }
+            onClick={handleScrollIndicatorClick}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                handleScrollIndicatorClick();
+              }
+            }}
           >
             <div className="heroScrollIndicator__chevron" />
           </div>

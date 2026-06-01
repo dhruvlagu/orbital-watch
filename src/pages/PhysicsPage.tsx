@@ -18,6 +18,13 @@ export default function PhysicsPage() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  const handleScrollIndicatorClick = () => {
+    window.scrollTo({
+      top: window.innerHeight,
+      behavior: "smooth",
+    });
+  };
+
   // Calculate kinetic energy in joules
   const massKg = mass / 1000;
   const velocityMs = velocity * 1000;
@@ -45,14 +52,14 @@ export default function PhysicsPage() {
     labels: [
       "Bullet\n(10g, 900 m/s)",
       "1cm debris\n(1g, 7,900 m/s)",
-      "Hand grenade",
       "1cm debris\n(5g, 7,900 m/s)",
+      "Hand grenade",
       "Tennis ball debris\n(57g, 7,900 m/s)",
     ],
     datasets: [
       {
         label: "Kinetic Energy (Joules)",
-        data: [4000, 31000, 160000, 155000, 1780000],
+        data: [4000, 31000, 155000, 160000, 1780000],
         backgroundColor: [
           "rgba(245, 166, 35, 0.6)",
           "rgba(255, 140, 35, 0.6)",
@@ -87,6 +94,16 @@ export default function PhysicsPage() {
         padding: 12,
         titleFont: { size: 14, weight: "bold" as const },
         bodyFont: { size: 13 },
+        displayColors: false,
+        callbacks: {
+          title: (context: any) => {
+            return context[0].label.split("\n")[0];
+          },
+          label: (context: any) => {
+            const value = context.parsed.x;
+            return `Kinetic Energy: ${value.toLocaleString()} J`;
+          },
+        },
       },
     },
     scales: {
@@ -129,6 +146,14 @@ export default function PhysicsPage() {
                 ? "heroScrollIndicator heroScrollIndicator--visible"
                 : "heroScrollIndicator"
             }
+            onClick={handleScrollIndicatorClick}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                handleScrollIndicatorClick();
+              }
+            }}
           >
             <div className="heroScrollIndicator__chevron" />
           </div>
@@ -279,32 +304,49 @@ export default function PhysicsPage() {
           <p className="section-subtitle">Why debris doesn't just accumulate — it multiplies.</p>
 
           <div className="cascadeFlow">
-            <div className="cascadeStep">
-              <div className="cascadeIcon cascade-icon--impact">⚡</div>
-              <h3>Initial Impact</h3>
-              <p>
-                A single hypervelocity collision shatters both objects into thousands of high-velocity fragments. Each fragment retains roughly the orbital energy of the original object.
-              </p>
-            </div>
+            <div className="cascadeTimeline">
+              <div className="cascadeStep cascadeStep--timeline">
+                <div className="cascadeStepContent">
+                  <div className="cascadeStepLeft">
+                    <h3>Initial Impact</h3>
+                  </div>
+                  <div className="cascadeStepRight">
+                    <p>
+                      A single hypervelocity collision shatters both objects into thousands of high-velocity fragments. Each fragment retains roughly the orbital energy of the original object.
+                    </p>
+                  </div>
+                </div>
+              </div>
 
-            <div className="cascadeArrow">→</div>
+              <div className="cascadeArrow cascadeArrow--vertical">↓</div>
 
-            <div className="cascadeStep">
-              <div className="cascadeIcon cascade-icon--fragmentation">✦</div>
-              <h3>Fragmentation Cloud</h3>
-              <p>
-                Fragments spread across a range of orbital altitudes. At LEO densities, each new fragment has a non-zero probability of striking another object within months or years.
-              </p>
-            </div>
+              <div className="cascadeStep cascadeStep--timeline">
+                <div className="cascadeStepContent">
+                  <div className="cascadeStepLeft">
+                    <h3>Fragmentation Cloud</h3>
+                  </div>
+                  <div className="cascadeStepRight">
+                    <p>
+                      Fragments spread across a range of orbital altitudes. At LEO densities, each new fragment has a non-zero probability of striking another object within months or years.
+                    </p>
+                  </div>
+                </div>
+              </div>
 
-            <div className="cascadeArrow">→</div>
+              <div className="cascadeArrow cascadeArrow--vertical">↓</div>
 
-            <div className="cascadeStep">
-              <div className="cascadeIcon cascade-icon--cascade">∞</div>
-              <h3>Self-Sustaining Cascade</h3>
-              <p>
-                Above a critical density threshold, collisions produce fragments faster than atmospheric drag can remove them. The cascade becomes self-sustaining — LEO unusable for centuries.
-              </p>
+              <div className="cascadeStep cascadeStep--timeline">
+                <div className="cascadeStepContent">
+                  <div className="cascadeStepLeft">
+                    <h3>Self-Sustaining Cascade</h3>
+                  </div>
+                  <div className="cascadeStepRight">
+                    <p>
+                      Above a critical density threshold, collisions produce fragments faster than atmospheric drag can remove them. The cascade becomes self-sustaining — LEO unusable for centuries.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
