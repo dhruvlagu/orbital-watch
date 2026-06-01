@@ -1,10 +1,6 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "env": {
-    "SPACE_TRACK_USER": "@SPACE_TRACK_USER",
-    "SPACE_TRACK_PASS": "@SPACE_TRACK_PASS"
-  },
   "rewrites": [
     {
       "source": "/api/spacetrack/satcat",
