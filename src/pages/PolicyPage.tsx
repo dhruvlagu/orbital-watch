@@ -1,4 +1,77 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+
+type Policy = {
+  id: string;
+  name: string;
+  description: string;
+  impact: number;
+  tooltip: string;
+};
+
+const policyOptions: Policy[] = [
+  {
+    id: "iadc",
+    name: "Make IADC Guidelines Legally Binding",
+    description: "Transform voluntary international debris mitigation standards into enforceable international law with compliance monitoring.",
+    impact: 8000,
+    tooltip: "Based on ESA compliance modeling showing ~16% reduction in debris generation if all spacefaring nations followed IADC guidelines",
+  },
+  {
+    id: "asat",
+    name: "Global Ban on ASAT Missile Tests",
+    description: "International treaty prohibiting all destructive anti-satellite weapons tests that generate trackable debris.",
+    impact: 5000,
+    tooltip: "Prevents recurrence of events like China 2007 (+150,000 fragments) and Russia 2021 (+1,500 fragments)",
+  },
+  {
+    id: "adr",
+    name: "Create International Debris Removal Authority",
+    description: "A UN-backed body with legal authority and dedicated funding to conduct active debris removal missions on high-risk objects.",
+    impact: 15000,
+    tooltip: "Modeled on Liou et al. (2021) finding that removing 5 large objects per year stabilizes LEO debris density",
+  },
+  {
+    id: "fiveyear",
+    name: "Extend 5-Year De-orbit Rule Globally",
+    description: "Apply the FCC's 5-Year Rule to all spacefaring nations through an international agreement — not just US-licensed operators.",
+    impact: 10000,
+    tooltip: "Currently only ~30% of global launches are FCC-licensed; global extension covers the remaining 70%",
+  },
+];
+
+function useCountValue(target: number, durationMs: number = 1000) {
+  const [display, setDisplay] = useState(target);
+  const prevTargetRef = useRef(target);
+
+  useEffect(() => {
+    let frameId: number;
+    const start = performance.now();
+    const startVal = prevTargetRef.current;
+    const diff = target - startVal;
+
+    const animate = (now: number) => {
+      const elapsed = now - start;
+      const t = Math.min(1, elapsed / durationMs);
+      const eased = 1 - Math.pow(1 - t, 3); // easeOutCubic
+      const value = Math.round(startVal + diff * eased);
+
+      setDisplay(value);
+
+      if (t < 1) {
+        frameId = requestAnimationFrame(animate);
+      } else {
+        prevTargetRef.current = target;
+      }
+    };
+
+    frameId = requestAnimationFrame(animate);
+
+    return () => cancelAnimationFrame(frameId);
+  }, [target, durationMs]);
+
+  return display;
+}
 
 type EnforcementTone = "red" | "amber" | "green";
 
@@ -214,6 +287,53 @@ function ScoreCell({ value, note }: { value: number; note: string }) {
 
 export default function PolicyPage() {
   const [sortKey, setSortKey] = useState<SortKey>("grade");
+  const [activeToggles, setActiveToggles] = useState<string[]>([]);
+
+  const handleToggle = (id: string) => {
+    setActiveToggles((prev) =>
+      prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]
+    );
+  };
+
+  const totalReduction = activeToggles.reduce((sum, id) => {
+    const policy = policyOptions.find((p) => p.id === id);
+    return sum + (policy ? policy.impact : 0);
+  }, 0);
+
+  const resultValue = 50000 - totalReduction;
+  const animatedValue = useCountValue(resultValue);
+
+  let statusBadgeText = "";
+  let statusBadgeColor = "";
+  let displayColor = "";
+
+  if (resultValue > 40000) {
+    statusBadgeText = "⚠ CRITICAL — Kessler Cascade Risk";
+    statusBadgeColor = "red";
+    displayColor = "#ff3b3b";
+  } else if (resultValue >= 25000) {
+    statusBadgeText = "⚡ DANGEROUS";
+    statusBadgeColor = "amber";
+    displayColor = "#f5a623";
+  } else if (resultValue >= 15000) {
+    statusBadgeText = "↓ MANAGEABLE";
+    statusBadgeColor = "blue";
+    displayColor = "#00d4ff";
+  } else {
+    statusBadgeText = "✓ STABILIZING";
+    statusBadgeColor = "green";
+    displayColor = "#00d464";
+  }
+
+  const needlePos = Math.max(5, Math.min(95, (resultValue / 50000) * 90));
+  const allTogglesOn = activeToggles.length === policyOptions.length;
+
+  const displaySubtitle = activeToggles.length === 0
+    ? "Baseline projection with no new policy action"
+    : allTogglesOn
+      ? "Best-case projection with all proposed policy reforms"
+      : `Projected path with ${activeToggles.length} active reform${activeToggles.length > 1 ? "s" : ""}`;
+
 
   const sortedScores = useMemo(() => {
     return [...nationScores].sort((a, b) => {
@@ -337,6 +457,130 @@ export default function PolicyPage() {
           Secure World Foundation Annual Report. Research by Dhruv Lagu.
         </div>
       </div>
+
+      {/* Treaty Reform Simulator Section */}
+      <div className="container policySection policySection--simulator">
+        <div className="simulatorHeader">
+          <h2>What If We Fixed It?</h2>
+          <p>
+            Toggle policy reforms below and see their projected impact on LEO debris density by 2050.
+            Projections are illustrative, modeled on debris growth research from Liou et al. (2021) and
+            ESA Space Environment Report 2023.
+          </p>
+        </div>
+
+        <div className="simulatorGrid">
+          {/* Central Display Card */}
+          <div className="card simulatorDisplay">
+            <div className="displayLabel">Projected LEO Objects by 2050</div>
+            <div className="displayNumber" style={{ color: displayColor }}>
+              {animatedValue.toLocaleString()}
+            </div>
+            <div className={`badge badge--${statusBadgeColor} displayBadge`}>
+              {statusBadgeText}
+            </div>
+            
+            <div className="progressBarContainer">
+              <div className="progressBarTrack" aria-hidden="true">
+                <div className="progressBarNeedle" style={{ left: `${needlePos}%` }} />
+              </div>
+              <div className="progressBarLabels">
+                <span>Stabilizing</span>
+                <span>Critical</span>
+              </div>
+            </div>
+            
+            <div className="displaySubtitle">{displaySubtitle}</div>
+
+            {!allTogglesOn ? null : (
+              <div className="bestCaseBanner">
+                <span className="bestCaseIcon">✓</span>
+                <p>
+                  <strong>Best Case Scenario:</strong> With all reforms enacted, models suggest LEO debris could stabilize below current levels by 2075.
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Toggles Grid */}
+          <div className="togglesGrid">
+            {policyOptions.map((policy) => {
+              const isOn = activeToggles.includes(policy.id);
+              return (
+                <div
+                  key={policy.id}
+                  className={isOn ? "card toggleCard is-active" : "card toggleCard"}
+                  onClick={() => handleToggle(policy.id)}
+                  role="checkbox"
+                  aria-checked={isOn}
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      handleToggle(policy.id);
+                    }
+                  }}
+                >
+                  <div className="toggleCardHeader">
+                    <div className="toggleSwitchContainer">
+                      <span className={isOn ? "toggleSwitch is-on" : "toggleSwitch"} />
+                    </div>
+                    <span className="policyName">{policy.name}</span>
+                    <div className="tooltipContainer" onClick={(e) => e.stopPropagation()}>
+                      <span className="infoIcon" tabIndex={0} aria-label="Learn more about this logic">ⓘ</span>
+                      <div className="tooltipText">{policy.tooltip}</div>
+                    </div>
+                  </div>
+                  <p className="policyDesc">{policy.description}</p>
+                  <div className="policyImpact">
+                    {isOn ? (
+                      <span className="text-green">
+                        Projected reduction: {policy.impact.toLocaleString()} objects
+                      </span>
+                    ) : (
+                      <span className="text-muted">
+                        Projected reduction: {policy.impact.toLocaleString()} objects
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Obstacles Section */}
+      <div className="container policySection policySection--obstacles">
+        <div className="obstaclesHeader">
+          <h2>What's Standing in the Way?</h2>
+          <p>Enacting these reforms requires overcoming deep structural and geopolitical barriers.</p>
+        </div>
+        <div className="obstaclesGrid">
+          <Link to="/solutions" className="card obstacleCard">
+            <div>
+              <h3>The Sovereignty Trap</h3>
+              <p>The 1967 Outer Space Treaty prevents any nation from cleaning up or touching space debris without the owner nation's explicit consent, legally blocking active cleanup.</p>
+            </div>
+            <span className="obstacleLink">Explore Solutions →</span>
+          </Link>
+          <Link to="/solutions" className="card obstacleCard">
+            <div>
+              <h3>Geopolitical Distrust</h3>
+              <p>US, Russia, and China treat space as a military domain, refusing to share precise tracking data or active debris removal technology due to espionage and weaponization fears.</p>
+            </div>
+            <span className="obstacleLink">Explore Solutions →</span>
+          </Link>
+          <Link to="/solutions" className="card obstacleCard">
+            <div>
+              <h3>The Economics</h3>
+              <p>Space orbits are a global commons. Like oceanic plastic, no single nation or private operator has a direct financial incentive to pay for cleaning up debris they don't own.</p>
+            </div>
+            <span className="obstacleLink">Explore Solutions →</span>
+          </Link>
+        </div>
+      </div>
     </section>
   );
 }
+
