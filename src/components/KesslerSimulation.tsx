@@ -5,6 +5,7 @@ interface Debris {
   x: number;
   y: number;
   angle: number;
+  radius: number;
   size: number;
 }
 
@@ -14,13 +15,18 @@ export default function KesslerSimulation() {
   const [isRunning, setIsRunning] = useState(false);
   const animationRef = useRef<number>();
 
-  const initialDebris: Debris[] = Array.from({ length: 15 }, (_, i) => ({
-    id: `d-${i}`,
-    x: 0.5,
-    y: 0.5,
-    angle: (i / 15) * Math.PI * 2,
-    size: 3,
-  }));
+  const initialDebris: Debris[] = Array.from({ length: 15 }, (_, i) => {
+    const angle = (i / 15) * Math.PI * 2;
+    const radius = 0.25 + Math.random() * 0.15;
+    return {
+      id: `d-${i}`,
+      angle,
+      radius,
+      x: 0.5 + Math.cos(angle) * radius,
+      y: 0.5 + Math.sin(angle) * radius,
+      size: 3,
+    };
+  });
 
   useEffect(() => {
     setDebris(initialDebris);
@@ -39,24 +45,29 @@ export default function KesslerSimulation() {
       if (progress < 1) {
         // Add new debris randomly every few frames
         if (Math.random() < 0.3) {
-          const randomDebris = currentDebris[Math.floor(Math.random() * currentDebris.length)];
+          const newRadius = 0.25 + Math.random() * 0.15;
+          const newAngle = Math.random() * Math.PI * 2;
           const newDebris: Debris = {
             id: `d-${Date.now()}-${Math.random()}`,
-            x: randomDebris.x + (Math.random() - 0.5) * 0.1,
-            y: randomDebris.y + (Math.random() - 0.5) * 0.1,
-            angle: Math.random() * Math.PI * 2,
+            angle: newAngle,
+            radius: newRadius,
+            x: 0.5 + Math.cos(newAngle) * newRadius,
+            y: 0.5 + Math.sin(newAngle) * newRadius,
             size: 2 + Math.random() * 2,
           };
           currentDebris = [...currentDebris, newDebris];
         }
 
         // Update positions
-        currentDebris = currentDebris.map((d) => ({
-          ...d,
-          angle: (d.angle + 0.02) % (Math.PI * 2),
-          x: 0.5 + Math.cos(d.angle) * (0.25 + Math.random() * 0.15),
-          y: 0.5 + Math.sin(d.angle) * (0.25 + Math.random() * 0.15),
-        }));
+        currentDebris = currentDebris.map((d) => {
+          const nextAngle = (d.angle + 0.02) % (Math.PI * 2);
+          return {
+            ...d,
+            angle: nextAngle,
+            x: 0.5 + Math.cos(nextAngle) * d.radius,
+            y: 0.5 + Math.sin(nextAngle) * d.radius,
+          };
+        });
 
         setDebris(currentDebris);
         animationRef.current = requestAnimationFrame(animate);
@@ -142,8 +153,8 @@ export default function KesslerSimulation() {
 
     // Draw debris
     debris.forEach((d) => {
-      const x = centerX + (width * 0.35) * Math.cos(d.angle) * (1 + Math.random() * 0.1);
-      const y = centerY + (height * 0.35) * Math.sin(d.angle) * (1 + Math.random() * 0.1);
+      const x = d.x * width;
+      const y = d.y * height;
 
       // Debris glow
       const glowGradient = ctx.createRadialGradient(x, y, 0, x, y, d.size * 2);

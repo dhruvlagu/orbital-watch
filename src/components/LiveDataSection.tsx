@@ -20,14 +20,6 @@ function WarningIcon() {
   );
 }
 
-function Spinner() {
-  return (
-    <div className="liveData__spinner">
-      <div className="liveData__spinnerInner" />
-    </div>
-  );
-}
-
 const FALLBACK: LiveOrbitalResponse = {
   data: {
     totalTracked: 27000,
@@ -111,16 +103,12 @@ export default function LiveDataSection() {
 
         <div className="liveData__grid">
           {loading
-            ? (
-              <div className="card liveDataCard liveData__loadingState">
-                <Spinner />
-                <p className="liveData__loadingText">
-                  Fetching live orbital data from Space-Track.org...
-                  <br />
-                  This may take 10–15 seconds on first load.
-                </p>
-              </div>
-            )
+            ? Array.from({ length: 4 }).map((_, idx) => (
+                <div className="card liveDataCard liveDataCard--skeleton" key={idx}>
+                  <div className="liveDataCard__skeletonValue" />
+                  <div className="liveDataCard__skeletonLabel" />
+                </div>
+              ))
             : payload.error
               ? (
                 <div className="card liveDataCard liveData__errorState">

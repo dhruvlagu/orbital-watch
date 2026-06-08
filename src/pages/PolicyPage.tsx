@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { useCountUp } from "../hooks/useCountUp";
 
 type Policy = {
   id: string;
@@ -39,39 +40,7 @@ const policyOptions: Policy[] = [
     tooltip: "Currently only ~30% of global launches are FCC-licensed; global extension covers the remaining 70%",
   },
 ];
-
-function useCountValue(target: number, durationMs: number = 1000) {
-  const [display, setDisplay] = useState(target);
-  const prevTargetRef = useRef(target);
-
-  useEffect(() => {
-    let frameId: number;
-    const start = performance.now();
-    const startVal = prevTargetRef.current;
-    const diff = target - startVal;
-
-    const animate = (now: number) => {
-      const elapsed = now - start;
-      const t = Math.min(1, elapsed / durationMs);
-      const eased = 1 - Math.pow(1 - t, 3); // easeOutCubic
-      const value = Math.round(startVal + diff * eased);
-
-      setDisplay(value);
-
-      if (t < 1) {
-        frameId = requestAnimationFrame(animate);
-      } else {
-        prevTargetRef.current = target;
-      }
-    };
-
-    frameId = requestAnimationFrame(animate);
-
-    return () => cancelAnimationFrame(frameId);
-  }, [target, durationMs]);
-
-  return display;
-}
+// Consolidated useCountValue helper to useCountUp hook
 
 type EnforcementTone = "red" | "amber" | "green";
 
@@ -301,7 +270,11 @@ export default function PolicyPage() {
   }, 0);
 
   const resultValue = 50000 - totalReduction;
-  const animatedValue = useCountValue(resultValue);
+  const animatedValue = useCountUp(resultValue, {
+    startFromZero: false,
+    durationMs: 1000,
+    formatter: (v) => v.toLocaleString(),
+  });
 
   let statusBadgeText = "";
   let statusBadgeColor = "";
@@ -474,7 +447,7 @@ export default function PolicyPage() {
           <div className="card simulatorDisplay">
             <div className="displayLabel">Projected LEO Objects by 2050</div>
             <div className="displayNumber" style={{ color: displayColor }}>
-              {animatedValue.toLocaleString()}
+              {animatedValue}
             </div>
             <div className={`badge badge--${statusBadgeColor} displayBadge`}>
               {statusBadgeText}

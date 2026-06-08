@@ -6,6 +6,7 @@ import HomePage from "./pages/HomePage";
 import PhysicsPage from "./pages/PhysicsPage";
 import PolicyPage from "./pages/PolicyPage";
 import PlaceholderPage from "./pages/PlaceholderPage";
+import SolutionsPage from "./pages/SolutionsPage";
 
 export default function App() {
   return (
@@ -19,7 +20,7 @@ export default function App() {
           <Route path="/the-crisis" element={<Navigate to="/crisis" replace />} />
           <Route path="/the-physics" element={<Navigate to="/physics" replace />} />
           <Route path="/policy" element={<PolicyPage />} />
-          <Route path="/solutions" element={<PlaceholderPage />} />
+          <Route path="/solutions" element={<SolutionsPage />} />
           <Route path="/get-involved" element={<PlaceholderPage />} />
           <Route path="/about" element={<PlaceholderPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
