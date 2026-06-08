@@ -7,7 +7,7 @@ ChartJS.register(CategoryScale, LinearScale, BarController, BarElement, Tooltip,
 
 export default function PhysicsPage() {
   const [mass, setMass] = useState(10); // grams
-  const [velocity, setVelocity] = useState(7.9); // km/s
+  const [velocity, setVelocity] = useState(7.8); // km/s — standard LEO average (~17,500 mph)
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
 
   useEffect(() => {
@@ -166,10 +166,10 @@ export default function PhysicsPage() {
           <h2>The Speed Problem</h2>
 
           <div className="speedCallout card">
-            <div className="speedCallout__stat">17,500 mph</div>
+            <div className="speedCallout__stat">~17,500 mph</div>
             <div className="speedCallout__label">Average orbital velocity in LEO</div>
             <div className="speedCallout__description">
-              At this speed, a 1cm bolt carries the kinetic energy of a hand grenade. A 10cm fragment matches a small car crash. A 1kg object exceeds a military explosive.
+              At this speed, a 1cm bolt carries kinetic energy comparable to a hand grenade. A 10cm fragment matches a small car crash. A 1kg object exceeds a military explosive.
             </div>
           </div>
 
@@ -248,8 +248,8 @@ export default function PhysicsPage() {
                   <button className="presetBtn" onClick={() => handleVelocityPreset(3)}>
                     Slow (3 km/s)
                   </button>
-                  <button className="presetBtn" onClick={() => handleVelocityPreset(7.9)}>
-                    LEO Average (7.9 km/s)
+                  <button className="presetBtn" onClick={() => handleVelocityPreset(7.8)}>
+                    LEO Average (7.8 km/s)
                   </button>
                   <button className="presetBtn" onClick={() => handleVelocityPreset(11)}>
                     Max Orbital (11 km/s)

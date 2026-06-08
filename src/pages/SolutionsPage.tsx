@@ -23,11 +23,11 @@ const adrMissions = [
     org: "ESA",
     badgeClass: "badge--amber",
     badgeLabel: "In Development",
-    meta: "Planned 2026 · ESA / ClearSpace SA",
+    meta: "Planned 2028 · ESA / ClearSpace SA",
     method: "Four-armed robotic claw capture",
-    target: "VESPA payload adapter (~100 kg, abandoned 2013)",
+    target: "PROBA-1 satellite (~94 kg, retired 2018)",
     description:
-      "The first ESA-contracted debris removal mission. ClearSpace-1 will rendezvous with, capture, and de-orbit a specific piece of ESA's own debris — avoiding the sovereignty problem by targeting ESA property.",
+      "The first ESA-contracted debris removal mission. ClearSpace-1 will rendezvous with, capture, and de-orbit ESA's own retired PROBA-1 Earth-observation satellite — sidestepping the sovereignty problem by targeting ESA property. The original target (the VESPA adapter) was struck by debris in 2023 and replaced. A precursor technology demo, PRELUDE, is planned for 2027.",
     challenge: "Scaling from one object to thousands remains unsolved.",
     source: "ESA",
     accentColor: "amber",
@@ -35,16 +35,16 @@ const adrMissions = [
   {
     name: "Astroscale ELSA-d",
     org: "Astroscale",
-    badgeClass: "badge--green",
-    badgeLabel: "Demonstrated",
-    meta: "2021 · Astroscale (Japan / UK)",
+    badgeClass: "badge--blue",
+    badgeLabel: "Completed",
+    meta: "2021–2024 · Astroscale (Japan / UK)",
     method: "Magnetic docking plate",
     target: null,
     description:
-      "Astroscale's End-of-Life Services mission successfully demonstrated the ability to locate, approach, and magnetically capture a tumbling client spacecraft in 2021. Proved the technology works — but requires satellites to be pre-fitted with a docking plate at launch.",
-    challenge: "Legacy debris has no docking plates.",
+      "Astroscale's End-of-Life Services mission successfully demonstrated magnetic docking and proximity operations in 2021, validating the core capture mechanism with a cooperative (non-tumbling) client. A planned tumbling-target phase was cut short by an on-orbit anomaly in 2022. The mission concluded with a controlled de-orbit in January 2024 — proving proximity navigation works, with caveats.",
+    challenge: "Legacy debris has no docking plates, and tumbling capture remains unproven at scale.",
     source: null,
-    accentColor: "green",
+    accentColor: "blue",
   },
   {
     name: "JAXA ADR Program",
@@ -87,7 +87,7 @@ const economicsPanels = [
   {
     icon: "🧮",
     title: "The Cleanup Math",
-    body: "Removing one piece of large debris costs an estimated $100M–$300M per object. With 25,000+ objects, full LEO cleanup would cost trillions of dollars. The nation that pays gets no exclusive benefit — cleaner orbits benefit every spacefaring nation equally. So no single nation will volunteer to pay.",
+    body: "Removing one piece of large debris costs an estimated $100M–$300M per object. At 25,000+ objects, the math is brutal: even at the low end, full LEO cleanup exceeds $2.5 trillion. The nation that pays gets no exclusive benefit — cleaner orbits help every spacefaring nation equally. So no single actor will volunteer to foot the bill.",
     accent: "amber",
   },
   {
@@ -265,6 +265,13 @@ export default function SolutionsPage() {
                 satellite. This dual-use problem means that even a purely
                 civilian ADR mission would face intense geopolitical resistance
                 from nations viewing it as a potential weapons system.
+              </p>
+              <p>
+                No inspection regime currently exists that could credibly verify
+                a removal craft's intent before it approaches a target. That
+                makes the dual-use concern technically unfalsifiable — and
+                therefore politically insurmountable without a new class of
+                international verification treaty.
               </p>
               <div className="sovereigntyCard__dualUse">
                 <div className="dualUseRow">

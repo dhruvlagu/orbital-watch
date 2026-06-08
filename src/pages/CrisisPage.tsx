@@ -123,7 +123,7 @@ const crisisEvents = [
     year: "2007",
     title: "The ASAT Crisis",
     context:
-      "China's People's Liberation Army destroyed the defunct Fengyun-1C weather satellite with a direct-ascent anti-satellite missile. The single impact created 3,000+ trackable fragments and an estimated 150,000 untrackable pieces — the largest debris-generating event in history. The fragments spread across altitudes from 200km to 3,800km.",
+      "China's People's Liberation Army destroyed the defunct Fengyun-1C weather satellite with a direct-ascent anti-satellite missile at 865 km altitude. The single impact created 3,000+ trackable fragments and tens of thousands of smaller untrackable pieces — the largest debris-generating event in history. Much of this cloud remains in orbit today, spread across altitudes from 200 km to 3,800 km.",
     significance: "The most destructive deliberate act in orbital history.",
     visualType: "scatter",
   },
@@ -131,7 +131,7 @@ const crisisEvents = [
     year: "2009",
     title: "The Zombie Strike",
     context:
-      "On February 10, 2009, the active Iridium-33 communications satellite collided with the decommissioned Russian Cosmos-2251 at a closing speed of 11.7 km/s — roughly 26,000 mph. The collision was the first accidental hypervelocity impact between two intact satellites in history, generating over 2,000 trackable fragments. No one had been monitoring Cosmos-2251 because it was 'dead.'",
+      "On February 10, 2009, the active Iridium-33 communications satellite collided with the decommissioned Russian Cosmos-2251 at a closing speed of 11.7 km/s — roughly 26,000 mph. The first accidental hypervelocity impact between two intact satellites in history, it generated over 2,300 trackable fragments and an estimated 100,000+ smaller pieces. Both objects were tracked by the Space Surveillance Network — but the conjunction warning system failed to flag the collision risk in time for Iridium operators to maneuver.",
     significance: "The Kessler Syndrome stopped being theoretical.",
     visualType: "impact",
   },

@@ -74,7 +74,7 @@ const treaties: Treaty[] = [
   {
     year: "1967",
     name: "Outer Space Treaty",
-    jurisdiction: "International (112 nations)",
+    jurisdiction: "International (118 nations)",
     description:
       "The foundational document of space law. Declares space the 'province of all mankind' and prohibits weapons of mass destruction in orbit. Critically, Article VIII establishes that nations retain permanent jurisdiction and control over objects they launch, even after those objects become debris. This sovereignty clause is the primary legal barrier to international debris removal today.",
     enforcementTone: "red",
@@ -88,12 +88,12 @@ const treaties: Treaty[] = [
     name: "Liability Convention",
     jurisdiction: "International",
     description:
-      "Establishes that launching nations are liable for damage caused by their space objects on Earth's surface and, in cases of fault, in orbit. In 1978, Canada successfully sued the USSR for $3M CAD after the nuclear-powered Cosmos 954 satellite crashed in Canadian territory. However, no nation has ever been successfully sued for orbital debris damage.",
+      "Establishes that launching nations are liable for damage caused by their space objects on Earth's surface and, in cases of fault, in orbit. In 1978, Canada invoked the Convention after the nuclear-powered Cosmos 954 satellite crashed in Canadian territory. In 1981, the USSR paid Canada $3M CAD in a diplomatic settlement — notably without formally admitting liability. It remains the only time the Convention has been invoked between states, and no nation has ever faced consequences specifically for orbital debris damage.",
     enforcementTone: "amber",
     enforcementLabel: "Partially Binding / Rarely Enforced",
     enforcementLevel: 2,
     whyItMatters:
-      "Liability exists on paper but has never been applied to orbital debris collisions.",
+      "The sole precedent under this treaty was resolved diplomatically, not legally — revealing the limits of its enforcement mechanism.",
   },
   {
     year: "2002",
@@ -188,7 +188,7 @@ const nationScores: NationScore[] = [
     mitigationNote: "Improving compliance with growing space program",
     asat: 2,
     asatNote:
-      "2019 Mission Shakti ASAT test at low altitude, debris mostly decayed within weeks",
+      "2019 Mission Shakti ASAT test at ~282 km altitude; debris designed to decay within 45 days per DRDO",
     adr: 2,
     adrNote: "Early stage ADR research, limited funding",
     grade: "C",
@@ -328,7 +328,7 @@ export default function PolicyPage() {
         </p>
         <div className="policyWarningBanner">
           <span aria-hidden="true">⚠</span>
-          The 1967 Outer Space Treaty has not been meaningfully amended in 58 years.
+          The 1967 Outer Space Treaty has not been meaningfully amended in 59 years.
         </div>
       </div>
 
