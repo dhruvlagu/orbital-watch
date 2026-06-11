@@ -7,6 +7,8 @@ import "./styles/layout.css";
 import "./styles/components.css";
 import "./styles/physics.css";
 import "./styles/solutions.css";
+import "./styles/get-involved.css";
+import "./styles/about.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

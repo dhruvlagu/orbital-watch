@@ -305,7 +305,11 @@ export default function PhysicsPage() {
 
           <div className="cascadeFlow">
             <div className="cascadeTimeline">
-              <div className="cascadeStep cascadeStep--timeline">
+              <div className="cascadeTimeline__track" />
+
+              {/* Step 1: Initial Impact */}
+              <div className="cascadeStep cascadeStep--timeline cascadeStep--trigger">
+                <div className="cascadeStep__node">01</div>
                 <div className="cascadeStepContent">
                   <div className="cascadeStepLeft">
                     <h3>Initial Impact</h3>
@@ -318,9 +322,9 @@ export default function PhysicsPage() {
                 </div>
               </div>
 
-              <div className="cascadeArrow cascadeArrow--vertical">↓</div>
-
-              <div className="cascadeStep cascadeStep--timeline">
+              {/* Step 2: Fragmentation Cloud */}
+              <div className="cascadeStep cascadeStep--timeline cascadeStep--growth">
+                <div className="cascadeStep__node">02</div>
                 <div className="cascadeStepContent">
                   <div className="cascadeStepLeft">
                     <h3>Fragmentation Cloud</h3>
@@ -333,9 +337,9 @@ export default function PhysicsPage() {
                 </div>
               </div>
 
-              <div className="cascadeArrow cascadeArrow--vertical">↓</div>
-
-              <div className="cascadeStep cascadeStep--timeline">
+              {/* Step 3: Self-Sustaining Cascade */}
+              <div className="cascadeStep cascadeStep--timeline cascadeStep--failure">
+                <div className="cascadeStep__node">03</div>
                 <div className="cascadeStepContent">
                   <div className="cascadeStepLeft">
                     <h3>Self-Sustaining Cascade</h3>

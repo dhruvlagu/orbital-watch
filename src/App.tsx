@@ -5,8 +5,9 @@ import CrisisPage from "./pages/CrisisPage";
 import HomePage from "./pages/HomePage";
 import PhysicsPage from "./pages/PhysicsPage";
 import PolicyPage from "./pages/PolicyPage";
-import PlaceholderPage from "./pages/PlaceholderPage";
 import SolutionsPage from "./pages/SolutionsPage";
+import GetInvolvedPage from "./pages/GetInvolvedPage";
+import AboutPage from "./pages/AboutPage";
 
 export default function App() {
   return (
@@ -21,8 +22,8 @@ export default function App() {
           <Route path="/the-physics" element={<Navigate to="/physics" replace />} />
           <Route path="/policy" element={<PolicyPage />} />
           <Route path="/solutions" element={<SolutionsPage />} />
-          <Route path="/get-involved" element={<PlaceholderPage />} />
-          <Route path="/about" element={<PlaceholderPage />} />
+          <Route path="/get-involved" element={<GetInvolvedPage />} />
+          <Route path="/about" element={<AboutPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
