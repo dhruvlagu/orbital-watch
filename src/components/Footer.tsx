@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { NAV_LINKS } from "./nav";
+import { NAV_LINKS } from "../lib/navLinks";
 
 export default function Footer() {
   return (
