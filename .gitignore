@@ -4,3 +4,5 @@ dist
 .env.local
 spacetrack.env
 .DS_Store
+
+*.tsbuildinfo
