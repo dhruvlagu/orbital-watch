@@ -31,7 +31,7 @@ export default function Footer() {
       </div>
 
       <div className="container footer__bottom">
-        Data sources: <NavLink to="/about#sources" className="footer__sourcesLink">ESA, Space-Track.org, NASA ODPO, UNOOSA, IADC, and more →</NavLink>
+        Data sources: <a href="/about#sources" className="footer__sourcesLink">ESA, Space-Track.org, NASA ODPO, UNOOSA, IADC, and more →</a>
       </div>
     </footer>
   );
