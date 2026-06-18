@@ -3,6 +3,7 @@ import {
   fetchLiveOrbitalEnvironment,
   type LiveOrbitalResponse,
 } from "../lib/liveOrbitalData";
+import { useCountUp } from "../hooks/useCountUp";
 
 function hoursAgo(timestamp: number | null) {
   if (!timestamp) return "unknown";
@@ -32,7 +33,12 @@ const FALLBACK: LiveOrbitalResponse = {
   lastUpdatedAt: null,
 };
 
-export default function LiveDataSection() {
+interface LiveDataSectionProps {
+  /** "hero" renders without the outer <section> wrapper, for embedding inside the hero */
+  variant?: "hero" | "standalone";
+}
+
+export default function LiveDataSection({ variant = "standalone" }: LiveDataSectionProps) {
   const [loading, setLoading] = useState(true);
   const [payload, setPayload] = useState<LiveOrbitalResponse>(FALLBACK);
 
@@ -57,15 +63,26 @@ export default function LiveDataSection() {
     };
   }, []);
 
+  const totalTrackedTarget = loading ? 0 : payload.data.totalTracked;
+  const added30DaysTarget = loading ? 0 : payload.data.addedLast30Days;
+
+  const animatedTotalTracked = useCountUp(totalTrackedTarget, {
+    formatter: (val) => val.toLocaleString(),
+  });
+
+  const animatedAddedLast30Days = useCountUp(added30DaysTarget, {
+    formatter: (val) => val.toLocaleString(),
+  });
+
   const metricCards = useMemo(
     () => [
       {
-        label: "Total tracked objects",
-        value: payload.data.totalTracked.toLocaleString(),
+        label: "Total tracked objects across all orbital regimes",
+        value: animatedTotalTracked,
       },
       {
         label: "Objects added in last 30 days",
-        value: payload.data.addedLast30Days.toLocaleString(),
+        value: animatedAddedLast30Days,
       },
       {
         label: "Current debris-to-active-satellite ratio",
@@ -76,64 +93,71 @@ export default function LiveDataSection() {
         value: payload.data.highestRiskShell,
       },
     ],
-    [payload],
+    [animatedTotalTracked, animatedAddedLast30Days, payload],
   );
+
+  const inner = (
+    <>
+      <div className="liveData__header">
+        <div>
+          <h2 className="liveData__title">Live Orbital Environment</h2>
+          <p className="liveData__subtitle">
+            Real data from Space-Track.org, updated live.
+          </p>
+        </div>
+        {payload.isFresh && !payload.fromCache ? (
+          <span className="badge badge--green liveData__liveBadge">
+            <span className="liveData__pulseDot" />
+            LIVE
+          </span>
+        ) : null}
+      </div>
+
+      {payload.fromCache ? (
+        <div className="liveData__meta">Last updated: {hoursAgo(payload.lastUpdatedAt)}</div>
+      ) : null}
+
+      <div className="liveData__grid">
+        {loading
+          ? Array.from({ length: 4 }).map((_, idx) => (
+              <div className="card liveDataCard liveDataCard--skeleton" key={idx}>
+                <div className="liveDataCard__skeletonValue" />
+                <div className="liveDataCard__skeletonLabel" />
+              </div>
+            ))
+          : payload.error
+            ? (
+              <div className="card liveDataCard liveData__errorState">
+                <div className="liveData__errorHeader">
+                  <WarningIcon />
+                  <p className="liveData__errorText">
+                    Live data unavailable — displaying last cached data.
+                    <br />
+                    Space-Track.org may be temporarily unreachable.
+                  </p>
+                </div>
+                {payload.lastUpdatedAt && (
+                  <p className="liveData__errorMeta">Last updated: {hoursAgo(payload.lastUpdatedAt)}</p>
+                )}
+              </div>
+            )
+            : metricCards.map((metric) => (
+              <div className="card liveDataCard" key={metric.label}>
+                <div className="liveDataCard__value">{metric.value}</div>
+                <div className="liveDataCard__label">{metric.label}</div>
+              </div>
+            ))}
+      </div>
+    </>
+  );
+
+  if (variant === "hero") {
+    return <div className="liveData liveData--hero">{inner}</div>;
+  }
 
   return (
     <section className="liveData">
-      <div className="container">
-        <div className="liveData__header">
-          <div>
-            <h2 className="liveData__title">Live Orbital Environment</h2>
-            <p className="liveData__subtitle">
-              Real data from Space-Track.org, updated daily.
-            </p>
-          </div>
-          {payload.isFresh && !payload.fromCache ? (
-            <span className="badge badge--green liveData__liveBadge">
-              <span className="liveData__pulseDot" />
-              LIVE
-            </span>
-          ) : null}
-        </div>
-
-        {payload.fromCache ? (
-          <div className="liveData__meta">Last updated: {hoursAgo(payload.lastUpdatedAt)}</div>
-        ) : null}
-
-        <div className="liveData__grid">
-          {loading
-            ? Array.from({ length: 4 }).map((_, idx) => (
-                <div className="card liveDataCard liveDataCard--skeleton" key={idx}>
-                  <div className="liveDataCard__skeletonValue" />
-                  <div className="liveDataCard__skeletonLabel" />
-                </div>
-              ))
-            : payload.error
-              ? (
-                <div className="card liveDataCard liveData__errorState">
-                  <div className="liveData__errorHeader">
-                    <WarningIcon />
-                    <p className="liveData__errorText">
-                      Live data unavailable — displaying last cached data.
-                      <br />
-                      Space-Track.org may be temporarily unreachable.
-                    </p>
-                  </div>
-                  {payload.lastUpdatedAt && (
-                    <p className="liveData__errorMeta">Last updated: {hoursAgo(payload.lastUpdatedAt)}</p>
-                  )}
-                </div>
-              )
-              : metricCards.map((metric) => (
-                <div className="card liveDataCard" key={metric.label}>
-                  <div className="liveDataCard__value">{metric.value}</div>
-                  <div className="liveDataCard__label">{metric.label}</div>
-                </div>
-              ))}
-        </div>
-      </div>
+      <div className="container">{inner}</div>
     </section>
   );
 }
-

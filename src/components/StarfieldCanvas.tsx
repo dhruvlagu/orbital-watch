@@ -9,6 +9,8 @@ type Star = {
 };
 
 const STAR_COUNT = 200;
+/** Target: 60 fps → ~16.67ms per frame */
+const FRAME_BUDGET_MS = 1000 / 60;
 
 function createStar(width: number, height: number, fromEdge?: "top" | "bottom" | "left" | "right"): Star {
   let x = Math.random() * width;
@@ -34,35 +36,52 @@ export default function StarfieldCanvas() {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+
+    // Respect devicePixelRatio for sharp rendering on retina displays
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     let animationFrameId: number;
     let stars: Star[] = [];
+    let lastTimestamp = 0;
 
     const resize = () => {
       const { innerWidth, innerHeight } = window;
-      canvas.width = innerWidth;
-      canvas.height = innerHeight;
+      canvas.width = innerWidth * dpr;
+      canvas.height = innerHeight * dpr;
+      canvas.style.width = `${innerWidth}px`;
+      canvas.style.height = `${innerHeight}px`;
+      ctx.scale(dpr, dpr);
       stars = Array.from({ length: STAR_COUNT }, () =>
-        createStar(canvas.width, canvas.height),
+        createStar(innerWidth, innerHeight),
       );
     };
 
     resize();
     window.addEventListener("resize", resize);
 
-    const render = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const render = (timestamp: number) => {
+      animationFrameId = window.requestAnimationFrame(render);
+
+      // Throttle to ≤60fps
+      const elapsed = timestamp - lastTimestamp;
+      if (elapsed < FRAME_BUDGET_MS) return;
+      lastTimestamp = timestamp - (elapsed % FRAME_BUDGET_MS);
+
+      const w = canvas.width / dpr;
+      const h = canvas.height / dpr;
+
+      ctx.clearRect(0, 0, w, h);
 
       for (let i = 0; i < stars.length; i += 1) {
         const s = stars[i];
         s.x += s.speed;
         s.y += s.speed * 0.6;
 
-        if (s.x > canvas.width || s.y > canvas.height) {
+        if (s.x > w || s.y > h) {
           const fromEdge = Math.random() > 0.5 ? "top" : "left";
-          stars[i] = createStar(canvas.width, canvas.height, fromEdge);
+          stars[i] = createStar(w, h, fromEdge);
           continue;
         }
 
@@ -71,8 +90,6 @@ export default function StarfieldCanvas() {
         ctx.fillStyle = `rgba(255,255,255,${s.opacity})`;
         ctx.fill();
       }
-
-      animationFrameId = window.requestAnimationFrame(render);
     };
 
     animationFrameId = window.requestAnimationFrame(render);
@@ -85,4 +102,3 @@ export default function StarfieldCanvas() {
 
   return <canvas ref={canvasRef} className="starfieldCanvas" aria-hidden="true" />;
 }
-

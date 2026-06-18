@@ -209,7 +209,7 @@ export default function AboutPage() {
       </div>
 
       {/* SECTION 5 — Full Source Library */}
-      <div className="aboutSection aboutSection--sources">
+      <div id="sources" className="aboutSection aboutSection--sources">
         <div className="container">
           <div className="aboutSection__header reveal-item">
             <div className="hero__label">Section 05</div>
