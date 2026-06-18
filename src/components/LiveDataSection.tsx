@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   fetchLiveOrbitalEnvironment,
   type LiveOrbitalResponse,
-} from "../lib/liveOrbitalData";
+} from "../services/liveOrbitalData";
 import { useCountUp } from "../hooks/useCountUp";
 
 function hoursAgo(timestamp: number | null) {

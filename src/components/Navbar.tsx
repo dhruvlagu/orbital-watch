@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
-import { NAV_LINKS } from "../lib/navLinks";
+import { NAV_LINKS } from "../services/navLinks";
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
