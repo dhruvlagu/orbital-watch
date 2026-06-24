@@ -4,7 +4,11 @@
   "rewrites": [
     {
       "source": "/api/spacetrack/satcat",
-      "destination": "/api/spacetrack.mjs"
+      "destination": "/api/spacetrack"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
