@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import LiveDataSection from "../components/LiveDataSection";
 import StarfieldCanvas from "../components/StarfieldCanvas";
+import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
 
 const STATS_GROUP = (
   <div className="quickStats__group">
@@ -25,6 +26,11 @@ const STATS_GROUP = (
 );
 
 export default function HomePage() {
+  useDocumentMetadata(
+    "Orbital Watch | LEO Space Debris Tracker & Simulator",
+    "Track live orbital objects, run physics-based collision cascade simulations, and inspect sovereign compliance with space sustainability guidelines."
+  );
+
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
 
   useEffect(() => {

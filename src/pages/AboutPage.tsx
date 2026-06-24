@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import StarfieldCanvas from "../components/StarfieldCanvas";
+import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
 
 export default function AboutPage() {
+  useDocumentMetadata(
+    "About & Methodology | Orbital Watch",
+    "Review our development methodology, meet the creators of Orbital Watch, and access our comprehensive library of peer-reviewed data sources."
+  );
+
   // Live Editable states with localStorage persistence
   const [reflection, setReflection] = useState(() => {
     return localStorage.getItem("about_reflection") || "Dhruv's personal reflection goes here — what unexpected finding changed how you thought about this topic?";

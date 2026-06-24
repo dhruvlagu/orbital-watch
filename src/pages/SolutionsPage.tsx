@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
 import StarfieldCanvas from "../components/StarfieldCanvas";
 
 // ─── SSR Audit Data ───────────────────────────────────────────────────────────
@@ -189,6 +190,11 @@ function useRevealOnScroll(selector: string, threshold = 0.15) {
 
 // ─── Page Component ────────────────────────────────────────────────────────────
 export default function SolutionsPage() {
+  useDocumentMetadata(
+    "Remediation Solutions & ADR Technology | Orbital Watch",
+    "Evaluate emerging active debris removal (ADR) technologies like robotic capture and electromagnetic tethers, and study economic frameworks for maintaining LEO."
+  );
+
   useRevealOnScroll(".sol-reveal");
 
   return (

@@ -699,6 +699,58 @@
   width: 60%;
 }
 
+.holographicDoc__line--fade1 {
+  width: 85%;
+  opacity: 0.6;
+}
+
+.holographicDoc__line--fade2 {
+  width: 70%;
+  opacity: 0.4;
+}
+
+/* Scan-line sweep across the document */
+.holographicDoc__scanline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.25), transparent);
+  animation: scanSweep 3.5s linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes scanSweep {
+  0% { top: 0%; opacity: 0; }
+  5% { opacity: 1; }
+  95% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+/* Blinking status dot */
+.holographicDoc__statusBlink {
+  color: #00d4ff;
+  animation: statusBlink 1.4s step-end infinite;
+}
+
+@keyframes statusBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
+/* Blinking cursor */
+.holographicDoc__cursor {
+  animation: cursorBlink 0.9s step-end infinite;
+  color: var(--accent-blue);
+  font-weight: 400;
+}
+
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
 .holographicDoc__highlight {
   margin-top: auto;
   border: 1px solid rgba(245, 166, 35, 0.3);

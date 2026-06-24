@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import StarfieldCanvas from "../components/StarfieldCanvas";
+import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
 
 export default function GetInvolvedPage() {
+  useDocumentMetadata(
+    "Get Involved | STEM Education & Advocacy | Orbital Watch",
+    "Discover how citizens, students, and policymakers can collaborate on space stewardship, advocacy, and STEM-focused educational initiatives."
+  );
+
   const [copied, setCopied] = useState(false);
   const [showInstaTip, setShowInstaTip] = useState(false);
 

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarController, BarElement, Tooltip, Legend } from "chart.js";
 import { Bar } from "react-chartjs-2";
 import KesslerSimulation from "../components/KesslerSimulation";
@@ -6,6 +7,11 @@ import KesslerSimulation from "../components/KesslerSimulation";
 ChartJS.register(CategoryScale, LinearScale, BarController, BarElement, Tooltip, Legend);
 
 export default function PhysicsPage() {
+  useDocumentMetadata(
+    "The Physics & Kessler Simulator | Orbital Watch",
+    "Study the mechanics and kinetic energy of high-velocity space debris collisions, explore orbital shells, and run interactive Kessler Syndrome cascade simulations."
+  );
+
   const [mass, setMass] = useState(10); // grams
   const [velocity, setVelocity] = useState(7.8); // km/s — standard LEO average (~17,500 mph)
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);

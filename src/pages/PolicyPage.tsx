@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useCountUp } from "../hooks/useCountUp";
+import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
 
 type Policy = {
   id: string;
@@ -255,6 +256,11 @@ function ScoreCell({ value, note }: { value: number; note: string }) {
 }
 
 export default function PolicyPage() {
+  useDocumentMetadata(
+    "Space Policy & Sustainability Scorecard | Orbital Watch",
+    "Investigate legal liability under international space law, track treaty compliance, and explore our country-by-country orbital sustainability scorecard."
+  );
+
   const [sortKey, setSortKey] = useState<SortKey>("grade");
   const [activeToggles, setActiveToggles] = useState<string[]>([]);
 
