@@ -1,6 +1,7 @@
 /* Physics Page Specific Styles */
 
 .physics-hero {
+  min-height: auto;
   background: linear-gradient(135deg,
       rgba(0, 212, 255, 0.1) 0%,
       rgba(0, 212, 255, 0.03) 50%,
@@ -8,10 +9,41 @@
     var(--bg-primary);
 }
 
+.physics-hero::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 96px;
+  background: linear-gradient(
+    to bottom,
+    rgba(10, 14, 26, 0),
+    rgba(10, 14, 26, 0.72) 58%,
+    var(--bg-primary)
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.physics-hero .hero__overlay {
+  position: relative;
+  z-index: 1;
+  padding: 96px 0 58px;
+}
+
+.physics-hero .hero__subheadline {
+  margin-bottom: 38px;
+}
+
+.physics-hero .heroScrollIndicator {
+  bottom: 18px;
+}
+
 /* Speed Problem Section */
 .section--speed {
-  padding: 120px 0;
-  border-top: 1px solid var(--border-subtle);
+  padding: 96px 0 120px;
+  border-top: 0;
 }
 
 .speedCallout {
@@ -50,6 +82,7 @@
 
 .chartContainer {
   margin: 64px 0;
+  overflow: hidden;
 }
 
 .chartContainer h3 {
@@ -60,14 +93,16 @@
 .chartWrapper {
   position: relative;
   height: 400px;
-  margin-bottom: 16px;
+  min-height: 320px;
+  margin-bottom: 24px;
+  overflow: hidden;
 }
 
 .chartCaption {
   font-size: 14px;
   color: var(--text-secondary);
   text-align: center;
-  margin-top: 20px;
+  margin: 0;
 }
 
 /* Calculator Section */
@@ -631,7 +666,7 @@
   }
 
   .chartWrapper {
-    height: 300px;
+    height: 320px;
   }
 
   .cascadeFlow {

@@ -88,7 +88,7 @@ export default function PhysicsPage() {
   const chartOptions = {
     indexAxis: "y" as const,
     responsive: true,
-    maintainAspectRatio: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: { display: false },
       tooltip: {
@@ -115,6 +115,7 @@ export default function PhysicsPage() {
     scales: {
       x: {
         beginAtZero: true,
+        max: 2000000,
         type: "linear" as const,
         grid: { color: "rgba(255, 255, 255, 0.05)" },
         ticks: { color: "#8b9ab0", font: { size: 12 } },
