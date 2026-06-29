@@ -1,23 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import StarfieldCanvas from "../components/StarfieldCanvas";
 import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
+
+const reflectionText =
+  "I started this project assuming the orbital debris crisis was fundamentally a technical problem — that the barrier to cleaning up low Earth orbit was that we simply hadn't invented the right tools yet. What I found was almost the opposite. Active debris removal technology exists today. Robotic capture arms, magnetic docking systems, electrodynamic tethers — the engineering is real, demonstrated, and improving. The barrier isn't scientific. It's a 1967 treaty clause that nobody intended to become a debris removal prohibition, interpreted by nations that have every geopolitical incentive to keep it ambiguous. That gap between what engineering can do and what international law allows was genuinely surprising to me — and it reframed the entire project. This isn't a story about waiting for technology. It's a story about whether legal institutions can evolve faster than the problems they were never designed to anticipate.";
+
+const questionsText =
+  "The question I'd most want to pursue is one this research kept raising without answering: does public awareness of orbital debris actually change space policy, or does space law move through different channels entirely — industry lobbying, bilateral agreements, regulatory pressure — largely independent of what the public knows or cares about? The FCC's 5-Year Rule passed with almost no public attention. The 1967 Outer Space Treaty was negotiated entirely between governments. If that pattern holds, then awareness campaigns like this site may matter less than understanding which specific institutional levers actually move space law — and who has access to them. I'd want to study the political history of the FCC ruling in detail: who pushed for it, what arguments worked, and whether that model could be replicated internationally. That feels like the more honest question about how change actually happens.";
 
 export default function AboutPage() {
   useDocumentMetadata(
     "About & Methodology | Orbital Watch",
     "Review our development methodology, meet the creators of Orbital Watch, and access our comprehensive library of peer-reviewed data sources."
   );
-
-  // Live Editable states with localStorage persistence
-  const [reflection, setReflection] = useState(() => {
-    return localStorage.getItem("about_reflection") || "Dhruv's personal reflection goes here — what unexpected finding changed how you thought about this topic?";
-  });
-  const [questions, setQuestions] = useState(() => {
-    return localStorage.getItem("about_questions") || "What would you research further if you had six more months? What questions does this research raise that it doesn't answer?";
-  });
-
-  const [isEditingReflection, setIsEditingReflection] = useState(false);
-  const [isEditingQuestions, setIsEditingQuestions] = useState(false);
 
   // Scroll Reveal Hook
   useEffect(() => {
@@ -35,16 +30,6 @@ export default function AboutPage() {
     elements.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, []);
-
-  const saveReflection = (val: string) => {
-    setReflection(val);
-    localStorage.setItem("about_reflection", val);
-  };
-
-  const saveQuestions = (val: string) => {
-    setQuestions(val);
-    localStorage.setItem("about_questions", val);
-  };
 
   return (
     <section className="aboutPage">
@@ -110,7 +95,7 @@ export default function AboutPage() {
             {[
               {
                 title: "Primary Data Sources",
-                body: "Orbital debris statistics drawn from ESA's Space Environment Report 2023 and the Space-Track.org satellite catalog. Live data fetched via Space-Track.org API.",
+                body: "Orbital debris statistics drawn from ESA Annual Space Environment Report and the Space-Track.org satellite catalog. Live data fetched via Space-Track.org API.",
                 icon: "📊",
               },
               {
@@ -144,36 +129,18 @@ export default function AboutPage() {
         <div className="container">
           <div className="reflectionGrid">
             {/* Section 3: What I Found Surprising */}
-            <div className="card reflectPanel reveal-item">
+            <div className="card reflectPanel reflectPanel--amber reveal-item">
               <div className="reflectPanel__header">
                 <div className="reflectPanel__meta">
                   <span className="reflectPanel__num">03</span>
                   <h3>What Surprised Me</h3>
                 </div>
-                <button
-                  className="btn btn--secondary reflectPanel__editBtn"
-                  onClick={() => setIsEditingReflection(!isEditingReflection)}
-                >
-                  {isEditingReflection ? "View" : "Edit Note ✏️"}
-                </button>
               </div>
 
               <div className="reflectPanel__body">
-                {isEditingReflection ? (
-                  <textarea
-                    value={reflection}
-                    onChange={(e) => saveReflection(e.target.value)}
-                    className="reflectPanel__textarea"
-                    placeholder="Enter your personal reflection..."
-                  />
-                ) : (
-                  <blockquote className="reflectPanel__quote">
-                    {reflection}
-                  </blockquote>
-                )}
-              </div>
-              <div className="reflectPanel__footer">
-                <span className="terminal-tag">DHRUV_REFLECT // STATUS: {isEditingReflection ? "EDITING" : "LOCKED"}</span>
+                <blockquote className="reflectPanel__quote">
+                  {reflectionText}
+                </blockquote>
               </div>
             </div>
 
@@ -184,30 +151,12 @@ export default function AboutPage() {
                   <span className="reflectPanel__num">04</span>
                   <h3>Open Questions</h3>
                 </div>
-                <button
-                  className="btn btn--secondary reflectPanel__editBtn"
-                  onClick={() => setIsEditingQuestions(!isEditingQuestions)}
-                >
-                  {isEditingQuestions ? "View" : "Edit Note ✏️"}
-                </button>
               </div>
 
               <div className="reflectPanel__body">
-                {isEditingQuestions ? (
-                  <textarea
-                    value={questions}
-                    onChange={(e) => saveQuestions(e.target.value)}
-                    className="reflectPanel__textarea"
-                    placeholder="Enter open research questions..."
-                  />
-                ) : (
-                  <blockquote className="reflectPanel__quote">
-                    {questions}
-                  </blockquote>
-                )}
-              </div>
-              <div className="reflectPanel__footer">
-                <span className="terminal-tag">FUTURE_STUDY // STATUS: {isEditingQuestions ? "EDITING" : "LOCKED"}</span>
+                <blockquote className="reflectPanel__quote">
+                  {questionsText}
+                </blockquote>
               </div>
             </div>
           </div>
