@@ -7,7 +7,7 @@
       "destination": "/api/spacetrack"
     },
     {
-      "source": "/(.*)",
+      "source": "/((?!sitemap\\.xml|robots\\.txt|favicon\\.ico).*)",
       "destination": "/index.html"
     }
   ]

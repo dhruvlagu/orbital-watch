@@ -63,5 +63,22 @@ export default defineConfig(({ mode }) => {
                 },
             },
         ],
+        build: {
+            rollupOptions: {
+                output: {
+                    manualChunks(id) {
+                        if (id.includes("node_modules")) {
+                            if (id.includes("react") || id.includes("scheduler") || id.includes("prop-types")) {
+                                return "vendor";
+                            }
+                            if (id.includes("chart.js") || id.includes("react-chartjs-2")) {
+                                return "charts";
+                            }
+                            return "deps"; // Other third party dependencies
+                        }
+                    },
+                },
+            },
+        },
     };
 });

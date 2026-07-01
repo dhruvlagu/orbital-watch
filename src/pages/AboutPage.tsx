@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { Link } from "react-router-dom";
 import StarfieldCanvas from "../components/StarfieldCanvas";
 import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
 
@@ -299,6 +300,23 @@ export default function AboutPage() {
               </ul>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Page Navigation CTA */}
+      <div className="container crisisCTA" style={{ marginBottom: "60px" }}>
+        <h3>Explore the Space Commons</h3>
+        <p>
+          Re-examine the live low Earth orbit environment and active debris trackers.
+          Return to the home dashboard to analyze other pillars.
+        </p>
+        <div className="crisisCTA__actions">
+          <Link className="btn btn--primary" to="/">
+            Return to Dashboard →
+          </Link>
+          <Link className="btn btn--secondary" to="/get-involved">
+            Back to Get Involved
+          </Link>
         </div>
       </div>
     </section>

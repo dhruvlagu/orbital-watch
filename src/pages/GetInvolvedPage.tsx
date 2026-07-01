@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import StarfieldCanvas from "../components/StarfieldCanvas";
 import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
 
@@ -350,6 +351,23 @@ export default function GetInvolvedPage() {
               </ul>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Page Navigation CTA */}
+      <div className="container crisisCTA" style={{ marginBottom: "60px" }}>
+        <h3>Behind the Research</h3>
+        <p>
+          Discover the development methodology, peer-reviewed academic database sources,
+          and creators of the Orbital Watch platform.
+        </p>
+        <div className="crisisCTA__actions">
+          <Link className="btn btn--primary" to="/about">
+            About the Project →
+          </Link>
+          <Link className="btn btn--secondary" to="/solutions">
+            Back to Solutions
+          </Link>
         </div>
       </div>
     </section>

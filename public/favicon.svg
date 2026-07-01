@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Dark space-like theme background circular cutout -->
+  <circle cx="16" cy="16" r="15" fill="#090f1f" stroke="#00d4ff" stroke-width="1" />
+  
+  <!-- Planet Earth representation -->
+  <circle cx="16" cy="16" r="6" fill="#00d4ff" />
+  
+  <!-- Orbital paths/rings -->
+  <ellipse cx="16" cy="16" rx="11" ry="4" fill="none" stroke="#ffffff" stroke-width="0.8" opacity="0.85" transform="rotate(-15 16 16)" />
+  <ellipse cx="16" cy="16" rx="12.5" ry="2.5" fill="none" stroke="#00d4ff" stroke-width="0.6" opacity="0.6" transform="rotate(30 16 16)" />
+
+  <!-- Tiny dots representing tracked satellites/debris -->
+  <circle cx="9" cy="12" r="0.8" fill="#ffffff" />
+  <circle cx="24" cy="19" r="0.8" fill="#00d4ff" />
+  <circle cx="12" cy="22" r="0.8" fill="#ff3b3b" />
+</svg>

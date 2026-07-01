@@ -474,18 +474,18 @@ export default function SolutionsPage() {
       </div>
 
       {/* ── CTA ──────────────────────────────────────────────────────────────── */}
-      <div className="container crisisCTA sol-reveal">
+      <div className="container crisisCTA sol-reveal" style={{ marginBottom: "60px" }}>
         <h3>From Solutions to Action</h3>
         <p>
-          Technology is only one part. Understand the policy levers and
-          the history that brought us here.
+          Technology and scoring systems are only designs until they are implemented. 
+          Explore how you can support space sustainability efforts and advocate for LEO protection.
         </p>
         <div className="crisisCTA__actions">
-          <Link className="btn btn--primary" to="/policy">
-            Policy Pathways →
+          <Link className="btn btn--primary" to="/get-involved">
+            Get Involved →
           </Link>
-          <Link className="btn btn--secondary" to="/crisis">
-            The Crisis
+          <Link className="btn btn--secondary" to="/policy">
+            Back to Policy
           </Link>
         </div>
       </div>

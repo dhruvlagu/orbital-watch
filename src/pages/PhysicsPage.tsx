@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarController, BarElement, Tooltip, Legend } from "chart.js";
 import { Bar } from "react-chartjs-2";
@@ -420,6 +421,23 @@ ESA Space Debris User's Handbook`}</pre>
           </div>
         </div>
       </section>
+
+      {/* Page Navigation CTA */}
+      <div className="container crisisCTA" style={{ marginBottom: "60px" }}>
+        <h3>From Equations to Action</h3>
+        <p>
+          Physics outlines the threat of collision cascades. Policy outlines our response.
+          See why international space law is currently failing to stop the cascade.
+        </p>
+        <div className="crisisCTA__actions">
+          <Link className="btn btn--primary" to="/policy">
+            Read Policy Pathways →
+          </Link>
+          <Link className="btn btn--secondary" to="/crisis">
+            Back to the Crisis
+          </Link>
+        </div>
+      </div>
     </>
   );
 }
