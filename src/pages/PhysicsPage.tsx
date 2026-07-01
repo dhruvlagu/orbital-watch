@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarController, BarElement, Tooltip, Legend } from "chart.js";
 import { Bar } from "react-chartjs-2";
@@ -15,6 +15,16 @@ export default function PhysicsPage() {
   const [mass, setMass] = useState(10); // grams
   const [velocity, setVelocity] = useState(7.8); // km/s — standard LEO average (~17,500 mph)
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
+  const [isMobileChart, setIsMobileChart] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(max-width: 768px)").matches,
+  );
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 768px)");
+    const sync = () => setIsMobileChart(media.matches);
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
 
   useEffect(() => {
     const onScroll = () => {
@@ -53,15 +63,19 @@ export default function PhysicsPage() {
   const handleMassPreset = (value: number) => setMass(value);
   const handleVelocityPreset = (value: number) => setVelocity(value);
 
+  const chartLabels = isMobileChart
+    ? ["Bullet", "1cm (1g)", "1cm (5g)", "Grenade", "Tennis ball"]
+    : [
+        "Bullet\n(10g, 900 m/s)",
+        "1cm debris\n(1g, 7,900 m/s)",
+        "1cm debris\n(5g, 7,900 m/s)",
+        "Hand grenade",
+        "Tennis ball debris\n(57g, 7,900 m/s)",
+      ];
+
   // Chart.js data
   const chartData = {
-    labels: [
-      "Bullet\n(10g, 900 m/s)",
-      "1cm debris\n(1g, 7,900 m/s)",
-      "1cm debris\n(5g, 7,900 m/s)",
-      "Hand grenade",
-      "Tennis ball debris\n(57g, 7,900 m/s)",
-    ],
+    labels: chartLabels,
     datasets: [
       {
         label: "Kinetic Energy (Joules)",
@@ -85,10 +99,13 @@ export default function PhysicsPage() {
     ],
   };
 
-  const chartOptions = {
+  const chartOptions = useMemo(() => ({
     indexAxis: "y" as const,
     responsive: true,
     maintainAspectRatio: false,
+    layout: {
+      padding: { left: isMobileChart ? 4 : 0, right: isMobileChart ? 8 : 0 },
+    },
     plugins: {
       legend: { display: false },
       tooltip: {
@@ -128,10 +145,17 @@ export default function PhysicsPage() {
       },
       y: {
         grid: { display: false },
-        ticks: { color: "#8b9ab0", font: { size: 11, family: "monospace" } },
+        ticks: {
+          color: "#8b9ab0",
+          font: { size: isMobileChart ? 10 : 11, family: "monospace" },
+          autoSkip: false,
+        },
+        afterFit: (scale: { width: number }) => {
+          if (isMobileChart) scale.width = 84;
+        },
       },
     },
-  };
+  }), [isMobileChart]);
 
   return (
     <>
@@ -183,7 +207,7 @@ export default function PhysicsPage() {
           <div className="chartContainer">
             <h3>Kinetic Energy vs. Familiar Objects</h3>
             <div className="chartWrapper">
-              <Bar data={chartData} options={chartOptions} />
+              <Bar key={isMobileChart ? "mobile" : "desktop"} data={chartData} options={chartOptions} />
             </div>
             <p className="chartCaption">
               Each bar represents kinetic energy in joules at orbital velocity. Red bars show impact energy exceeding military explosives.

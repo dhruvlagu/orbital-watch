@@ -665,8 +665,14 @@
     grid-template-columns: 1fr;
   }
 
+  .chartContainer,
   .chartWrapper {
-    height: 320px;
+    overflow: visible;
+  }
+
+  .chartWrapper {
+    height: 360px;
+    margin-inline: -4px;
   }
 
   .cascadeFlow {

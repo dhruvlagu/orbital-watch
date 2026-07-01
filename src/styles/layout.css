@@ -2099,25 +2099,16 @@
     min-height: 200px;
   }
 
-  /* Country scorecard table: horizontally scrollable */
-  .scorecardTable {
-    overflow-x: auto;
+  /* Policy scorecard table: horizontally scrollable with edge hint */
+  .policyTableWrap {
     -webkit-overflow-scrolling: touch;
-  }
-
-  .scorecardTable table {
-    min-width: 560px;
-  }
-
-  /* Scroll shadow hint on scorecardTable right edge */
-  .scorecardTable {
     background:
-      linear-gradient(to right, rgba(10, 14, 26, 1) 30px, transparent 60px),
-      linear-gradient(to left, rgba(10, 14, 26, 0.9) 30px, transparent 60px) 100% 0,
-      radial-gradient(farthest-side at 0% 50%, rgba(0, 0, 0, 0.4), transparent),
-      radial-gradient(farthest-side at 100% 50%, rgba(0, 0, 0, 0.4), transparent) 100% 0;
+      linear-gradient(to right, rgba(13, 17, 23, 1) 24px, transparent 48px),
+      linear-gradient(to left, rgba(13, 17, 23, 0.95) 24px, transparent 48px) 100% 0,
+      radial-gradient(farthest-side at 0% 50%, rgba(0, 0, 0, 0.35), transparent),
+      radial-gradient(farthest-side at 100% 50%, rgba(0, 0, 0, 0.35), transparent) 100% 0;
     background-repeat: no-repeat;
-    background-size: 60px 100%, 60px 100%, 20px 100%, 20px 100%;
+    background-size: 48px 100%, 48px 100%, 16px 100%, 16px 100%;
     background-attachment: local, local, scroll, scroll;
   }
 
@@ -2152,6 +2143,10 @@
   .backToTop {
     bottom: 20px;
     right: 16px;
+  }
+
+  .displayNumber {
+    font-size: clamp(48px, 14vw, 80px);
   }
 }
 
@@ -2208,7 +2203,7 @@
   line-height: 1.6;
 }
 
-@media (min-width: 992px) {
+@media (min-width: 1100px) {
   .homeExplore__subtitle {
     white-space: nowrap;
   }

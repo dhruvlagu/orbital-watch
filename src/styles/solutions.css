@@ -21,12 +21,12 @@
 
 /* ── Hero ────────────────────────────────────────────────────────────────────── */
 .solHero {
-  min-height: 52vh;
+  min-height: auto;
   display: grid;
   align-content: center;
   justify-items: center;
   text-align: center;
-  padding: 72px 0 56px;
+  padding: 120px 0 80px;
 }
 
 .solHero__title {
@@ -239,13 +239,8 @@
 
 .adrGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-}
-
-/* 4 cards: first row 3, second row 1 centered */
-.adrGrid > :nth-child(4) {
-  grid-column: 2 / 3;
+  grid-template-columns: 1fr;
+  gap: 24px;
 }
 
 .adrCard {
@@ -371,18 +366,20 @@
   opacity: 0.7;
 }
 
-@media (max-width: 1000px) {
+@media (min-width: 768px) {
   .adrGrid {
     grid-template-columns: repeat(2, 1fr);
   }
-  .adrGrid > :nth-child(4) {
-    grid-column: auto;
-  }
 }
 
-@media (max-width: 640px) {
+@media (min-width: 1024px) {
   .adrGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* Center the lone fourth card in the second row */
+  .adrGrid > :nth-child(4) {
+    grid-column: 2 / 3;
   }
 }
 
@@ -503,6 +500,17 @@
   grid-template-columns: 1fr 340px;
   gap: 24px;
   align-items: start;
+}
+
+.auditContext {
+  font-family: "Inter", var(--font-body);
+  font-weight: 400;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-style: italic;
+  line-height: 1.6;
+  margin: 12px 0 0;
+  max-width: 680px;
 }
 
 .auditCard {
@@ -751,6 +759,14 @@
   }
 
   .solHero {
-    padding: 56px 0 40px;
+    padding: 96px 0 56px;
+  }
+
+  .dualUseRow {
+    flex-wrap: wrap;
+  }
+
+  .dualUseRow__label {
+    white-space: normal;
   }
 }

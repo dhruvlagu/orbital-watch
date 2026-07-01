@@ -395,6 +395,11 @@ export default function SolutionsPage() {
               A mock Space Sustainability Rating audit for a hypothetical
               satellite mission.
             </p>
+            <p className="auditContext">
+              Hypothetical mid-size commercial satellite, assessed against SSR
+              v2.0 criteria. Criteria pre-selected to reflect common real-world
+              compliance gaps.
+            </p>
           </div>
 
           <div className="auditLayout sol-reveal">
