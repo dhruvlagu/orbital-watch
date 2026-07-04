@@ -1088,6 +1088,11 @@
   gap: 10px;
 }
 
+.footer__socialLinks {
+  display: flex;
+  gap: 10px;
+}
+
 .footer__iconLink {
   width: 42px;
   height: 42px;
@@ -1097,42 +1102,20 @@
   border: 1px solid var(--border-subtle);
   background: rgba(255, 255, 255, 0.02);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  color: var(--text-secondary);
 }
 
 .footer__iconLink:hover {
   border-color: rgba(0, 212, 255, 0.3);
   box-shadow: var(--glow-blue);
+  color: var(--accent-blue);
 }
 
-.linkedinIcon {
-  width: 16px;
-  height: 16px;
-  border-radius: 3px;
-  border: 2px solid rgba(255, 255, 255, 0.85);
-  position: relative;
-  display: inline-block;
-}
-
-.linkedinIcon::before {
-  content: "";
-  position: absolute;
-  left: 2px;
-  top: 2px;
-  width: 3px;
-  height: 3px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.85);
-}
-
-.linkedinIcon::after {
-  content: "";
-  position: absolute;
-  left: 2px;
-  bottom: 2px;
-  width: 10px;
-  height: 8px;
-  border-left: 2px solid rgba(255, 255, 255, 0.85);
-  border-bottom: 2px solid rgba(255, 255, 255, 0.85);
+.footer__iconLink svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+  transition: color 0.2s ease;
 }
 
 .footer__bottom {

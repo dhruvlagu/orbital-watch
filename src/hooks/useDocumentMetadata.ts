@@ -2,7 +2,16 @@ import { useEffect } from "react";
 
 const SITE_URL = "https://orbitalwatch.vercel.app";
 const SITE_NAME = "Orbital Watch";
+const SITE_AUTHOR = "Dhruv Lagu";
 const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.png`;
+const DEFAULT_KEYWORDS = [
+  SITE_NAME,
+  "Dhruv Lagu",
+  "space debris",
+  "Kessler Syndrome",
+  "orbital sustainability",
+  "space policy"
+].join(", ");
 
 function setMetaAttribute(
   selector: string,
@@ -56,6 +65,23 @@ export function useDocumentMetadata(
     }
 
     metaDescription.setAttribute("content", description);
+
+    let metaAuthor = document.querySelector('meta[name="author"]');
+    if (!metaAuthor) {
+      metaAuthor = document.createElement("meta");
+      metaAuthor.setAttribute("name", "author");
+      document.head.appendChild(metaAuthor);
+    }
+    metaAuthor.setAttribute("content", SITE_AUTHOR);
+
+    let metaKeywords = document.querySelector('meta[name="keywords"]');
+    if (!metaKeywords) {
+      metaKeywords = document.createElement("meta");
+      metaKeywords.setAttribute("name", "keywords");
+      document.head.appendChild(metaKeywords);
+    }
+    metaKeywords.setAttribute("content", DEFAULT_KEYWORDS);
+
     setCanonicalUrl(canonicalUrl);
 
     // Open Graph
@@ -66,6 +92,7 @@ export function useDocumentMetadata(
     setMetaAttribute('meta[property="og:url"]', "property", "og:url", canonicalUrl);
     setMetaAttribute('meta[property="og:image"]', "property", "og:image", ogImage);
     setMetaAttribute('meta[property="og:image:alt"]', "property", "og:image:alt", `${SITE_NAME} — ${title}`);
+    setMetaAttribute('meta[property="article:author"]', "property", "article:author", SITE_AUTHOR);
 
     // Twitter / X
     setMetaAttribute('meta[name="twitter:card"]', "name", "twitter:card", "summary_large_image");
@@ -84,23 +111,25 @@ export function useDocumentMetadata(
     }
     const schema = {
       "@context": "https://schema.org",
-      "@type": "Article",
+      "@type": "WebPage",
+      "name": title,
       "headline": title,
       "description": description,
       "url": canonicalUrl,
       "image": ogImage,
       "author": {
-        "@type": "Organization",
-        "name": "Orbital Watch"
+        "@type": "Person",
+        "name": SITE_AUTHOR
       },
       "publisher": {
         "@type": "Organization",
-        "name": "Orbital Watch",
+        "name": SITE_NAME,
         "logo": {
           "@type": "ImageObject",
           "url": `${SITE_URL}/og-image.png`
         }
-      }
+      },
+      "inLanguage": "en"
     };
     ldJsonScript.textContent = JSON.stringify(schema);
 

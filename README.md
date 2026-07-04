@@ -113,11 +113,4 @@ Not affiliated with any space agency, military, or government body.
 
 ---
 
-## Contests
-
-- NASA Space Apps Challenge 2025
-- Congressional App Challenge 2025
-
----
-
 *Data sources: ESA DISCOS, Space-Track.org, NASA Orbital Debris Program Office*
