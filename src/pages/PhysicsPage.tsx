@@ -42,6 +42,18 @@ export default function PhysicsPage() {
     });
   };
 
+  const trackCalculatorUsage = (nextMass: number, nextVelocity: number) => {
+    if (typeof window === "undefined") return;
+
+    const gtagFn = (window as Window & { gtag?: (...args: unknown[]) => void }).gtag;
+    if (typeof gtagFn === "function") {
+      gtagFn("event", "calculator_used", {
+        mass_grams: nextMass,
+        velocity_kms: nextVelocity,
+      });
+    }
+  };
+
   // Calculate kinetic energy in joules
   const massKg = mass / 1000;
   const velocityMs = velocity * 1000;
@@ -237,7 +249,11 @@ export default function PhysicsPage() {
                   max="10000"
                   step="0.1"
                   value={mass}
-                  onChange={(e) => setMass(parseFloat(e.target.value))}
+                  onChange={(e) => {
+                    const nextMass = parseFloat(e.target.value);
+                    setMass(nextMass);
+                    trackCalculatorUsage(nextMass, velocity);
+                  }}
                   className="slider"
                 />
                 <div className="presetButtons">
@@ -273,7 +289,11 @@ export default function PhysicsPage() {
                   max="15"
                   step="0.1"
                   value={velocity}
-                  onChange={(e) => setVelocity(parseFloat(e.target.value))}
+                  onChange={(e) => {
+                    const nextVelocity = parseFloat(e.target.value);
+                    setVelocity(nextVelocity);
+                    trackCalculatorUsage(mass, nextVelocity);
+                  }}
                   className="slider"
                 />
                 <div className="presetButtons">

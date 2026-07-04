@@ -265,9 +265,22 @@ export default function PolicyPage() {
   const [activeToggles, setActiveToggles] = useState<string[]>([]);
 
   const handleToggle = (id: string) => {
+    const isActive = activeToggles.includes(id);
+    const policy = policyOptions.find((option) => option.id === id);
+
     setActiveToggles((prev) =>
       prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]
     );
+
+    if (typeof window === "undefined") return;
+
+    const gtagFn = (window as Window & { gtag?: (...args: unknown[]) => void }).gtag;
+    if (typeof gtagFn === "function") {
+      gtagFn("event", "simulator_toggled", {
+        policy_name: policy?.name ?? id,
+        new_state: isActive ? "off" : "on",
+      });
+    }
   };
 
   const totalReduction = activeToggles.reduce((sum, id) => {
