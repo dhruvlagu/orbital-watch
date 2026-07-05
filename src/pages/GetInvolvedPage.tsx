@@ -5,8 +5,8 @@ import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
 
 export default function GetInvolvedPage() {
   useDocumentMetadata(
-    "Get Involved | STEM Education & Advocacy | Orbital Watch",
-    "Discover how citizens, students, and policymakers can collaborate on space stewardship, advocacy, and STEM-focused educational initiatives."
+    "Get Involved | Space Stewardship & Advocacy",
+    "Learn how students, citizens, and policymakers can support orbital sustainability, treaty reform, and public education."
   );
 
   const [copied, setCopied] = useState(false);

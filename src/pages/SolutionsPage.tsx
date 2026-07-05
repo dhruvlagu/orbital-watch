@@ -5,12 +5,12 @@ import StarfieldCanvas from "../components/StarfieldCanvas";
 
 // ─── SSR Audit Data ───────────────────────────────────────────────────────────
 const auditCriteria = [
-  { pass: true,  text: "Pre-launch collision probability analysis filed" },
-  { pass: true,  text: "Automatic identification system (AIS) installed" },
-  { pass: true,  text: "Passivation plan submitted (venting fuel tanks at end of life)" },
-  { pass: true,  text: "De-orbit plan within 5 years documented" },
-  { pass: true,  text: "Propulsion system for active maneuverability" },
-  { pass: true,  text: "TLE data shared with Space-Track.org" },
+  { pass: true, text: "Pre-launch collision probability analysis filed" },
+  { pass: true, text: "Automatic identification system (AIS) installed" },
+  { pass: true, text: "Passivation plan submitted (venting fuel tanks at end of life)" },
+  { pass: true, text: "De-orbit plan within 5 years documented" },
+  { pass: true, text: "Propulsion system for active maneuverability" },
+  { pass: true, text: "TLE data shared with Space-Track.org" },
   { pass: false, text: "Laser ranging reflectors installed (enables precise tracking)" },
   { pass: false, text: "Debris removal docking plate installed" },
   { pass: false, text: "On-orbit servicing compatibility designed" },
@@ -191,8 +191,8 @@ function useRevealOnScroll(selector: string, threshold = 0.15) {
 // ─── Page Component ────────────────────────────────────────────────────────────
 export default function SolutionsPage() {
   useDocumentMetadata(
-    "Remediation Solutions & ADR Technology | Orbital Watch",
-    "Evaluate emerging active debris removal (ADR) technologies like robotic capture and electromagnetic tethers, and study economic frameworks for maintaining LEO."
+    "Solutions | ADR Technology & Debris Removal",
+    "Inspect active debris removal concepts, robotic capture systems, and the legal and economic barriers to cleaning up low Earth orbit."
   );
 
   useRevealOnScroll(".sol-reveal");
@@ -446,7 +446,7 @@ export default function SolutionsPage() {
                   {[
                     { label: "Bronze", range: "1–5", color: "#cd7f32", active: false },
                     { label: "Silver", range: "6–8", color: "#f5a623", active: true },
-                    { label: "Gold",   range: "9–10", color: "#ffd700", active: false },
+                    { label: "Gold", range: "9–10", color: "#ffd700", active: false },
                   ].map((tier) => (
                     <div
                       key={tier.label}
@@ -477,7 +477,7 @@ export default function SolutionsPage() {
       <div className="container crisisCTA sol-reveal" style={{ marginBottom: "60px" }}>
         <h3>From Solutions to Action</h3>
         <p>
-          Technology and scoring systems are only designs until they are implemented. 
+          Technology and scoring systems are only designs until they are implemented.
           Explore how you can support space sustainability efforts and advocate for LEO protection.
         </p>
         <div className="crisisCTA__actions">

@@ -1114,14 +1114,14 @@ function getInitialLiveCount(): number {
         return parsed.data.totalTracked;
       }
     }
-  } catch {}
+  } catch { }
   return 27000;
 }
 
 export default function CrisisPage() {
   useDocumentMetadata(
-    "The Crisis | Historical Debris & Altitudes | Orbital Watch",
-    "Examine the growth of space junk since Sputnik, analyze size classifications from paint flakes to spent rocket stages, and study treaty effectiveness."
+    "The Crisis | Space Debris History & Orbital Risks",
+    "Follow the growth of space junk from Sputnik to today, compare debris size classes, and see how treaty gaps shaped modern orbital risk."
   );
 
   const chartRef = useRef<HTMLDivElement | null>(null);
@@ -1136,7 +1136,7 @@ export default function CrisisPage() {
         if (!isCancelled) {
           setLiveCount(response.data.totalTracked);
         }
-      } catch {}
+      } catch { }
     };
     load();
     return () => {

@@ -257,8 +257,8 @@ function ScoreCell({ value, note }: { value: number; note: string }) {
 
 export default function PolicyPage() {
   useDocumentMetadata(
-    "Space Policy & Sustainability Scorecard | Orbital Watch",
-    "Investigate legal liability under international space law, track treaty compliance, and explore our country-by-country orbital sustainability scorecard."
+    "Policy | Space Sustainability Scorecard",
+    "Review treaty gaps, legal liability, and a country-by-country scorecard for orbital debris mitigation and space sustainability."
   );
 
   const [sortKey, setSortKey] = useState<SortKey>("grade");
@@ -471,7 +471,7 @@ export default function PolicyPage() {
             <div className={`badge badge--${statusBadgeColor} displayBadge`}>
               {statusBadgeText}
             </div>
-            
+
             <div className="progressBarContainer">
               <div className="progressBarTrack" aria-hidden="true">
                 <div className="progressBarNeedle" style={{ left: `${needlePos}%` }} />
@@ -481,7 +481,7 @@ export default function PolicyPage() {
                 <span>Critical</span>
               </div>
             </div>
-            
+
             <div className="displaySubtitle">{displaySubtitle}</div>
 
             {!allTogglesOn ? null : (

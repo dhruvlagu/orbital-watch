@@ -27,8 +27,8 @@ const STATS_GROUP = (
 
 export default function HomePage() {
   useDocumentMetadata(
-    "Orbital Watch | LEO Space Debris Tracker & Simulator",
-    "Track live orbital objects, run physics-based collision cascade simulations, and inspect sovereign compliance with space sustainability guidelines."
+    "Orbital Watch | Space Debris Tracker & Policy Explorer",
+    "Explore live orbital debris data, collision-risk science, and policy tools for building a safer low Earth orbit."
   );
 
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);

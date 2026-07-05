@@ -9,8 +9,8 @@ ChartJS.register(CategoryScale, LinearScale, BarController, BarElement, Tooltip,
 
 export default function PhysicsPage() {
   useDocumentMetadata(
-    "The Physics & Kessler Simulator | Orbital Watch",
-    "Study the mechanics and kinetic energy of high-velocity space debris collisions, explore orbital shells, and run interactive Kessler Syndrome cascade simulations."
+    "The Physics | Kessler Simulator & Collision Energy",
+    "Understand the physics of orbital debris impacts, kinetic energy, and Kessler Syndrome with interactive simulations."
   );
 
   const [mass, setMass] = useState(10); // grams
@@ -79,12 +79,12 @@ export default function PhysicsPage() {
   const chartLabels = isMobileChart
     ? ["Bullet", "1cm (1g)", "1cm (5g)", "Grenade", "Tennis ball"]
     : [
-        "Bullet\n(10g, 900 m/s)",
-        "1cm debris\n(1g, 7,900 m/s)",
-        "1cm debris\n(5g, 7,900 m/s)",
-        "Hand grenade",
-        "Tennis ball debris\n(57g, 7,900 m/s)",
-      ];
+      "Bullet\n(10g, 900 m/s)",
+      "1cm debris\n(1g, 7,900 m/s)",
+      "1cm debris\n(5g, 7,900 m/s)",
+      "Hand grenade",
+      "Tennis ball debris\n(57g, 7,900 m/s)",
+    ];
 
   // Chart.js data
   const chartData = {

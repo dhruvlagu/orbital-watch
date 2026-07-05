@@ -1,9 +1,137 @@
+import { config } from "dotenv";
+
+config({ path: ".env" });
+config({ path: "./spacetrack.env" });
+
 // Vercel serverless function — lives at /api/spacetrack.mjs (project root)
 // Vercel injects SPACE_TRACK_USER / SPACE_TRACK_PASS via Project Settings → Environment Variables.
-// No dotenv import needed: process.env is populated by the Vercel runtime.
+// In local development, dotenv loads the project env file if present.
+
+let cachedCookieHeader = null;
+let cachedCookieIssuedAt = 0;
+const COOKIE_TTL_MS = 90 * 60 * 1000;
+const AUTH_URL = "https://www.space-track.org/ajaxauth/login";
+const SATCAT_QUERY_URL =
+  "https://www.space-track.org/basicspacedata/query/class/satcat/predicates/OBJECT_TYPE,LAUNCH,CURRENT,DECAY/format/json";
+
+function getCookieHeaderValue(headers) {
+  const rawCookies =
+    typeof headers.getSetCookie === "function" ? headers.getSetCookie() : null;
+
+  return rawCookies
+    ? rawCookies.map((cookie) => cookie.split(";")[0]).join("; ")
+    : headers.get("set-cookie")?.split(";")[0] ?? null;
+}
+
+function buildMetrics(records) {
+  const now = Date.now();
+  const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
+
+  const totalTracked = Array.isArray(records) ? records.length : 0;
+  const addedLast30Days = Array.isArray(records)
+    ? records.filter((record) => {
+        if (!record?.LAUNCH) return false;
+        const launchTime = Date.parse(record.LAUNCH);
+        return Number.isFinite(launchTime) && launchTime >= thirtyDaysAgo;
+      }).length
+    : 0;
+
+  const debrisCount = Array.isArray(records)
+    ? records.filter((record) => (record?.OBJECT_TYPE || "").toUpperCase() === "DEBRIS").length
+    : 0;
+  const activeSatellites = Array.isArray(records)
+    ? records.filter((record) => {
+        const objectType = (record?.OBJECT_TYPE || "").toUpperCase();
+        if (objectType !== "PAYLOAD") return false;
+        const isCurrent = (record?.CURRENT || "").toUpperCase() === "Y";
+        const notDecayed = !record?.DECAY || record.DECAY.trim() === "";
+        return isCurrent || notDecayed;
+      }).length
+    : 0;
+
+  const debrisToActiveRatio =
+    activeSatellites > 0
+      ? `${Math.max(1, Math.round(debrisCount / activeSatellites))}:1`
+      : "N/A";
+
+  return {
+    totalTracked,
+    addedLast30Days,
+    debrisToActiveRatio,
+    highestRiskShell: "LEO 800–1000km",
+  };
+}
+
+async function authenticateWithSpaceTrack(user, pass) {
+  const authResponse = await fetch(AUTH_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ identity: user, password: pass }).toString(),
+  });
+
+  const cookieHeader = getCookieHeaderValue(authResponse.headers);
+
+  if (!authResponse.ok || !cookieHeader) {
+    throw new Error("Space-Track authentication failed.");
+  }
+
+  cachedCookieHeader = cookieHeader;
+  cachedCookieIssuedAt = Date.now();
+  return cookieHeader;
+}
+
+async function fetchSatcatData(user, pass) {
+  const hasFreshCookie = Boolean(
+    cachedCookieHeader && Date.now() - cachedCookieIssuedAt < COOKIE_TTL_MS,
+  );
+
+  let cookieHeader = hasFreshCookie ? cachedCookieHeader : null;
+
+  if (!cookieHeader) {
+    cookieHeader = await authenticateWithSpaceTrack(user, pass);
+  }
+
+  try {
+    const dataResponse = await fetch(SATCAT_QUERY_URL, {
+      headers: { Cookie: cookieHeader },
+    });
+
+    if (dataResponse.status === 401 || dataResponse.status === 403) {
+      throw new Error("Space-Track session expired.");
+    }
+
+    if (!dataResponse.ok) {
+      throw new Error(`Space-Track SATCAT query failed: HTTP ${dataResponse.status}`);
+    }
+
+    return dataResponse;
+  } catch (error) {
+    const shouldRetryWithFreshAuth =
+      cookieHeader === cachedCookieHeader &&
+      error instanceof Error &&
+      error.message === "Space-Track session expired.";
+
+    if (!shouldRetryWithFreshAuth) {
+      throw error;
+    }
+
+    cachedCookieHeader = null;
+    cachedCookieIssuedAt = 0;
+
+    const freshCookieHeader = await authenticateWithSpaceTrack(user, pass);
+    const retryResponse = await fetch(SATCAT_QUERY_URL, {
+      headers: { Cookie: freshCookieHeader },
+    });
+
+    if (!retryResponse.ok) {
+      throw new Error(`Space-Track SATCAT query failed: HTTP ${retryResponse.status}`);
+    }
+
+    return retryResponse;
+  }
+}
 
 export default async function handler(req, res) {
-  // Only allow GET
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed" });
   }
@@ -19,44 +147,12 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Step 1: authenticate with Space-Track
-    const authResponse = await fetch("https://www.space-track.org/ajaxauth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({ identity: user, password: pass }).toString(),
-    });
-
-    // Extract session cookie — try getSetCookie() first (Node 18+), fall back to get()
-    const rawCookies =
-      typeof authResponse.headers.getSetCookie === "function"
-        ? authResponse.headers.getSetCookie()
-        : null;
-
-    const cookieHeader = rawCookies
-      ? rawCookies.map((c) => c.split(";")[0]).join("; ")
-      : authResponse.headers.get("set-cookie")?.split(";")[0] ?? null;
-
-    if (!authResponse.ok || !cookieHeader) {
-      return res.status(502).json({ error: "Space-Track authentication failed." });
-    }
-
-    // Step 2: fetch SATCAT data
-    const dataResponse = await fetch(
-      "https://www.space-track.org/basicspacedata/query/class/satcat/format/json",
-      { headers: { Cookie: cookieHeader } }
-    );
-
-    if (!dataResponse.ok) {
-      return res.status(502).json({
-        error: `Space-Track SATCAT query failed: HTTP ${dataResponse.status}`,
-      });
-    }
-
+    const dataResponse = await fetchSatcatData(user, pass);
     const payload = await dataResponse.json();
+    const metrics = buildMetrics(payload);
 
-    // Cache for 1 day on Vercel's edge (stale-while-revalidate keeps it fast)
     res.setHeader("Cache-Control", "s-maxage=86400, stale-while-revalidate");
-    return res.status(200).json(payload);
+    return res.status(200).json(metrics);
   } catch (err) {
     return res.status(500).json({
       error: err instanceof Error ? err.message : "Unknown Space-Track proxy error",

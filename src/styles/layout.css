@@ -294,6 +294,15 @@
   margin-bottom: 0;
 }
 
+.liveData__headerActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-left: auto;
+  min-height: 32px;
+}
+
 .liveData__liveBadge {
   display: inline-flex;
   align-items: center;
@@ -323,10 +332,70 @@
   }
 }
 
+.liveData__metaRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  min-height: 32px;
+}
+
 .liveData__meta {
   color: var(--text-secondary);
   font-size: 13px;
-  margin-bottom: 16px;
+}
+
+.liveData__refreshButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid rgba(0, 212, 255, 0.28);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--accent-blue);
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+}
+
+.liveData__refreshButton:hover:not(:disabled) {
+  box-shadow: 0 0 0 1px rgba(0, 212, 255, 0.22), 0 0 18px rgba(0, 180, 255, 0.16);
+  transform: translateY(-1px);
+}
+
+.liveData__refreshButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.liveData__refreshButton--spinning .liveData__refreshIcon {
+  animation: live-data-refresh-spin 0.9s linear infinite;
+}
+
+.liveData__refreshIcon {
+  width: 15px;
+  height: 15px;
+  display: block;
+}
+
+.liveData__refreshLabel {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.liveData__refreshFeedback {
+  margin: 0 0 14px;
+  color: var(--accent-amber);
+  font-size: 12px;
+}
+
+@keyframes live-data-refresh-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .liveData__grid {

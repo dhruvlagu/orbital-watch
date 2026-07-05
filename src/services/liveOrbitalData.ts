@@ -21,48 +21,6 @@ export type LiveOrbitalResponse = {
   error?: string;
 };
 
-type SatcatRecord = {
-  OBJECT_TYPE?: string;
-  LAUNCH?: string;
-  CURRENT?: string;
-  DECAY?: string | null;
-};
-
-function buildMetrics(records: SatcatRecord[]): LiveOrbitalData {
-  const now = Date.now();
-  const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
-
-  const totalTracked = records.length;
-  const addedLast30Days = records.filter((record) => {
-    if (!record.LAUNCH) return false;
-    const launchTime = Date.parse(record.LAUNCH);
-    return Number.isFinite(launchTime) && launchTime >= thirtyDaysAgo;
-  }).length;
-
-  const debrisCount = records.filter(
-    (record) => (record.OBJECT_TYPE || "").toUpperCase() === "DEBRIS",
-  ).length;
-  const activeSatellites = records.filter((record) => {
-    const objectType = (record.OBJECT_TYPE || "").toUpperCase();
-    if (objectType !== "PAYLOAD") return false;
-    const isCurrent = (record.CURRENT || "").toUpperCase() === "Y";
-    const notDecayed = !record.DECAY || record.DECAY.trim() === "";
-    return isCurrent || notDecayed;
-  }).length;
-
-  const debrisToActiveRatio =
-    activeSatellites > 0
-      ? `${Math.max(1, Math.round(debrisCount / activeSatellites))}:1`
-      : "N/A";
-
-  return {
-    totalTracked,
-    addedLast30Days,
-    debrisToActiveRatio,
-    highestRiskShell: "LEO 800–1000km",
-  };
-}
-
 function readCache(): CachedEnvelope | null {
   try {
     const raw = localStorage.getItem(CACHE_KEY);
@@ -83,17 +41,23 @@ function writeCache(data: LiveOrbitalData) {
   localStorage.setItem(CACHE_KEY, JSON.stringify(payload));
 }
 
-export async function fetchLiveOrbitalEnvironment(): Promise<LiveOrbitalResponse> {
-  const cached = readCache();
+async function fetchLiveMetrics(): Promise<LiveOrbitalData> {
+  const response = await fetch("/api/spacetrack/satcat");
+  if (!response.ok) {
+    throw new Error(`Space-Track request failed with status ${response.status}`);
+  }
 
+  const metrics = (await response.json()) as LiveOrbitalData;
+  if (!metrics || typeof metrics.totalTracked !== "number") {
+    throw new Error("Space-Track returned an invalid payload.");
+  }
+
+  return metrics;
+}
+
+async function fetchAndCacheLiveMetrics(): Promise<LiveOrbitalResponse> {
   try {
-    const response = await fetch("/api/spacetrack/satcat");
-    if (!response.ok) {
-      throw new Error(`Space-Track request failed with status ${response.status}`);
-    }
-
-    const rows = (await response.json()) as SatcatRecord[];
-    const metrics = buildMetrics(rows);
+    const metrics = await fetchLiveMetrics();
     writeCache(metrics);
 
     return {
@@ -103,6 +67,7 @@ export async function fetchLiveOrbitalEnvironment(): Promise<LiveOrbitalResponse
       lastUpdatedAt: Date.now(),
     };
   } catch (error) {
+    const cached = readCache();
     if (!cached) {
       throw error;
     }
@@ -118,5 +83,35 @@ export async function fetchLiveOrbitalEnvironment(): Promise<LiveOrbitalResponse
       error: error instanceof Error ? error.message : "Unknown fetch error",
     };
   }
+}
+
+export async function fetchLiveOrbitalEnvironment(
+  onFreshData?: (response: LiveOrbitalResponse) => void,
+): Promise<LiveOrbitalResponse> {
+  const cached = readCache();
+
+  if (cached) {
+    const ageMs = Date.now() - cached.timestamp;
+    const response: LiveOrbitalResponse = {
+      data: cached.data,
+      isFresh: ageMs <= CACHE_TTL_MS,
+      fromCache: true,
+      lastUpdatedAt: cached.timestamp,
+    };
+
+    void fetchAndCacheLiveMetrics().then((freshResponse) => {
+      if (onFreshData) {
+        onFreshData(freshResponse);
+      }
+    });
+
+    return response;
+  }
+
+  return fetchAndCacheLiveMetrics();
+}
+
+export async function forceRefreshLiveOrbitalEnvironment(): Promise<LiveOrbitalResponse> {
+  return fetchAndCacheLiveMetrics();
 }
 

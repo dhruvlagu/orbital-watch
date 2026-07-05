@@ -20,37 +20,114 @@ export default defineConfig(({ mode }) => {
                                 }));
                                 return;
                             }
-                            const loginBody = new URLSearchParams({
-                                identity: user,
-                                password: pass,
-                            }).toString();
-                            const authResponse = await fetch("https://www.space-track.org/ajaxauth/login", {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/x-www-form-urlencoded",
-                                },
-                                body: loginBody,
-                            });
-                            const setCookies = authResponse.headers.getSetCookie?.();
-                            const cookieHeader = setCookies
-                                ?.map((cookie) => cookie.split(";")[0])
-                                .join("; ")
-                                .trim() || authResponse.headers.get("set-cookie")?.split(";")[0];
-                            if (!authResponse.ok || !cookieHeader) {
-                                throw new Error("Space-Track authentication failed.");
-                            }
-                            const dataResponse = await fetch("https://www.space-track.org/basicspacedata/query/class/satcat/format/json", {
-                                headers: {
-                                    Cookie: cookieHeader,
-                                },
-                            });
-                            if (!dataResponse.ok) {
-                                throw new Error(`SATCAT query failed with status ${dataResponse.status}`);
-                            }
-                            const payload = await dataResponse.text();
+                            let cachedCookieHeader = null;
+                            let cachedCookieIssuedAt = 0;
+                            const COOKIE_TTL_MS = 90 * 60 * 1000;
+                            const AUTH_URL = "https://www.space-track.org/ajaxauth/login";
+                            const SATCAT_QUERY_URL = "https://www.space-track.org/basicspacedata/query/class/satcat/predicates/OBJECT_TYPE,LAUNCH,CURRENT,DECAY/format/json";
+                            const getCookieHeaderValue = (headers) => {
+                                const rawCookies = headers.getSetCookie?.();
+                                return rawCookies
+                                    ? rawCookies.map((cookie) => cookie.split(";")[0]).join("; ")
+                                    : headers.get("set-cookie")?.split(";")[0] ?? null;
+                            };
+                            const buildMetrics = (records) => {
+                                const now = Date.now();
+                                const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
+                                const totalTracked = Array.isArray(records) ? records.length : 0;
+                                const addedLast30Days = Array.isArray(records)
+                                    ? records.filter((record) => {
+                                        const launch = record?.LAUNCH;
+                                        if (!launch)
+                                            return false;
+                                        const launchTime = Date.parse(launch);
+                                        return Number.isFinite(launchTime) && launchTime >= thirtyDaysAgo;
+                                    }).length
+                                    : 0;
+                                const debrisCount = Array.isArray(records)
+                                    ? records.filter((record) => record?.OBJECT_TYPE?.toUpperCase() === "DEBRIS").length
+                                    : 0;
+                                const activeSatellites = Array.isArray(records)
+                                    ? records.filter((record) => {
+                                        const objectType = record?.OBJECT_TYPE?.toUpperCase();
+                                        if (objectType !== "PAYLOAD")
+                                            return false;
+                                        const isCurrent = record?.CURRENT?.toUpperCase() === "Y";
+                                        const notDecayed = !record?.DECAY || String(record.DECAY).trim() === "";
+                                        return isCurrent || notDecayed;
+                                    }).length
+                                    : 0;
+                                const debrisToActiveRatio = activeSatellites > 0
+                                    ? `${Math.max(1, Math.round(debrisCount / activeSatellites))}:1`
+                                    : "N/A";
+                                return {
+                                    totalTracked,
+                                    addedLast30Days,
+                                    debrisToActiveRatio,
+                                    highestRiskShell: "LEO 800–1000km",
+                                };
+                            };
+                            const authenticateWithSpaceTrack = async () => {
+                                const authResponse = await fetch(AUTH_URL, {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/x-www-form-urlencoded",
+                                    },
+                                    body: new URLSearchParams({ identity: user, password: pass }).toString(),
+                                });
+                                const cookieHeader = getCookieHeaderValue(authResponse.headers);
+                                if (!authResponse.ok || !cookieHeader) {
+                                    throw new Error("Space-Track authentication failed.");
+                                }
+                                cachedCookieHeader = cookieHeader;
+                                cachedCookieIssuedAt = Date.now();
+                                return cookieHeader;
+                            };
+                            const fetchSatcatData = async () => {
+                                const hasFreshCookie = Boolean(cachedCookieHeader && Date.now() - cachedCookieIssuedAt < COOKIE_TTL_MS);
+                                let cookieHeader = hasFreshCookie ? cachedCookieHeader : null;
+                                if (!cookieHeader) {
+                                    cookieHeader = await authenticateWithSpaceTrack();
+                                }
+                                try {
+                                    const dataResponse = await fetch(SATCAT_QUERY_URL, {
+                                        headers: {
+                                            Cookie: cookieHeader,
+                                        },
+                                    });
+                                    if (dataResponse.status === 401 || dataResponse.status === 403) {
+                                        throw new Error("Space-Track session expired.");
+                                    }
+                                    if (!dataResponse.ok) {
+                                        throw new Error(`SATCAT query failed with status ${dataResponse.status}`);
+                                    }
+                                    return dataResponse;
+                                }
+                                catch (error) {
+                                    if (!(error instanceof Error) || error.message !== "Space-Track session expired.") {
+                                        throw error;
+                                    }
+                                    cachedCookieHeader = null;
+                                    cachedCookieIssuedAt = 0;
+                                    const freshCookieHeader = await authenticateWithSpaceTrack();
+                                    const retryResponse = await fetch(SATCAT_QUERY_URL, {
+                                        headers: {
+                                            Cookie: freshCookieHeader,
+                                        },
+                                    });
+                                    if (!retryResponse.ok) {
+                                        throw new Error(`SATCAT query failed with status ${retryResponse.status}`);
+                                    }
+                                    return retryResponse;
+                                }
+                            };
+                            const dataResponse = await fetchSatcatData();
+                            const payload = await dataResponse.json();
+                            const metrics = buildMetrics(payload);
                             res.statusCode = 200;
                             res.setHeader("Content-Type", "application/json");
-                            res.end(payload);
+                            res.setHeader("Cache-Control", "s-maxage=86400, stale-while-revalidate");
+                            res.end(JSON.stringify(metrics));
                         }
                         catch (error) {
                             res.statusCode = 500;

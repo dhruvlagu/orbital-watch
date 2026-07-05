@@ -11,8 +11,8 @@ const questionsText =
 
 export default function AboutPage() {
   useDocumentMetadata(
-    "About & Methodology | Orbital Watch",
-    "Review our development methodology, meet the creators of Orbital Watch, and access our comprehensive library of peer-reviewed data sources."
+    "About | Research Methodology & Sources",
+    "Read about the research behind Orbital Watch, the data sources used, and the methodology behind the site."
   );
 
   // Scroll Reveal Hook
