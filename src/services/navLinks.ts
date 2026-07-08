@@ -1,6 +1,7 @@
 export const NAV_LINKS = [
   { label: "Home", path: "/" },
   { label: "The Crisis", path: "/crisis" },
+  { label: "Collision Watch", path: "/collision-watch" },
   { label: "The Physics", path: "/physics" },
   { label: "Policy", path: "/policy" },
   { label: "Solutions", path: "/solutions" },

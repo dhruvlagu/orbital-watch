@@ -1,0 +1,474 @@
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import StarfieldCanvas from "../components/StarfieldCanvas";
+import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
+import {
+  fetchConjunctions,
+  type ConjunctionEvent,
+  type ConjunctionResponse,
+  type RiskTier,
+} from "../services/conjunctionData";
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function hoursAgo(timestamp: number | null): string {
+  if (!timestamp) return "unknown";
+  const diffMs = Date.now() - timestamp;
+  if (diffMs < 60 * 1000) return "just now";
+  const minutes = Math.floor(diffMs / 60000);
+  if (minutes < 60) return `${minutes} minute${minutes === 1 ? "" : "s"} ago`;
+  const hours = Math.floor(minutes / 60);
+  return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+}
+
+function getCountdown(tcaMs: number): string {
+  const diff = tcaMs - Date.now();
+  if (diff <= 0) return "PASSED";
+  const totalMinutes = Math.floor(diff / 60000);
+  const days = Math.floor(totalMinutes / 1440);
+  const hours = Math.floor((totalMinutes % 1440) / 60);
+  const minutes = totalMinutes % 60;
+  if (days > 0) return `${days}d ${hours}h`;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes}m`;
+}
+
+function formatMissDistance(metres: number): { text: string; urgent: boolean } {
+  const urgent = metres < 1000;
+  const text =
+    metres < 1000
+      ? `${metres.toFixed(0)} m`
+      : `${(metres / 1000).toFixed(1)} km`;
+  return { text, urgent };
+}
+
+function formatPc(pc: number): string {
+  if (pc === 0) return "< 1×10⁻⁶";
+  const exp = Math.floor(Math.log10(pc));
+  const mantissa = pc / Math.pow(10, exp);
+  return `${mantissa.toFixed(2)} × 10${superscript(exp)}`;
+}
+
+function superscript(n: number): string {
+  const supers: Record<string, string> = {
+    "-": "⁻",
+    "0": "⁰",
+    "1": "¹",
+    "2": "²",
+    "3": "³",
+    "4": "⁴",
+    "5": "⁵",
+    "6": "⁶",
+    "7": "⁷",
+    "8": "⁸",
+    "9": "⁹",
+  };
+  return String(n)
+    .split("")
+    .map((c) => supers[c] ?? c)
+    .join("");
+}
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
+function RiskBadge({ tier, emergency }: { tier: RiskTier; emergency: boolean }) {
+  const tierMap: Record<RiskTier, { cls: string; label: string }> = {
+    ELEVATED: { cls: "badge badge--amber", label: "ELEVATED" },
+    MONITORED: { cls: "badge badge--blue", label: "MONITORED" },
+    LOW: { cls: "badge badge--green", label: "LOW" },
+  };
+  const { cls, label } = tierMap[tier];
+  return (
+    <div className="cw__badgeRow">
+      <span className={cls}>{label}</span>
+      {emergency && <span className="badge badge--red">⚠ EMERGENCY REPORTABLE</span>}
+    </div>
+  );
+}
+
+function CountdownCell({ tcaMs }: { tcaMs: number }) {
+  const [display, setDisplay] = useState(() => getCountdown(tcaMs));
+
+  useEffect(() => {
+    // Update every 60 seconds — don't re-render every second
+    const id = window.setInterval(() => {
+      setDisplay(getCountdown(tcaMs));
+    }, 60_000);
+    return () => window.clearInterval(id);
+  }, [tcaMs]);
+
+  return (
+    <div
+      className="cw__countdown"
+      title={new Date(tcaMs).toUTCString()}
+      aria-label={`Time to closest approach: ${display}`}
+    >
+      {display}
+    </div>
+  );
+}
+
+function ConjunctionCard({ event }: { event: ConjunctionEvent }) {
+  const dist = formatMissDistance(event.missDistanceM);
+  const pcFormatted = formatPc(event.pc);
+
+  return (
+    <article className="card cw__card reveal-item">
+      {/* Object names */}
+      <div className="cw__objects">
+        <span className="cw__satName">{event.sat1Name}</span>
+        <svg
+          className="cw__crossIcon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          aria-hidden="true"
+          width="18"
+          height="18"
+        >
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+        <span className="cw__satName">{event.sat2Name}</span>
+      </div>
+
+      {/* Risk badge row */}
+      <RiskBadge tier={event.riskTier} emergency={event.emergencyReportable} />
+
+      {/* Countdown */}
+      <div className="cw__countdown__label">Time to Closest Approach (TCA)</div>
+      <CountdownCell tcaMs={event.tcaMs} />
+
+      {/* Miss distance */}
+      <div className="cw__metaRow">
+        <div className="cw__metaItem">
+          <span className="cw__metaLabel">Miss Distance</span>
+          <span
+            className="cw__metaValue"
+            style={{ color: dist.urgent ? "var(--accent-amber)" : undefined }}
+          >
+            {dist.text}
+          </span>
+        </div>
+
+        {/* Probability */}
+        <div className="cw__metaItem">
+          <span className="cw__metaLabel">Pc</span>
+          <span className="cw__metaValue cw__pc">{pcFormatted}</span>
+        </div>
+      </div>
+
+      {/* Plain-English odds */}
+      <div className="cw__odds">
+        ≈ {event.oddsString} chance of collision
+      </div>
+    </article>
+  );
+}
+
+function SkeletonCard() {
+  return (
+    <div className="card cw__card cw__card--skeleton" aria-hidden="true">
+      <div className="cw__skeleton cw__skeleton--title" />
+      <div className="cw__skeleton cw__skeleton--badge" />
+      <div className="cw__skeleton cw__skeleton--countdown" />
+      <div className="cw__skeleton cw__skeleton--meta" />
+      <div className="cw__skeleton cw__skeleton--odds" />
+    </div>
+  );
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
+const FALLBACK_RESPONSE: ConjunctionResponse = {
+  events: [],
+  count: 0,
+  fromCache: true,
+  isFresh: false,
+  lastUpdatedAt: null,
+};
+
+export default function CollisionWatchPage() {
+  useDocumentMetadata(
+    "Collision Watch | Live Conjunction Alerts | Orbital Watch",
+    "Real predicted close approaches between tracked objects in orbit, sourced directly from the U.S. Space Force's public conjunction data feed (CDM Public class).",
+  );
+
+  const [loading, setLoading] = useState(true);
+  const [payload, setPayload] = useState<ConjunctionResponse>(FALLBACK_RESPONSE);
+  const [showScrollIndicator, setShowScrollIndicator] = useState(true);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const onScroll = () => {
+      setShowScrollIndicator(window.scrollY < 100);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const handleScrollIndicatorClick = () => {
+    window.scrollTo({
+      top: window.innerHeight,
+      behavior: "smooth",
+    });
+  };
+
+  // Scroll-reveal IntersectionObserver — identical pattern to CrisisPage
+  useEffect(() => {
+    const elements = document.querySelectorAll<HTMLElement>(".reveal-item");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+          }
+        });
+      },
+      { threshold: 0.1 },
+    );
+    elements.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [loading]); // re-run after loading resolves so newly mounted cards are observed
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    const load = async () => {
+      setLoading(true);
+      try {
+        const response = await fetchConjunctions((freshResponse) => {
+          if (!isCancelled && isMountedRef.current) {
+            setPayload(freshResponse);
+          }
+        });
+        if (!isCancelled) {
+          setPayload(response);
+        }
+      } catch {
+        if (!isCancelled) {
+          setPayload(FALLBACK_RESPONSE);
+        }
+      } finally {
+        if (!isCancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    load();
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
+
+  const hasEvents = payload.events.length > 0;
+
+  // Memoize to avoid re-sorting on every render
+  const sortedEvents = useMemo(
+    () => [...payload.events].sort((a, b) => a.tcaMs - b.tcaMs),
+    [payload.events],
+  );
+
+  return (
+    <>
+      {/* ── Hero ────────────────────────────────────────────────────────────── */}
+      <section className="hero cw__hero">
+        <StarfieldCanvas />
+        <div className="hero__overlay">
+          <div className="container hero__inner">
+            <div className="hero__content">
+              <div className="hero__label cw__heroLabel">
+                <span className="cw__liveDot" aria-hidden="true" />
+                LIVE DATA · SPACE-TRACK CDM PUBLIC
+              </div>
+
+              <h1 className="hero__headline cw__heroHeadline">
+                Collision{" "}
+                <span style={{ color: "var(--accent-blue)" }}>Watch</span>
+              </h1>
+
+              <p className="hero__subheadline">
+                Real predicted close approaches between tracked objects in orbit
+                — sourced directly from the U.S. Space Force's public conjunction
+                data feed.
+              </p>
+
+              {/* Disclaimer callout */}
+              <div className="cw__disclaimer reveal-item">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                  style={{ flexShrink: 0, marginTop: 2 }}
+                >
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+                <span>
+                  This shows the <strong>publicly released subset</strong> of
+                  conjunction screenings. Some operators opt out of public
+                  release, and Pc values may be withheld or rounded for
+                  sensitive assets. This is a partial picture, not a complete
+                  risk map.
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className={
+              showScrollIndicator
+                ? "heroScrollIndicator heroScrollIndicator--visible"
+                : "heroScrollIndicator"
+            }
+            onClick={handleScrollIndicatorClick}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                handleScrollIndicatorClick();
+              }
+            }}
+          >
+            <div className="heroScrollIndicator__chevron" />
+          </div>
+        </div>
+      </section>
+
+      {/* ── Main Section ────────────────────────────────────────────────────── */}
+      <section className="section cw__section">
+        <div className="container">
+
+          {/* Section header */}
+          <div className="cw__sectionHeader reveal-item">
+            <div>
+              <span className="cw__sectionLabel">UPCOMING EVENTS</span>
+              <h2 className="cw__sectionTitle">Upcoming Close Approaches</h2>
+              <p className="cw__sectionSubtitle">
+                Sorted soonest-first. Pc values are from the U.S. Space
+                Surveillance Network.
+              </p>
+            </div>
+
+            {/* Live / cache badge */}
+            <div className="cw__statusBadge">
+              {loading ? null : payload.isFresh && !payload.fromCache ? (
+                <span className="badge badge--green">
+                  <span className="liveData__pulseDot" aria-hidden="true" />
+                  LIVE
+                </span>
+              ) : payload.lastUpdatedAt ? (
+                <span className="cw__cacheLabel">
+                  Last updated: {hoursAgo(payload.lastUpdatedAt)}
+                </span>
+              ) : null}
+            </div>
+          </div>
+
+          {/* Error / stale banner */}
+          {!loading && payload.error && (
+            <div className="cw__errorBanner reveal-item" role="alert">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                <line x1="12" y1="9" x2="12" y2="13" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+              {payload.lastUpdatedAt
+                ? `Live fetch failed — showing cached data from ${hoursAgo(payload.lastUpdatedAt)}.`
+                : "No conjunction data currently available — Space-Track.org may be temporarily unreachable."}
+            </div>
+          )}
+
+          {/* Card grid */}
+          <div className="cw__grid">
+            {loading ? (
+              // Skeleton loading state
+              Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
+            ) : !hasEvents ? (
+              // Empty state
+              <div className="card cw__emptyState">
+                <div className="cw__emptyIcon" aria-hidden="true">📡</div>
+                <h3>No conjunction data available</h3>
+                <p>
+                  {payload.lastUpdatedAt
+                    ? `Last cached results are from ${hoursAgo(payload.lastUpdatedAt)}. Check back shortly.`
+                    : "Space-Track.org may be temporarily unreachable. This data updates a few times daily."}
+                </p>
+              </div>
+            ) : (
+              sortedEvents.map((event) => (
+                <ConjunctionCard key={event.id} event={event} />
+              ))
+            )}
+          </div>
+
+          {/* ── What Is Pc? ───────────────────────────────────────────────── */}
+          <div className="card cw__explainerCard reveal-item">
+            <div className="cw__explainerHeader">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="var(--accent-blue)"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="16" x2="12" y2="12" />
+                <line x1="12" y1="8" x2="12.01" y2="8" />
+              </svg>
+              <h3 className="cw__explainerTitle">What Is Pc?</h3>
+            </div>
+            <p className="cw__explainerBody">
+              <strong>Pc (probability of collision)</strong> is not the literal
+              chance two objects will collide — it's the modeled probability
+              that both objects will pass within a specified combined distance of
+              each other at time of closest approach, given known uncertainty in
+              their tracked positions. It is deliberately conservative: when in
+              doubt, the models overestimate risk rather than underestimate it.
+              A Pc of 1×10⁻⁴ (0.01%) is considered operationally significant
+              and typically triggers avoidance maneuver planning.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Footer CTA ──────────────────────────────────────────────────────── */}
+      <div className="container crisisCTA" style={{ marginBottom: "60px" }}>
+        <h3>Curious about the physics?</h3>
+        <p>
+          At orbital velocities, even a 10-gram bolt carries the kinetic energy
+          of a grenade. Try the impact calculator to understand why miss
+          distances of hundreds of metres still matter enormously.
+        </p>
+        <div className="crisisCTA__actions">
+          <Link className="btn btn--primary" to="/physics">
+            Try the Impact Calculator →
+          </Link>
+          <Link className="btn btn--secondary" to="/crisis">
+            Back to the Crisis
+          </Link>
+        </div>
+      </div>
+    </>
+  );
+}

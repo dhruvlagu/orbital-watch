@@ -1,0 +1,399 @@
+/* ─── Collision Watch Page Styles ─────────────────────────────────────────── */
+
+/* Hero */
+.cw__hero {
+  min-height: auto;
+}
+
+.cw__hero .hero__overlay {
+  position: relative;
+  padding: 96px 0 58px;
+}
+
+.cw__hero .hero__headline {
+  font-size: clamp(42px, 7vw, 72px);
+}
+
+.cw__hero .heroScrollIndicator {
+  bottom: 18px;
+}
+
+.cw__heroLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cw__liveDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-blue);
+  animation: cwPulseDot 1.8s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes cwPulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.6); }
+  50%       { opacity: 0.7; transform: scale(1.15); box-shadow: 0 0 0 5px rgba(0, 212, 255, 0); }
+}
+
+/* Disclaimer callout */
+.cw__disclaimer {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 24px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  border: 1px solid rgba(245, 166, 35, 0.3);
+  background: rgba(245, 166, 35, 0.06);
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+  max-width: 640px;
+}
+
+.cw__disclaimer strong {
+  color: var(--accent-amber);
+}
+
+/* ─── Section header ──────────────────────────────────────────────────────── */
+.cw__section {
+  padding-block: 64px 32px;
+}
+
+.cw__sectionHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 36px;
+  flex-wrap: wrap;
+}
+
+.cw__sectionLabel {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--accent-blue);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.cw__sectionTitle {
+  font-size: clamp(24px, 4vw, 36px);
+  margin: 0 0 4px;
+}
+
+.cw__sectionSubtitle {
+  margin: 0;
+  font-size: 15px;
+  color: var(--text-secondary);
+}
+
+.cw__statusBadge {
+  flex-shrink: 0;
+}
+
+.cw__cacheLabel {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* Error banner */
+.cw__errorBanner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: rgba(245, 166, 35, 0.06);
+  border: 1px solid rgba(245, 166, 35, 0.2);
+  color: var(--accent-amber);
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+
+/* ─── Card grid ───────────────────────────────────────────────────────────── */
+.cw__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-bottom: 48px;
+}
+
+@media (max-width: 768px) {
+  .cw__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─── Conjunction card ────────────────────────────────────────────────────── */
+.cw__card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 22px;
+  border: 1px solid var(--border-subtle);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cw__card:hover {
+  border-color: rgba(0, 212, 255, 0.2);
+  box-shadow: var(--glow-blue);
+}
+
+/* Object names row */
+.cw__objects {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.cw__satName {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  word-break: break-all;
+}
+
+.cw__crossIcon {
+  color: #ff3b3b;
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+
+/* Badge row */
+.cw__badgeRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Countdown */
+.cw__countdown__label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: -8px;
+}
+
+.cw__countdown {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 5vw, 38px);
+  font-weight: 700;
+  color: var(--accent-blue);
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+@media (max-width: 375px) {
+  .cw__countdown {
+    font-size: 26px;
+  }
+}
+
+/* Miss distance + Pc row */
+.cw__metaRow {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.cw__metaItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cw__metaLabel {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.cw__metaValue {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.cw__pc {
+  font-size: 15px;
+  letter-spacing: 0.01em;
+}
+
+/* Plain-English odds */
+.cw__odds {
+  font-size: 13px;
+  color: var(--text-secondary);
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 10px;
+  margin-top: auto;
+}
+
+/* ─── Skeleton loading ────────────────────────────────────────────────────── */
+.cw__card--skeleton {
+  pointer-events: none;
+}
+
+.cw__skeleton {
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 25%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: cwShimmer 1.4s linear infinite;
+}
+
+@keyframes cwShimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.cw__skeleton--title    { height: 20px; width: 80%; }
+.cw__skeleton--badge    { height: 26px; width: 120px; border-radius: 999px; }
+.cw__skeleton--countdown { height: 42px; width: 140px; }
+.cw__skeleton--meta     { height: 18px; width: 60%; }
+.cw__skeleton--odds     { height: 14px; width: 70%; }
+
+/* ─── Empty state ─────────────────────────────────────────────────────────── */
+.cw__emptyState {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  padding: 48px 32px;
+}
+
+.cw__emptyIcon {
+  font-size: 40px;
+  line-height: 1;
+}
+
+.cw__emptyState h3 {
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* ─── Pc explainer card ───────────────────────────────────────────────────── */
+.cw__explainerCard {
+  padding: 28px;
+  margin-bottom: 48px;
+  border: 1px solid rgba(0, 212, 255, 0.15);
+  background: rgba(0, 212, 255, 0.03);
+}
+
+.cw__explainerHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.cw__explainerTitle {
+  font-size: 20px;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.cw__explainerBody {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.cw__explainerBody strong {
+  color: var(--accent-blue);
+}
+
+/* ─── Home page teaser card ───────────────────────────────────────────────── */
+.cw__teaserCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 22px;
+  border: 1px solid rgba(0, 212, 255, 0.18);
+  background: rgba(0, 212, 255, 0.04);
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  margin-top: 16px;
+}
+
+.cw__teaserCard:hover {
+  border-color: rgba(0, 212, 255, 0.35);
+  background: rgba(0, 212, 255, 0.07);
+  box-shadow: var(--glow-blue);
+}
+
+.cw__teaserCard__left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cw__teaserCard__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(0, 212, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--accent-blue);
+}
+
+.cw__teaserCard__count {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent-blue);
+  line-height: 1;
+}
+
+.cw__teaserCard__text {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.cw__teaserCard__arrow {
+  color: var(--accent-blue);
+  font-size: 20px;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+/* liveData__pulseDot reuse (defined in layout.css, referenced here for badge) */
+.liveData__pulseDot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #00d464;
+  margin-right: 6px;
+  animation: cwPulseDot 1.8s ease-in-out infinite;
+}

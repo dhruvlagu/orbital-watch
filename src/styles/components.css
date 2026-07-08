@@ -87,3 +87,37 @@
   border-color: rgba(0, 212, 255, 0.3);
 }
 
+/* Page Loader Fallback for Suspense */
+.pageLoader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  gap: 16px;
+}
+
+.pageLoader__spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(0, 212, 255, 0.1);
+  border-top-color: var(--accent-blue);
+  border-radius: 50%;
+  animation: pageLoaderRotate 1s linear infinite;
+}
+
+.pageLoader__text {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+@keyframes pageLoaderRotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+

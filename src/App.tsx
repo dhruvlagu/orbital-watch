@@ -1,14 +1,16 @@
-import { useEffect, useRef } from "react";
+import { lazy, useEffect, useRef } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import Layout from "./components/Layout";
 import ScrollToTop from "./components/ScrollToTop";
-import CrisisPage from "./pages/CrisisPage";
-import HomePage from "./pages/HomePage";
-import PhysicsPage from "./pages/PhysicsPage";
-import PolicyPage from "./pages/PolicyPage";
-import SolutionsPage from "./pages/SolutionsPage";
-import GetInvolvedPage from "./pages/GetInvolvedPage";
-import AboutPage from "./pages/AboutPage";
+
+const HomePage = lazy(() => import("./pages/HomePage"));
+const CrisisPage = lazy(() => import("./pages/CrisisPage"));
+const CollisionWatchPage = lazy(() => import("./pages/CollisionWatchPage"));
+const PhysicsPage = lazy(() => import("./pages/PhysicsPage"));
+const PolicyPage = lazy(() => import("./pages/PolicyPage"));
+const SolutionsPage = lazy(() => import("./pages/SolutionsPage"));
+const GetInvolvedPage = lazy(() => import("./pages/GetInvolvedPage"));
+const AboutPage = lazy(() => import("./pages/AboutPage"));
 
 export default function App() {
   const location = useLocation();
@@ -57,6 +59,7 @@ export default function App() {
         <Route element={<Layout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/crisis" element={<CrisisPage />} />
+          <Route path="/collision-watch" element={<CollisionWatchPage />} />
           <Route path="/physics" element={<PhysicsPage />} />
           <Route path="/the-crisis" element={<Navigate to="/crisis" replace />} />
           <Route path="/the-physics" element={<Navigate to="/physics" replace />} />

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import LiveDataSection from "../components/LiveDataSection";
 import StarfieldCanvas from "../components/StarfieldCanvas";
 import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
+import { fetchConjunctions } from "../services/conjunctionData";
 
 const STATS_GROUP = (
   <div className="quickStats__group">
@@ -32,6 +33,7 @@ export default function HomePage() {
   );
 
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
+  const [conjunctionCount, setConjunctionCount] = useState<number | null>(null);
 
   useEffect(() => {
     const onScroll = () => {
@@ -39,6 +41,19 @@ export default function HomePage() {
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Lightweight conjunction count fetch — just the count, no heavy rendering
+  useEffect(() => {
+    let isCancelled = false;
+    fetchConjunctions((fresh) => {
+      if (!isCancelled) setConjunctionCount(fresh.count);
+    }).then((response) => {
+      if (!isCancelled) setConjunctionCount(response.count);
+    }).catch(() => {
+      // Count is optional; don't surface errors on the home page
+    });
+    return () => { isCancelled = true; };
   }, []);
 
   const handleScrollIndicatorClick = () => {
@@ -67,6 +82,29 @@ export default function HomePage() {
 
               <div className="hero__liveData">
                 <LiveDataSection variant="hero" />
+
+                {/* Conjunction teaser */}
+                <Link to="/collision-watch" className="cw__teaserCard" aria-label="View live conjunction alerts on Collision Watch">
+                  <div className="cw__teaserCard__left">
+                    <div className="cw__teaserCard__icon" aria-hidden="true">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="8" cy="8" r="3" />
+                        <circle cx="16" cy="16" r="3" />
+                        <path d="M16 8l-6 6" />
+                        <path d="M8 16l6-6" />
+                      </svg>
+                    </div>
+                    <div>
+                      <div className="cw__teaserCard__count">
+                        {conjunctionCount !== null ? conjunctionCount : "—"}
+                      </div>
+                      <p className="cw__teaserCard__text">
+                        active conjunction alerts being tracked right now
+                      </p>
+                    </div>
+                  </div>
+                  <span className="cw__teaserCard__arrow" aria-hidden="true">→</span>
+                </Link>
               </div>
             </div>
           </div>
@@ -104,7 +142,7 @@ export default function HomePage() {
         <div className="container">
           <div className="homeExplore__header">
             <span className="homeExplore__label">EXPLORE THE PLATFORM</span>
-            <h2 className="homeExplore__title">Platform Modules & Policy Tools</h2>
+            <h2 className="homeExplore__title">Platform Modules &amp; Policy Tools</h2>
             <p className="homeExplore__subtitle">
               Analyze the science, orbital mechanics, regulatory frameworks, and engineering solutions driving space sustainability.
             </p>
@@ -126,6 +164,28 @@ export default function HomePage() {
               </p>
               <Link to="/crisis" className="btn btn--secondary homeExploreCard__btn">
                 Analyze the Crisis
+              </Link>
+            </div>
+
+            <div className="card homeExploreCard">
+              <div className="homeExploreCard__icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="8" cy="8" r="3" />
+                  <circle cx="16" cy="16" r="3" />
+                  <path d="M16 8l-6 6" />
+                  <path d="M8 16l6-6" />
+                  <path d="M12 6V2" />
+                  <path d="M12 18v4" />
+                  <path d="M6 12H2" />
+                  <path d="M18 12h4" />
+                </svg>
+              </div>
+              <h3 className="homeExploreCard__title">Collision Watch</h3>
+              <p className="homeExploreCard__description">
+                Live predicted close approaches between tracked objects — sourced from the U.S. Space Force's public conjunction data feed with real-time countdown timers.
+              </p>
+              <Link to="/collision-watch" className="btn btn--secondary homeExploreCard__btn">
+                View Live Alerts
               </Link>
             </div>
 

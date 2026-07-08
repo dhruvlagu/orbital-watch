@@ -9,6 +9,7 @@ import "./styles/physics.css";
 import "./styles/solutions.css";
 import "./styles/get-involved.css";
 import "./styles/about.css";
+import "./styles/collision-watch.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

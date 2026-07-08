@@ -7,7 +7,11 @@
       "destination": "/api/spacetrack"
     },
     {
-      "source": "/((?!sitemap\\.xml|robots\\.txt|favicon\\.ico).*)",
+      "source": "/api/conjunctions",
+      "destination": "/api/conjunctions"
+    },
+    {
+      "source": "/((?!sitemap\\.xml|robots\\.txt|favicon\\.ico|og-image\\.png|apple-touch-icon\\.png|favicon\\.svg).*)",
       "destination": "/index.html"
     }
   ]

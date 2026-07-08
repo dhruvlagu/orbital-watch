@@ -41,16 +41,14 @@ const debrisGrowthData = [
   { year: 2010, count: 16000 },
   { year: 2015, count: 17000 },
   { year: 2020, count: 20000 },
-  { year: 2023, count: 25000 },
-  { year: 2024, count: 27000 },
-  { year: 2025, count: 39246 },
+  { year: 2023, count: 31773 },
+  { year: 2024, count: 39246 },
 ];
 
 const markedEvents = [
   { year: 1957, label: "Sputnik" },
   { year: 2007, label: "ASAT test" },
   { year: 2009, label: "Iridium collision" },
-  { year: 2025, label: "2025: 4,772 new LEO objects added — 91% active payloads." },
 ];
 
 const eventMarkerPlugin: Plugin<"line"> = {
@@ -1219,7 +1217,7 @@ export default function CrisisPage() {
       </div>
 
       <div className="container crisisChart" ref={chartRef}>
-        <h3>Trackable Objects in Earth Orbit (1957–2025)</h3>
+        <h3>Trackable Objects in Earth Orbit</h3>
         {chartVisible ? (
           <Line
             data={chartData}
@@ -1256,7 +1254,7 @@ export default function CrisisPage() {
         ) : (
           <div className="crisisChart__skeleton" />
         )}
-        <div className="crisisChart__source">Source: ESA Annual Space Environment Report 2025, Space-Track.org</div>
+        <div className="crisisChart__source">Source: ESA Space Environment Report 2025 (data through end of 2024); earlier years illustrative, based on published ESA/NASA ODPO historical trend data.</div>
       </div>
 
       <div className="container timeline">
@@ -1288,6 +1286,12 @@ export default function CrisisPage() {
             <h3>The Tipping Point</h3>
             <p>
               <strong style={{ color: "#00d4ff" }}>{liveCount.toLocaleString()}</strong> tracked objects across all orbital regimes — and growing. In LEO alone, 4,772 new objects were added in 2025, 91% of them active megaconstellation payloads. Millions of additional fragments remain too small to track but large enough to destroy a satellite. Active debris removal technology exists but faces legal paralysis under the 1967 Treaty. The window to act may be closing.
+            </p>
+            <p>
+              See the conjunctions being tracked right now on the{" "}
+              <Link to="/collision-watch" style={{ color: "var(--accent-blue)", textDecoration: "underline" }}>
+                Collision Watch page →
+              </Link>
             </p>
             <h2 className="timelineEvent__question">
               Can international policy evolve faster than the debris is multiplying?

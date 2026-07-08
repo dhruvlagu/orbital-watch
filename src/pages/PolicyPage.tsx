@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useCountUp } from "../hooks/useCountUp";
 import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
@@ -228,6 +228,7 @@ function EnforcementMeter({ level }: { level: number }) {
         <span
           className={index < level ? "policyMeter__dot is-filled" : "policyMeter__dot"}
           key={index}
+          style={index < level ? { animationDelay: `${index * 160}ms` } : undefined}
         />
       ))}
     </div>
@@ -337,6 +338,24 @@ export default function PolicyPage() {
     });
   }, [sortKey]);
 
+  useEffect(() => {
+    const elements = document.querySelectorAll<HTMLElement>(".reveal-item");
+    const observer = new IntersectionObserver(
+      (entries, obs) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            obs.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.15, rootMargin: "0px 0px -20% 0px" },
+    );
+
+    elements.forEach((element) => observer.observe(element));
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <section className="policyPage">
       <div className="container policyHero">
@@ -362,7 +381,7 @@ export default function PolicyPage() {
         <div className="policyTimeline">
           {treaties.map((treaty) => (
             <article
-              className={treaty.isMissing ? "policyTreatyCard is-missing" : "policyTreatyCard"}
+              className={treaty.isMissing ? "policyTreatyCard reveal-item is-missing" : "policyTreatyCard reveal-item"}
               key={`${treaty.year}-${treaty.name}`}
             >
               <div className="policyTreatyCard__year">{treaty.year}</div>
