@@ -20,7 +20,7 @@ export type RawCdmRecord = {
   EMERGENCY_REPORTABLE: string; // "Y" | "N"
 };
 
-export type RiskTier = "ELEVATED" | "MONITORED" | "LOW";
+export type RiskTier = "ELEVATED" | "MONITORED" | "LOW" | "UNKNOWN";
 
 /** Enriched record with derived fields for the UI */
 export type ConjunctionEvent = {
@@ -29,7 +29,7 @@ export type ConjunctionEvent = {
   sat2Name: string;
   tcaMs: number; // unix ms — TCA parsed to number for countdowns
   missDistanceM: number;
-  pc: number;
+  pc: number | null;
   emergencyReportable: boolean;
   riskTier: RiskTier;
   /** e.g. "1 in 4,300" */
@@ -86,16 +86,20 @@ function dedupeRawCdmRecords(records: RawCdmRecord[]): RawCdmRecord[] {
 function parseEvents(records: RawCdmRecord[]): ConjunctionEvent[] {
   return dedupeRawCdmRecords(records)
     .map((r): ConjunctionEvent | null => {
-      const pc = parseFloat(r.PC);
+      const rawPc = (r.PC || "").trim();
+      const parsedPc = rawPc === "" ? NaN : parseFloat(rawPc);
+      const pc: number | null = Number.isFinite(parsedPc) ? parsedPc : null;
       const missDistanceM = parseFloat(r.MIN_RNG);
       const tcaMs = Date.parse(r.TCA);
 
-      // Discard records with unparseable critical fields
-      if (!Number.isFinite(pc) || !Number.isFinite(missDistanceM) || !Number.isFinite(tcaMs)) {
+      // Discard records with unparseable critical fields (MIN_RNG, TCA)
+      if (!Number.isFinite(missDistanceM) || !Number.isFinite(tcaMs)) {
         return null;
       }
 
       const emergencyReportable = r.EMERGENCY_REPORTABLE === "Y";
+      const riskTier: RiskTier = pc === null ? "UNKNOWN" : deriveRiskTier(pc);
+      const oddsString = pc === null ? "" : pcToOddsString(pc);
 
       return {
         id: r.CDM_ID,
@@ -105,8 +109,8 @@ function parseEvents(records: RawCdmRecord[]): ConjunctionEvent[] {
         missDistanceM,
         pc,
         emergencyReportable,
-        riskTier: deriveRiskTier(pc),
-        oddsString: pcToOddsString(pc),
+        riskTier,
+        oddsString,
       };
     })
     .filter((e): e is ConjunctionEvent => e !== null)

@@ -68,23 +68,23 @@ export default defineConfig(({ mode }) => {
                 const totalTracked = Array.isArray(records) ? records.length : 0;
                 const addedLast30Days = Array.isArray(records)
                   ? records.filter((record) => {
-                      const launch = record?.LAUNCH as string | undefined;
-                      if (!launch) return false;
-                      const launchTime = Date.parse(launch);
-                      return Number.isFinite(launchTime) && launchTime >= thirtyDaysAgo;
-                    }).length
+                    const launch = record?.LAUNCH as string | undefined;
+                    if (!launch) return false;
+                    const launchTime = Date.parse(launch);
+                    return Number.isFinite(launchTime) && launchTime >= thirtyDaysAgo;
+                  }).length
                   : 0;
                 const debrisCount = Array.isArray(records)
                   ? records.filter((record) => (record?.OBJECT_TYPE as string | undefined)?.toUpperCase() === "DEBRIS").length
                   : 0;
                 const activeSatellites = Array.isArray(records)
                   ? records.filter((record) => {
-                      const objectType = (record?.OBJECT_TYPE as string | undefined)?.toUpperCase();
-                      if (objectType !== "PAYLOAD") return false;
-                      const isCurrent = (record?.CURRENT as string | undefined)?.toUpperCase() === "Y";
-                      const notDecayed = !record?.DECAY || String(record.DECAY).trim() === "";
-                      return isCurrent || notDecayed;
-                    }).length
+                    const objectType = (record?.OBJECT_TYPE as string | undefined)?.toUpperCase();
+                    if (objectType !== "PAYLOAD") return false;
+                    const isCurrent = (record?.CURRENT as string | undefined)?.toUpperCase() === "Y";
+                    const notDecayed = !record?.DECAY || String(record.DECAY).trim() === "";
+                    return isCurrent || notDecayed;
+                  }).length
                   : 0;
                 const debrisToActiveRatio =
                   activeSatellites > 0

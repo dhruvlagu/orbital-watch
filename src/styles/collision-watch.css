@@ -35,8 +35,19 @@
 }
 
 @keyframes cwPulseDot {
-  0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.6); }
-  50%       { opacity: 0.7; transform: scale(1.15); box-shadow: 0 0 0 5px rgba(0, 212, 255, 0); }
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.6);
+  }
+
+  50% {
+    opacity: 0.7;
+    transform: scale(1.15);
+    box-shadow: 0 0 0 5px rgba(0, 212, 255, 0);
+  }
 }
 
 /* Disclaimer callout */
@@ -253,26 +264,49 @@
 
 .cw__skeleton {
   border-radius: 6px;
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.04) 25%,
-    rgba(255, 255, 255, 0.08) 50%,
-    rgba(255, 255, 255, 0.04) 75%
-  );
+  background: linear-gradient(90deg,
+      rgba(255, 255, 255, 0.04) 25%,
+      rgba(255, 255, 255, 0.08) 50%,
+      rgba(255, 255, 255, 0.04) 75%);
   background-size: 200% 100%;
   animation: cwShimmer 1.4s linear infinite;
 }
 
 @keyframes cwShimmer {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
 }
 
-.cw__skeleton--title    { height: 20px; width: 80%; }
-.cw__skeleton--badge    { height: 26px; width: 120px; border-radius: 999px; }
-.cw__skeleton--countdown { height: 42px; width: 140px; }
-.cw__skeleton--meta     { height: 18px; width: 60%; }
-.cw__skeleton--odds     { height: 14px; width: 70%; }
+.cw__skeleton--title {
+  height: 20px;
+  width: 80%;
+}
+
+.cw__skeleton--badge {
+  height: 26px;
+  width: 120px;
+  border-radius: 999px;
+}
+
+.cw__skeleton--countdown {
+  height: 42px;
+  width: 140px;
+}
+
+.cw__skeleton--meta {
+  height: 18px;
+  width: 60%;
+}
+
+.cw__skeleton--odds {
+  height: 14px;
+  width: 70%;
+}
 
 /* ─── Empty state ─────────────────────────────────────────────────────────── */
 .cw__emptyState {

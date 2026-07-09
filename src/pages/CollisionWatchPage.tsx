@@ -76,12 +76,34 @@ function RiskBadge({ tier, emergency }: { tier: RiskTier; emergency: boolean }) 
     ELEVATED: { cls: "badge badge--amber", label: "ELEVATED" },
     MONITORED: { cls: "badge badge--blue", label: "MONITORED" },
     LOW: { cls: "badge badge--green", label: "LOW" },
+    UNKNOWN: { cls: "badge badge--muted", label: "UNKNOWN" },
   };
   const { cls, label } = tierMap[tier];
+  // Tooltip strings must reflect the thresholds in src/services/conjunctionData.ts
+  const tierTooltip: Record<RiskTier, string> = {
+    ELEVATED: "Probability of collision at or above 1 in 1,000 — the higher end of publicly modeled conjunction risk.",
+    MONITORED: "Probability of collision between roughly 1 in 10,000 and 1 in 1,000 — being tracked, not currently high-risk.",
+    LOW: "Probability of collision below 1 in 10,000 — the lower end of modeled conjunction risk, though still tracked.",
+    UNKNOWN: "Probability of collision not publicly disclosed for this event.",
+  };
+
+  const emergencyTooltip =
+    "Flagged by the 18th Space Defense Squadron as meeting emergency reporting criteria — notified directly to the satellite operators involved.";
+
   return (
     <div className="cw__badgeRow">
-      <span className={cls}>{label}</span>
-      {emergency && <span className="badge badge--red">⚠ EMERGENCY REPORTABLE</span>}
+      <div className="tooltipContainer" style={{ marginLeft: 0 }}>
+        <span className={cls} tabIndex={0} aria-label={`Risk tier: ${label}`}>
+          {label}
+        </span>
+        <div className="tooltipText">{tierTooltip[tier]}</div>
+      </div>
+      {emergency && (
+        <div className="tooltipContainer" style={{ marginLeft: 0 }} onClick={(e) => e.stopPropagation()}>
+          <span className="badge badge--red" tabIndex={0} aria-label="Emergency reportable">⚠ EMERGENCY REPORTABLE</span>
+          <div className="tooltipText">{emergencyTooltip}</div>
+        </div>
+      )}
     </div>
   );
 }
@@ -110,7 +132,7 @@ function CountdownCell({ tcaMs }: { tcaMs: number }) {
 
 function ConjunctionCard({ event }: { event: ConjunctionEvent }) {
   const dist = formatMissDistance(event.missDistanceM);
-  const pcFormatted = formatPc(event.pc);
+  const pcFormatted = event.pc === null ? "Not publicly disclosed" : formatPc(event.pc);
 
   return (
     <article className="card cw__card reveal-item">
@@ -155,14 +177,26 @@ function ConjunctionCard({ event }: { event: ConjunctionEvent }) {
 
         {/* Probability */}
         <div className="cw__metaItem">
-          <span className="cw__metaLabel">Pc</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span className="cw__metaLabel">Pc</span>
+            <div className="tooltipContainer" onClick={(e) => e.stopPropagation()}>
+              <span className="infoIcon" tabIndex={0} aria-label="Pc definition">ⓘ</span>
+              <div className="tooltipText">
+                <a href="#what-is-pc">Click to view the definition of Pc</a>
+              </div>
+            </div>
+          </div>
           <span className="cw__metaValue cw__pc">{pcFormatted}</span>
         </div>
       </div>
 
       {/* Plain-English odds */}
       <div className="cw__odds">
-        ≈ {event.oddsString} chance of collision
+        {event.pc === null ? (
+          "Not publicly disclosed"
+        ) : (
+          <>≈ {event.oddsString} chance of collision</>
+        )}
       </div>
     </article>
   );
@@ -199,6 +233,7 @@ export default function CollisionWatchPage() {
   const [loading, setLoading] = useState(true);
   const [payload, setPayload] = useState<ConjunctionResponse>(FALLBACK_RESPONSE);
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
+  const [sortMode, setSortMode] = useState<"SOONEST" | "HIGHEST_RISK">("SOONEST");
   const isMountedRef = useRef(true);
 
   useEffect(() => {
@@ -270,13 +305,52 @@ export default function CollisionWatchPage() {
     };
   }, []);
 
+  // Ensure anchor links to #what-is-pc scroll the heading to center of viewport
+  useEffect(() => {
+    const selector = 'a[href="#what-is-pc"]';
+    const handler = (e: Event) => {
+      e.preventDefault();
+      const el = document.getElementById("what-is-pc");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        // update the hash without jumping
+        if (history && typeof history.replaceState === "function") {
+          history.replaceState(null, "", "#what-is-pc");
+        }
+      }
+    };
+
+    const anchors = Array.from(document.querySelectorAll<HTMLAnchorElement>(selector));
+    anchors.forEach((a) => a.addEventListener("click", handler));
+
+    // If page loaded with hash, scroll to center
+    if (window.location.hash === "#what-is-pc") {
+      setTimeout(() => {
+        const el = document.getElementById("what-is-pc");
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 120);
+    }
+
+    return () => anchors.forEach((a) => a.removeEventListener("click", handler));
+  }, []);
+
   const hasEvents = payload.events.length > 0;
 
-  // Memoize to avoid re-sorting on every render
-  const sortedEvents = useMemo(
-    () => [...payload.events].sort((a, b) => a.tcaMs - b.tcaMs),
-    [payload.events],
-  );
+  // Memoize to avoid re-sorting on every render; support client-side sort modes
+  const sortedEvents = useMemo(() => {
+    const events = [...payload.events];
+    if (sortMode === "SOONEST") {
+      return events.sort((a, b) => a.tcaMs - b.tcaMs);
+    }
+
+    // HIGHEST_RISK: sort by pc descending, treating null pc as lowest priority (sent to end). Tie-break by soonest TCA.
+    return events.sort((a, b) => {
+      const pa = a.pc ?? -Infinity;
+      const pb = b.pc ?? -Infinity;
+      if (pa === pb) return a.tcaMs - b.tcaMs;
+      return pb - pa;
+    });
+  }, [payload.events, sortMode]);
 
   return (
     <>
@@ -323,7 +397,14 @@ export default function CollisionWatchPage() {
                 <span>
                   This shows the <strong>publicly released subset</strong> of
                   conjunction screenings. Some operators opt out of public
-                  release, and Pc values may be withheld or rounded for
+                  release, and Pc
+                  <span className="tooltipContainer" style={{ marginLeft: 0 }}>
+                    <span className="infoIcon" tabIndex={0} aria-label="Pc definition">ⓘ</span>
+                    <div className="tooltipText">
+                      <a href="#what-is-pc">Click to view the definition of Pc</a>
+                    </div>
+                  </span>
+                  values may be withheld or rounded for
                   sensitive assets. This is a partial picture, not a complete
                   risk map.
                 </span>
@@ -361,8 +442,14 @@ export default function CollisionWatchPage() {
               <span className="cw__sectionLabel">UPCOMING EVENTS</span>
               <h2 className="cw__sectionTitle">Upcoming Close Approaches</h2>
               <p className="cw__sectionSubtitle">
-                Sorted soonest-first. Pc values are from the U.S. Space
-                Surveillance Network.
+                Default sort: Soonest-first. Toggle to "Highest Risk" to sort by Pc
+                <span className="tooltipContainer" style={{ marginLeft: 0 }}>
+                  <span className="infoIcon" tabIndex={0} aria-label="Pc definition">ⓘ</span>
+                  <div className="tooltipText">
+                      <a href="#what-is-pc">Click to view the definition of Pc</a>
+                  </div>
+                </span>
+                . Pc values are from the U.S. Space Surveillance Network.
               </p>
             </div>
 
@@ -396,6 +483,33 @@ export default function CollisionWatchPage() {
           )}
 
           {/* Card grid */}
+          {!loading && hasEvents && (
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+              <div
+                className="cw__summary"
+                style={{ color: "var(--text-secondary)", fontSize: "0.9rem", textAlign: "left" }}
+              >
+                {payload.events.length} conjunctions tracked · {payload.events.filter((e) => e.riskTier === "ELEVATED").length} at elevated risk
+              </div>
+
+              <div style={{ display: "flex", gap: 8 }} role="tablist" aria-label="Sort events">
+                <button
+                  type="button"
+                  className={sortMode === "SOONEST" ? "btn btn--primary" : "btn btn--secondary"}
+                  onClick={() => setSortMode("SOONEST")}
+                >
+                  Soonest
+                </button>
+                <button
+                  type="button"
+                  className={sortMode === "HIGHEST_RISK" ? "btn btn--primary" : "btn btn--secondary"}
+                  onClick={() => setSortMode("HIGHEST_RISK")}
+                >
+                  Highest Risk
+                </button>
+              </div>
+            </div>
+          )}
           <div className="cw__grid">
             {loading ? (
               // Skeleton loading state
@@ -436,7 +550,7 @@ export default function CollisionWatchPage() {
                 <line x1="12" y1="16" x2="12" y2="12" />
                 <line x1="12" y1="8" x2="12.01" y2="8" />
               </svg>
-              <h3 className="cw__explainerTitle">What Is Pc?</h3>
+              <h3 id="what-is-pc" className="cw__explainerTitle">What Is Pc?</h3>
             </div>
             <p className="cw__explainerBody">
               <strong>Pc (probability of collision)</strong> is not the literal

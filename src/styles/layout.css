@@ -1932,6 +1932,11 @@
   margin-left: auto;
 }
 
+/* Place tooltip icons next to labels within the collision watch meta rows */
+.cw__metaItem .tooltipContainer {
+  margin-left: 6px !important;
+}
+
 .infoIcon {
   font-size: 14px;
   color: var(--text-secondary);
@@ -1969,6 +1974,23 @@
   pointer-events: none;
 }
 
+/* Allow links inside tooltips to be interactive */
+.tooltipText a {
+  pointer-events: auto;
+  color: var(--accent-blue);
+  text-decoration: underline;
+}
+
+/* Offset in-page anchor targets to account for fixed header height */
+#what-is-pc {
+  scroll-margin-top: 96px;
+}
+@media (max-width: 768px) {
+  #what-is-pc {
+    scroll-margin-top: 72px;
+  }
+}
+
 .tooltipText::after {
   content: "";
   position: absolute;
@@ -1985,6 +2007,7 @@
   visibility: visible;
   opacity: 1;
   transform: translateY(0);
+  pointer-events: auto; /* enable interaction when visible */
 }
 
 /* Obstacles Section */
