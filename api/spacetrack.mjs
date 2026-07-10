@@ -7,6 +7,18 @@ config({ path: "./spacetrack.env" });
 // Vercel injects SPACE_TRACK_USER / SPACE_TRACK_PASS via Project Settings → Environment Variables.
 // In local development, dotenv loads the project env file if present.
 
+// ⚠️ LIVE FETCHING TEMPORARILY DISABLED (2026-07-09) ⚠️
+// Space-Track suspended this account for excessive SATCAT querying —
+// every user page load was triggering a live query, so request volume
+// scaled with site traffic instead of staying fixed. All the logic
+// below is preserved and correct, it's just unreachable for now via
+// the early return in the handler at the bottom of this file.
+// Do NOT remove this comment block or the early return until
+// api/cron/refresh-satcat.mjs (scheduled, fixed-rate fetching) is
+// built and verified working — then delete this disabled block and
+// the early return, and everything below resumes working as-is.
+
+/*
 let cachedCookieHeader = null;
 let cachedCookieIssuedAt = 0;
 const COOKIE_TTL_MS = 90 * 60 * 1000;
@@ -130,12 +142,23 @@ async function fetchSatcatData(user, pass) {
     return retryResponse;
   }
 }
+*/
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
+  // See disabled block above — remove this early return once the
+  // cron-based fetch system replaces direct live querying.
+  return res.status(503).json({
+    error: "Live Space-Track data temporarily disabled.",
+    liveDataDisabled: true,
+    message:
+      "Refactoring to comply with Space-Track's API usage policy. Live fetching will resume once scheduled, rate-limited requests are in place.",
+  });
+
+  /*
   const user = process.env.SPACE_TRACK_USER;
   const pass = process.env.SPACE_TRACK_PASS;
 
@@ -158,4 +181,5 @@ export default async function handler(req, res) {
       error: err instanceof Error ? err.message : "Unknown Space-Track proxy error",
     });
   }
+  */
 }

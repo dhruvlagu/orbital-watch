@@ -2,6 +2,18 @@
 // Fetches upcoming conjunction/close-approach events from Space-Track CDM Public class.
 // Same auth pattern as api/spacetrack.mjs (cookie-based session with in-memory cache).
 
+// ⚠️ LIVE FETCHING TEMPORARILY DISABLED (2026-07-09) ⚠️
+// Space-Track suspended this account for excessive cdm_public querying —
+// every user page load / manual refresh was triggering a live query,
+// well past the 3x/day limit. All the logic below is preserved and
+// correct, it's just unreachable for now via the early return in the
+// handler at the bottom of this file.
+// Do NOT remove this comment block or the early return until
+// api/cron/refresh-cdm.mjs (scheduled, fixed-rate fetching, max 3x/day)
+// is built and verified working — then delete this disabled block and
+// the early return, and everything below resumes working as-is.
+
+/*
 let cachedCookieHeader = null;
 let cachedCookieIssuedAt = 0;
 const COOKIE_TTL_MS = 90 * 60 * 1000;
@@ -88,12 +100,23 @@ async function fetchCdmData(user, pass) {
     return retryResponse;
   }
 }
+*/
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
+  // See disabled block above — remove this early return once the
+  // cron-based fetch system replaces direct live querying.
+  return res.status(503).json({
+    error: "Live conjunction data temporarily disabled.",
+    liveDataDisabled: true,
+    message:
+      "Refactoring to comply with Space-Track's API usage policy. Live fetching will resume once scheduled, rate-limited requests are in place.",
+  });
+
+  /*
   const user = process.env.SPACE_TRACK_USER;
   const pass = process.env.SPACE_TRACK_PASS;
 
@@ -116,4 +139,5 @@ export default async function handler(req, res) {
       error: err instanceof Error ? err.message : "Unknown Space-Track CDM proxy error",
     });
   }
+  */
 }
