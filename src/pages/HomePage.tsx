@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import LiveDataSection from "../components/LiveDataSection";
 import StarfieldCanvas from "../components/StarfieldCanvas";
 import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
+import { useCardSpotlight } from "../hooks/useCardSpotlight";
 import { fetchConjunctions } from "../services/conjunctionData";
 
 const STATS_GROUP = (
@@ -34,6 +35,9 @@ export default function HomePage() {
 
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
   const [conjunctionCount, setConjunctionCount] = useState<number | null>(null);
+  const exploreGridRef = useRef<HTMLDivElement>(null);
+
+  useCardSpotlight(exploreGridRef);
 
   useEffect(() => {
     const onScroll = () => {
@@ -84,26 +88,20 @@ export default function HomePage() {
                 <LiveDataSection variant="hero" />
 
                 {/* Conjunction teaser */}
-                <Link to="/collision-watch" className="cw__teaserCard" aria-label="View live conjunction alerts on Collision Watch">
+                {/* Conjunction teaser */}
+                <Link to="/collision-watch" className="cw__teaserCard" aria-label="View conjunction alerts on Collision Watch">
                   <div className="cw__teaserCard__left">
-                    <div className="cw__teaserCard__icon" aria-hidden="true">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="8" cy="8" r="3" />
-                        <circle cx="16" cy="16" r="3" />
-                        <path d="M16 8l-6 6" />
-                        <path d="M8 16l6-6" />
-                      </svg>
-                    </div>
-                    <div>
-                      <div className="cw__teaserCard__count">
-                        {conjunctionCount !== null ? conjunctionCount : "—"}
-                      </div>
-                      <p className="cw__teaserCard__text">
-                        active conjunction alerts being tracked right now
-                      </p>
-                    </div>
+                    <span className="badge badge--red" style={{ fontSize: "10px", padding: "2px 8px" }}>FEED</span>
+                    <span className="cw__teaserCard__text" style={{ color: "var(--text-primary)", fontWeight: 600 }}>
+                      Active Conjunction Alerts <span style={{ color: "var(--text-secondary)", fontWeight: 400, marginLeft: "4px" }}>(Updated 3x Daily)</span>
+                    </span>
                   </div>
-                  <span className="cw__teaserCard__arrow" aria-hidden="true">→</span>
+                  <div className="cw__teaserCard__right" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                    <span className="cw__teaserCard__count" style={{ fontSize: "20px", color: "var(--accent-blue)" }}>
+                      {conjunctionCount !== null ? conjunctionCount : "—"}
+                    </span>
+                    <span className="cw__teaserCard__arrow" aria-hidden="true" style={{ margin: 0 }}>→</span>
+                  </div>
                 </Link>
               </div>
             </div>
@@ -148,7 +146,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="homeExplore__grid">
+          <div className="homeExplore__grid" ref={exploreGridRef}>
             <div className="card homeExploreCard">
               <div className="homeExploreCard__icon">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -182,10 +180,10 @@ export default function HomePage() {
               </div>
               <h3 className="homeExploreCard__title">Collision Watch</h3>
               <p className="homeExploreCard__description">
-                Live predicted close approaches between tracked objects — sourced from the U.S. Space Force's public conjunction data feed with real-time countdown timers.
+                Predicted close approaches between tracked objects — updated 3x daily and sourced from the U.S. Space Force's public conjunction data feed with active countdown timers.
               </p>
               <Link to="/collision-watch" className="btn btn--secondary homeExploreCard__btn">
-                View Live Alerts
+                View Conjunctions
               </Link>
             </div>
 

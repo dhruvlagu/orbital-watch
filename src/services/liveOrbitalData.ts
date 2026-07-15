@@ -1,3 +1,9 @@
+// liveOrbitalData.ts
+// Reads pre-computed SATCAT metrics from /api/spacetrack/satcat, which in turn reads
+// from Redis populated once daily by the api/cron/refresh-satcat scheduled job.
+// This service never triggers a Space-Track query directly — all Space-Track access
+// is exclusively handled server-side by the cron job.
+
 const CACHE_KEY = "spaceTrackSatcatCacheV1";
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
@@ -43,13 +49,20 @@ function writeCache(data: LiveOrbitalData) {
 
 async function fetchLiveMetrics(): Promise<LiveOrbitalData> {
   const response = await fetch("/api/spacetrack/satcat");
+
+  if (response.status === 503) {
+    // Data not yet available — cron hasn't run yet on this deployment.
+    // Throw a typed error so the UI can show an appropriate message.
+    throw new Error("Orbital data not yet available — updated daily.");
+  }
+
   if (!response.ok) {
-    throw new Error(`Space-Track request failed with status ${response.status}`);
+    throw new Error(`Orbital data request failed with status ${response.status}`);
   }
 
   const metrics = (await response.json()) as LiveOrbitalData;
   if (!metrics || typeof metrics.totalTracked !== "number") {
-    throw new Error("Space-Track returned an invalid payload.");
+    throw new Error("Orbital data endpoint returned an invalid payload.");
   }
 
   return metrics;
@@ -111,6 +124,11 @@ export async function fetchLiveOrbitalEnvironment(
   return fetchAndCacheLiveMetrics();
 }
 
+/**
+ * Re-reads the latest stored orbital metrics from the server (Redis-backed).
+ * Does NOT trigger a Space-Track query — data is only refreshed by the daily
+ * api/cron/refresh-satcat scheduled job.
+ */
 export async function forceRefreshLiveOrbitalEnvironment(): Promise<LiveOrbitalResponse> {
   return fetchAndCacheLiveMetrics();
 }

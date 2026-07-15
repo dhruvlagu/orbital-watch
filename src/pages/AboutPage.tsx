@@ -1,7 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import StarfieldCanvas from "../components/StarfieldCanvas";
 import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
+import { useCardSpotlight } from "../hooks/useCardSpotlight";
 
 const reflectionText =
   "I started this project assuming the orbital debris crisis was fundamentally a technical problem — that the barrier to cleaning up low Earth orbit was that we simply hadn't invented the right tools yet. What I found was almost the opposite. Active debris removal technology exists today. Robotic capture arms, magnetic docking systems, electrodynamic tethers — the engineering is real, demonstrated, and improving. The barrier isn't scientific. It's a 1967 treaty clause that nobody intended to become a debris removal prohibition, interpreted by nations that have every geopolitical incentive to keep it ambiguous. That gap between what engineering can do and what international law allows was genuinely surprising to me — and it reframed the entire project. This isn't a story about waiting for technology. It's a story about whether legal institutions can evolve faster than the problems they were never designed to anticipate.";
@@ -14,6 +15,12 @@ export default function AboutPage() {
     "About | Research Methodology & Sources",
     "Read about the research behind Orbital Watch, the data sources used, and the methodology behind the site."
   );
+
+  const methodGridRef = useRef<HTMLDivElement>(null);
+  const reflectionGridRef = useRef<HTMLDivElement>(null);
+
+  useCardSpotlight(methodGridRef);
+  useCardSpotlight(reflectionGridRef);
 
   // Scroll Reveal Hook
   useEffect(() => {
@@ -92,11 +99,11 @@ export default function AboutPage() {
             </p>
           </div>
 
-          <div className="methodGrid">
+          <div className="methodGrid" ref={methodGridRef}>
             {[
               {
                 title: "Primary Data Sources",
-                body: "Orbital debris statistics drawn from ESA Annual Space Environment Report and the Space-Track.org satellite catalog. Live data fetched via Space-Track.org API.",
+                body: "Orbital debris statistics drawn from ESA Annual Space Environment Report and the Space-Track.org satellite catalog. Data cached via Space-Track.org API.",
                 icon: "📊",
               },
               {
@@ -128,7 +135,7 @@ export default function AboutPage() {
       {/* SECTION 3 & 4 — Interactive Reflective Notes */}
       <div className="aboutSection aboutSection--reflection">
         <div className="container">
-          <div className="reflectionGrid">
+          <div className="reflectionGrid" ref={reflectionGridRef}>
             {/* Section 3: What I Found Surprising */}
             <div className="card reflectPanel reflectPanel--amber reveal-item">
               <div className="reflectPanel__header">
@@ -189,7 +196,7 @@ export default function AboutPage() {
                 <li className="sourceItem">
                   <span className="sourceItem__title">Space-Track.org</span>
                   <span className="sourceItem__details">
-                    <em>Satellite Catalog (SATCAT) API.</em> Joint Force Space Component Command (JFSCC). Live query interface.
+                    <em>Satellite Catalog (SATCAT) API.</em> Joint Force Space Component Command (JFSCC). Cached daily.
                   </span>
                 </li>
                 <li className="sourceItem">

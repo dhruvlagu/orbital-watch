@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import StarfieldCanvas from "../components/StarfieldCanvas";
 import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
+import { useCardSpotlight } from "../hooks/useCardSpotlight";
 import {
   fetchConjunctions,
   type ConjunctionEvent,
@@ -226,8 +227,8 @@ const FALLBACK_RESPONSE: ConjunctionResponse = {
 
 export default function CollisionWatchPage() {
   useDocumentMetadata(
-    "Collision Watch | Live Conjunction Alerts | Orbital Watch",
-    "Real predicted close approaches between tracked objects in orbit, sourced directly from the U.S. Space Force's public conjunction data feed (CDM Public class).",
+    "Collision Watch | Conjunction Alerts | Orbital Watch",
+    "Predicted close approaches between tracked objects in orbit, updated 3x daily and sourced from the U.S. Space Force's public conjunction data feed (CDM Public class).",
   );
 
   const [loading, setLoading] = useState(true);
@@ -235,6 +236,9 @@ export default function CollisionWatchPage() {
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
   const [sortMode, setSortMode] = useState<"SOONEST" | "HIGHEST_RISK">("SOONEST");
   const isMountedRef = useRef(true);
+  const gridRef = useRef<HTMLDivElement>(null);
+
+  useCardSpotlight(gridRef);
 
   useEffect(() => {
     return () => {
@@ -361,8 +365,7 @@ export default function CollisionWatchPage() {
           <div className="container hero__inner">
             <div className="hero__content">
               <div className="hero__label cw__heroLabel">
-                <span className="cw__liveDot" aria-hidden="true" />
-                LIVE DATA · SPACE-TRACK CDM PUBLIC
+                UPDATED 3X DAILY · SPACE-TRACK CDM PUBLIC
               </div>
 
               <h1 className="hero__headline cw__heroHeadline">
@@ -371,8 +374,8 @@ export default function CollisionWatchPage() {
               </h1>
 
               <p className="hero__subheadline">
-                Real predicted close approaches between tracked objects in orbit
-                — sourced directly from the U.S. Space Force's public conjunction
+                Predicted close approaches between tracked objects in orbit
+                — updated 3x daily and sourced from the U.S. Space Force's public conjunction
                 data feed.
               </p>
 
@@ -456,9 +459,8 @@ export default function CollisionWatchPage() {
             {/* Live / cache badge */}
             <div className="cw__statusBadge">
               {loading ? null : payload.isFresh && !payload.fromCache ? (
-                <span className="badge badge--green">
-                  <span className="liveData__pulseDot" aria-hidden="true" />
-                  LIVE
+                <span className="badge badge--blue">
+                  UPDATED 3X DAILY
                 </span>
               ) : payload.lastUpdatedAt ? (
                 <span className="cw__cacheLabel">
@@ -477,8 +479,8 @@ export default function CollisionWatchPage() {
                 <line x1="12" y1="17" x2="12.01" y2="17" />
               </svg>
               {payload.lastUpdatedAt
-                ? `Live fetch failed — showing cached data from ${hoursAgo(payload.lastUpdatedAt)}.`
-                : "No conjunction data currently available — Space-Track.org may be temporarily unreachable."}
+                ? `Fetch failed — showing cached data from ${hoursAgo(payload.lastUpdatedAt)}.`
+                : "No conjunction data currently available — cache may be empty."}
             </div>
           )}
 
@@ -510,7 +512,7 @@ export default function CollisionWatchPage() {
               </div>
             </div>
           )}
-          <div className="cw__grid">
+          <div className="cw__grid" ref={gridRef}>
             {loading ? (
               // Skeleton loading state
               Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)

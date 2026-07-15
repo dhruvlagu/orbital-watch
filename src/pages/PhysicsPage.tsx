@@ -1,6 +1,7 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
+import { useCardSpotlight } from "../hooks/useCardSpotlight";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarController, BarElement, Tooltip, Legend } from "chart.js";
 import { Bar } from "react-chartjs-2";
 import KesslerSimulation from "../components/KesslerSimulation";
@@ -19,6 +20,13 @@ export default function PhysicsPage() {
   const [isMobileChart, setIsMobileChart] = useState(
     () => typeof window !== "undefined" && window.matchMedia("(max-width: 768px)").matches,
   );
+  const speedCalloutRef = useRef<HTMLDivElement>(null);
+  const calculatorRef = useRef<HTMLDivElement>(null);
+  const technicalCardRef = useRef<HTMLDivElement>(null);
+
+  useCardSpotlight(speedCalloutRef);
+  useCardSpotlight(calculatorRef);
+  useCardSpotlight(technicalCardRef);
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 768px)");
@@ -209,11 +217,13 @@ export default function PhysicsPage() {
         <div className="container">
           <h2>The Speed Problem</h2>
 
-          <div className="speedCallout card">
-            <div className="speedCallout__stat">~17,500 mph</div>
-            <div className="speedCallout__label">Average orbital velocity in LEO</div>
-            <div className="speedCallout__description">
-              At this speed, a 1cm bolt carries kinetic energy comparable to a hand grenade. A 10cm fragment matches a small car crash. A 1kg object exceeds a military explosive.
+          <div ref={speedCalloutRef}>
+            <div className="speedCallout card">
+              <div className="speedCallout__stat">~17,500 mph</div>
+              <div className="speedCallout__label">Average orbital velocity in LEO</div>
+              <div className="speedCallout__description">
+                At this speed, a 1cm bolt carries kinetic energy comparable to a hand grenade. A 10cm fragment matches a small car crash. A 1kg object exceeds a military explosive.
+              </div>
             </div>
           </div>
 
@@ -235,7 +245,8 @@ export default function PhysicsPage() {
           <h2>Calculate Impact Energy</h2>
           <p className="section-subtitle">Adjust the mass and speed of a debris object to see its kinetic energy in real terms.</p>
 
-          <div className="calculator card calculator--dark">
+          <div ref={calculatorRef}>
+            <div className="calculator card calculator--dark">
             {/* Mass Slider */}
             <div className="calculatorRow">
               <div className="sliderGroup">
@@ -345,6 +356,7 @@ export default function PhysicsPage() {
                 </div>
               </div>
             </div>
+            </div>
           </div>
         </div>
       </section>
@@ -416,7 +428,8 @@ export default function PhysicsPage() {
           <h2>The Math Behind This Page</h2>
           <p className="section-subtitle">For the technically curious.</p>
 
-          <div className="technicalCard card">
+          <div ref={technicalCardRef}>
+            <div className="technicalCard card">
             <pre className="technicalCode">{`Kinetic Energy Formula:
 KE = ½mv²
 Where m = mass in kilograms, v = velocity in meters/second
@@ -432,6 +445,7 @@ KE_TNT = KE(J) / 4,184
 
 Sources: Kessler & Cour-Palais (1978), NASA ODPO, 
 ESA Space Debris User's Handbook`}</pre>
+            </div>
           </div>
 
           <div className="attribution">

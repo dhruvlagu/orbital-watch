@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
+import { useCardSpotlight } from "../hooks/useCardSpotlight";
 import StarfieldCanvas from "../components/StarfieldCanvas";
 
 // ─── SSR Audit Data ───────────────────────────────────────────────────────────
@@ -195,6 +196,16 @@ export default function SolutionsPage() {
     "Inspect active debris removal concepts, robotic capture systems, and the legal and economic barriers to cleaning up low Earth orbit."
   );
 
+  const sovereigntyRef = useRef<HTMLDivElement>(null);
+  const adrRef = useRef<HTMLDivElement>(null);
+  const economicsRef = useRef<HTMLDivElement>(null);
+  const auditRef = useRef<HTMLDivElement>(null);
+
+  useCardSpotlight(sovereigntyRef);
+  useCardSpotlight(adrRef);
+  useCardSpotlight(economicsRef);
+  useCardSpotlight(auditRef);
+
   useRevealOnScroll(".sol-reveal");
 
   return (
@@ -237,7 +248,7 @@ export default function SolutionsPage() {
             </p>
           </div>
 
-          <div className="sovereigntyGrid sol-reveal">
+          <div className="sovereigntyGrid sol-reveal" ref={sovereigntyRef}>
             <div className="card sovereigntyCard">
               <div className="sovereigntyCard__label">THE LEGAL REALITY</div>
               <h3 className="sovereigntyCard__title">Article VIII &amp; the Sovereignty Trap</h3>
@@ -306,7 +317,7 @@ export default function SolutionsPage() {
             </p>
           </div>
 
-          <div className="adrGrid">
+          <div className="adrGrid" ref={adrRef}>
             {adrMissions.map((mission) => (
               <article
                 key={mission.name}
@@ -362,7 +373,7 @@ export default function SolutionsPage() {
             </p>
           </div>
 
-          <div className="economicsGrid">
+          <div className="economicsGrid" ref={economicsRef}>
             {economicsPanels.map((panel, i) => (
               <div
                 key={panel.title}
@@ -402,7 +413,7 @@ export default function SolutionsPage() {
             </p>
           </div>
 
-          <div className="auditLayout sol-reveal">
+          <div className="auditLayout sol-reveal" ref={auditRef}>
             {/* Checklist */}
             <div className="card auditCard">
               <div className="auditCard__header">

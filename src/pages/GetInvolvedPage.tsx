@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import StarfieldCanvas from "../components/StarfieldCanvas";
 import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
+import { useCardSpotlight } from "../hooks/useCardSpotlight";
 
 export default function GetInvolvedPage() {
   useDocumentMetadata(
@@ -11,6 +12,11 @@ export default function GetInvolvedPage() {
 
   const [copied, setCopied] = useState(false);
   const [showInstaTip, setShowInstaTip] = useState(false);
+  const actionsGridRef = useRef<HTMLDivElement>(null);
+  const orgsGridRef = useRef<HTMLDivElement>(null);
+
+  useCardSpotlight(actionsGridRef);
+  useCardSpotlight(orgsGridRef);
 
   // Scroll Reveal Hook
   useEffect(() => {
@@ -77,7 +83,7 @@ export default function GetInvolvedPage() {
             </p>
           </div>
 
-          <div className="actionsGrid">
+          <div className="actionsGrid" ref={actionsGridRef}>
             {/* Card 1 */}
             <article className="card actionCard reveal-item">
               <div className="actionCard__iconWrapper star-icon">
@@ -220,7 +226,7 @@ export default function GetInvolvedPage() {
             </p>
           </div>
 
-          <div className="orgsGrid">
+          <div className="orgsGrid" ref={orgsGridRef}>
             {[
               {
                 name: "ESA Space Debris Office",

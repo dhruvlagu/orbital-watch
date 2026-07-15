@@ -70,7 +70,7 @@ export function pcToOddsString(pc: number): string {
   return `1 in ${oneIn.toLocaleString()}`;
 }
 
-function dedupeRawCdmRecords(records: RawCdmRecord[]): RawCdmRecord[] {
+export function dedupeRawCdmRecords(records: RawCdmRecord[]): RawCdmRecord[] {
   const seen = new Set<string>();
   return records.filter((record) => {
     const sat1 = record.SAT_1_NAME.trim();
@@ -146,7 +146,10 @@ function writeCache(events: ConjunctionEvent[]) {
 
 async function fetchAndCacheConjunctions(): Promise<ConjunctionResponse> {
   try {
-    const response = await fetch("/api/conjunctions");
+    const response = await fetch("/api/spacetrack/conjunctions");
+    if (response.status === 503) {
+      throw new Error("Conjunction data not yet available — updated 3x daily.");
+    }
     if (!response.ok) {
       throw new Error(`Conjunctions request failed with status ${response.status}`);
     }

@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useCountUp } from "../hooks/useCountUp";
 import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
+import { useCardSpotlight } from "../hooks/useCardSpotlight";
 
 type Policy = {
   id: string;
@@ -265,6 +266,14 @@ export default function PolicyPage() {
   const [sortKey, setSortKey] = useState<SortKey>("grade");
   const [activeToggles, setActiveToggles] = useState<string[]>([]);
 
+  const timelineRef = useRef<HTMLDivElement>(null);
+  const togglesRef = useRef<HTMLDivElement>(null);
+  const obstaclesRef = useRef<HTMLDivElement>(null);
+
+  useCardSpotlight(timelineRef);
+  useCardSpotlight(togglesRef);
+  useCardSpotlight(obstaclesRef);
+
   const handleToggle = (id: string) => {
     const isActive = activeToggles.includes(id);
     const policy = policyOptions.find((option) => option.id === id);
@@ -378,10 +387,10 @@ export default function PolicyPage() {
           </div>
         </div>
 
-        <div className="policyTimeline">
+        <div className="policyTimeline" ref={timelineRef}>
           {treaties.map((treaty) => (
             <article
-              className={treaty.isMissing ? "policyTreatyCard reveal-item is-missing" : "policyTreatyCard reveal-item"}
+              className={treaty.isMissing ? "card policyTreatyCard reveal-item is-missing" : "card policyTreatyCard reveal-item"}
               key={`${treaty.year}-${treaty.name}`}
             >
               <div className="policyTreatyCard__year">{treaty.year}</div>
@@ -514,7 +523,7 @@ export default function PolicyPage() {
           </div>
 
           {/* Toggles Grid */}
-          <div className="togglesGrid">
+          <div className="togglesGrid" ref={togglesRef}>
             {policyOptions.map((policy) => {
               const isOn = activeToggles.includes(policy.id);
               return (
@@ -567,7 +576,7 @@ export default function PolicyPage() {
           <h2>What's Standing in the Way?</h2>
           <p>Enacting these reforms requires overcoming deep structural and geopolitical barriers.</p>
         </div>
-        <div className="obstaclesGrid">
+        <div className="obstaclesGrid" ref={obstaclesRef}>
           <Link to="/solutions" className="card obstacleCard">
             <div>
               <h3>The Sovereignty Trap</h3>

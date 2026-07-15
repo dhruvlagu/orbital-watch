@@ -147,31 +147,41 @@
 .cw__card {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 22px;
-  border: 1px solid var(--border-subtle);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  gap: 16px;
+  padding: 24px;
+  background: radial-gradient(120% 120% at 50% 10%, rgba(10, 25, 47, 0.7) 0%, rgba(2, 12, 27, 0.85) 100%);
+  border: 1px solid rgba(0, 212, 255, 0.12);
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+  transition: border-color 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), 
+              box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), 
+              transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .cw__card:hover {
-  border-color: rgba(0, 212, 255, 0.2);
-  box-shadow: var(--glow-blue);
+  transform: translateY(-4px);
+  border-color: rgba(0, 212, 255, 0.3);
+  box-shadow: var(--glow-blue), 0 8px 30px rgba(0, 0, 0, 0.5);
 }
 
 /* Object names row */
 .cw__objects {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
 .cw__satName {
   font-family: var(--font-display);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  color: var(--text-primary);
-  letter-spacing: 0.02em;
+  color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 4px 10px;
+  border-radius: 6px;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
   word-break: break-all;
 }
@@ -179,7 +189,8 @@
 .cw__crossIcon {
   color: #ff3b3b;
   flex-shrink: 0;
-  opacity: 0.8;
+  opacity: 0.95;
+  filter: drop-shadow(0 0 6px rgba(255, 60, 60, 0.5));
 }
 
 /* Badge row */
@@ -193,20 +204,21 @@
 /* Countdown */
 .cw__countdown__label {
   font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-secondary);
-  margin-bottom: -8px;
+  margin-bottom: -10px;
 }
 
 .cw__countdown {
-  font-family: var(--font-display);
-  font-size: clamp(28px, 5vw, 38px);
+  font-family: "Courier New", Courier, monospace, var(--font-display);
+  font-size: clamp(28px, 5vw, 36px);
   font-weight: 700;
   color: var(--accent-blue);
-  letter-spacing: -0.03em;
-  line-height: 1;
+  text-shadow: 0 0 10px rgba(0, 212, 255, 0.4);
+  letter-spacing: 0.02em;
+  line-height: 1.1;
 }
 
 @media (max-width: 375px) {
@@ -218,20 +230,20 @@
 /* Miss distance + Pc row */
 .cw__metaRow {
   display: flex;
-  gap: 24px;
+  gap: 28px;
   flex-wrap: wrap;
 }
 
 .cw__metaItem {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
 .cw__metaLabel {
   font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-secondary);
 }
@@ -253,8 +265,9 @@
   font-size: 13px;
   color: var(--text-secondary);
   border-top: 1px solid var(--border-subtle);
-  padding-top: 10px;
+  padding-top: 12px;
   margin-top: auto;
+  letter-spacing: 0.01em;
 }
 
 /* ─── Skeleton loading ────────────────────────────────────────────────────── */
@@ -315,17 +328,38 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 12px;
-  padding: 48px 32px;
+  gap: 16px;
+  padding: 64px 32px;
+  background: radial-gradient(100% 100% at 50% 50%, rgba(255, 255, 255, 0.015) 0%, rgba(255, 255, 255, 0) 100%);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
 }
 
 .cw__emptyIcon {
-  font-size: 40px;
+  font-size: 44px;
   line-height: 1;
+  position: relative;
+  animation: cwRadarPulse 2s ease-in-out infinite;
+}
+
+@keyframes cwRadarPulse {
+  0% {
+    transform: scale(0.96);
+    filter: drop-shadow(0 0 0 rgba(0, 212, 255, 0));
+  }
+  50% {
+    transform: scale(1.04);
+    filter: drop-shadow(0 0 14px rgba(0, 212, 255, 0.4));
+  }
+  100% {
+    transform: scale(0.96);
+    filter: drop-shadow(0 0 0 rgba(0, 212, 255, 0));
+  }
 }
 
 .cw__emptyState h3 {
   color: var(--text-primary);
+  font-family: var(--font-display);
   margin: 0;
 }
 
@@ -333,8 +367,11 @@
 .cw__explainerCard {
   padding: 28px;
   margin-bottom: 48px;
-  border: 1px solid rgba(0, 212, 255, 0.15);
-  background: rgba(0, 212, 255, 0.03);
+  border: 1px solid rgba(0, 212, 255, 0.12);
+  border-left: 4px solid var(--accent-blue);
+  background: rgba(0, 212, 255, 0.015);
+  box-shadow: inset 0 0 16px rgba(0, 212, 255, 0.02);
+  border-radius: 4px 16px 16px 4px;
 }
 
 .cw__explainerHeader {
@@ -348,6 +385,7 @@
   font-size: 20px;
   margin: 0;
   color: var(--text-primary);
+  font-family: var(--font-display);
 }
 
 .cw__explainerBody {
@@ -366,32 +404,38 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 18px 22px;
-  border: 1px solid rgba(0, 212, 255, 0.18);
-  background: rgba(0, 212, 255, 0.04);
-  border-radius: 12px;
+  padding: 18px 24px;
+  background: radial-gradient(100% 100% at 0% 0%, rgba(0, 212, 255, 0.05) 0%, rgba(0, 212, 255, 0.015) 100%);
+  border: 1px solid rgba(0, 212, 255, 0.15);
+  border-radius: 16px;
   text-decoration: none;
   color: var(--text-primary);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-  margin-top: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(8px);
+  transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1), 
+              border-color 0.25s cubic-bezier(0.25, 0.8, 0.25, 1), 
+              box-shadow 0.25s cubic-bezier(0.25, 0.8, 0.25, 1), 
+              background 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+  margin-top: 20px;
 }
 
 .cw__teaserCard:hover {
+  transform: translateY(-2px);
   border-color: rgba(0, 212, 255, 0.35);
   background: rgba(0, 212, 255, 0.07);
-  box-shadow: var(--glow-blue);
+  box-shadow: var(--glow-blue), 0 8px 24px rgba(0, 0, 0, 0.45);
 }
 
 .cw__teaserCard__left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 
 .cw__teaserCard__icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
   background: rgba(0, 212, 255, 0.12);
   display: flex;
   align-items: center;
@@ -402,7 +446,7 @@
 
 .cw__teaserCard__count {
   font-family: var(--font-display);
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
   color: var(--accent-blue);
   line-height: 1;
@@ -412,13 +456,19 @@
   font-size: 14px;
   color: var(--text-secondary);
   margin: 0;
+  letter-spacing: 0.01em;
 }
 
 .cw__teaserCard__arrow {
   color: var(--accent-blue);
-  font-size: 20px;
-  opacity: 0.7;
+  font-size: 22px;
+  opacity: 0.85;
   flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.cw__teaserCard:hover .cw__teaserCard__arrow {
+  transform: translateX(4px);
 }
 
 /* liveData__pulseDot reuse (defined in layout.css, referenced here for badge) */

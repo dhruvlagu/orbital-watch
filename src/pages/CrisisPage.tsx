@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
+import { useCardSpotlight } from "../hooks/useCardSpotlight";
 import { fetchLiveOrbitalEnvironment } from "../services/liveOrbitalData";
 import {
   CategoryScale,
@@ -1123,8 +1124,11 @@ export default function CrisisPage() {
   );
 
   const chartRef = useRef<HTMLDivElement | null>(null);
+  const timelineRef = useRef<HTMLDivElement | null>(null);
   const [chartVisible, setChartVisible] = useState(false);
   const [liveCount, setLiveCount] = useState<number>(getInitialLiveCount);
+
+  useCardSpotlight(timelineRef);
 
   useEffect(() => {
     let isCancelled = false;
@@ -1257,7 +1261,7 @@ export default function CrisisPage() {
         <div className="crisisChart__source">Source: ESA Space Environment Report 2025 (data through end of 2024); earlier years illustrative, based on published ESA/NASA ODPO historical trend data.</div>
       </div>
 
-      <div className="container timeline">
+      <div className="container timeline" ref={timelineRef}>
         {crisisEvents.map((event, idx) => (
           <article
             className={`timelineEvent ${idx % 2 === 0 ? "" : "timelineEvent--flip"} ${event.tone === "amber" ? "timelineEvent--amber" : ""
@@ -1265,13 +1269,15 @@ export default function CrisisPage() {
             key={event.year}
           >
             <div className="timelineEvent__text">
-              <div className="timelineEvent__watermark">{event.year}</div>
-              <span className="badge badge--blue timelineEvent__yearPill">{event.year}</span>
-              <h3>{event.title}</h3>
-              <p>{event.context}</p>
-              <div className="timelineEvent__significance">
-                <span>SIGNIFICANCE</span> {event.significance}
+              <div className="card timelineEvent__content">
+                <span className="badge badge--blue timelineEvent__yearPill">{event.year}</span>
+                <h3>{event.title}</h3>
+                <p>{event.context}</p>
+                <div className="timelineEvent__significance">
+                  <span>SIGNIFICANCE</span> {event.significance}
+                </div>
               </div>
+              <div className="timelineEvent__watermark">{event.year}</div>
             </div>
             <div className="timelineEvent__visual">
               <TimelineVisual type={event.visualType} />
@@ -1281,9 +1287,9 @@ export default function CrisisPage() {
 
         <article className="timelineEvent timelineEvent--today is-visible">
           <div className="timelineEvent__text">
-            <div className="timelineEvent__watermark">TODAY</div>
-            <span className="badge badge--red timelineEvent__yearPill">Today</span>
-            <h3>The Tipping Point</h3>
+            <div className="card timelineEvent__content">
+              <span className="badge badge--red timelineEvent__yearPill">Today</span>
+              <h3>The Tipping Point</h3>
             <p>
               <strong style={{ color: "#00d4ff" }}>{liveCount.toLocaleString()}</strong> tracked objects across all orbital regimes — and growing. In LEO alone, 4,772 new objects were added in 2025, 91% of them active megaconstellation payloads. Millions of additional fragments remain too small to track but large enough to destroy a satellite. Active debris removal technology exists but faces legal paralysis under the 1967 Treaty. The window to act may be closing.
             </p>
@@ -1296,6 +1302,8 @@ export default function CrisisPage() {
             <h2 className="timelineEvent__question">
               Can international policy evolve faster than the debris is multiplying?
             </h2>
+            </div>
+            <div className="timelineEvent__watermark">TODAY</div>
           </div>
         </article>
       </div>
