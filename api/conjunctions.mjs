@@ -35,7 +35,10 @@ export default async function handler(req, res) {
 
     // 1-hour edge cache — CDM cron runs 3x daily (~8h apart)
     res.setHeader("Cache-Control", "s-maxage=3600, stale-while-revalidate");
-    return res.status(200).json(records);
+    return res.status(200).json({
+      records,
+      lastUpdatedAt: lastChecked,
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error reading cached data";
     console.error("[/api/conjunctions] Redis read error:", message);

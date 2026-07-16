@@ -47,6 +47,7 @@ export type ConjunctionResponse = {
 
 type CachedEnvelope = {
   timestamp: number;
+  lastUpdatedAt: number | null;
   events: ConjunctionEvent[];
 };
 
@@ -131,11 +132,11 @@ function readCache(): CachedEnvelope | null {
   }
 }
 
-function writeCache(events: ConjunctionEvent[]) {
+function writeCache(events: ConjunctionEvent[], lastUpdatedAt: number | null = null) {
   try {
     localStorage.setItem(
       CACHE_KEY,
-      JSON.stringify({ timestamp: Date.now(), events }),
+      JSON.stringify({ timestamp: Date.now(), lastUpdatedAt, events }),
     );
   } catch {
     // localStorage may be unavailable in some environments
@@ -154,20 +155,22 @@ async function fetchAndCacheConjunctions(): Promise<ConjunctionResponse> {
       throw new Error(`Conjunctions request failed with status ${response.status}`);
     }
 
-    const raw = (await response.json()) as RawCdmRecord[];
+    const body = await response.json();
+    const raw = body.records as RawCdmRecord[];
     if (!Array.isArray(raw)) {
       throw new Error("Conjunctions endpoint returned an invalid payload.");
     }
 
     const events = parseEvents(raw);
-    writeCache(events);
+    const lastUpdatedAt = body.lastUpdatedAt ? Date.parse(body.lastUpdatedAt) : null;
+    writeCache(events, lastUpdatedAt);
 
     return {
       events,
       count: events.length,
       fromCache: false,
       isFresh: true,
-      lastUpdatedAt: Date.now(),
+      lastUpdatedAt,
     };
   } catch (error) {
     const cached = readCache();
@@ -181,7 +184,7 @@ async function fetchAndCacheConjunctions(): Promise<ConjunctionResponse> {
       count: cached.events.length,
       fromCache: true,
       isFresh: ageMs <= CACHE_TTL_MS,
-      lastUpdatedAt: cached.timestamp,
+      lastUpdatedAt: cached.lastUpdatedAt,
       error: error instanceof Error ? error.message : "Unknown fetch error",
     };
   }
@@ -203,7 +206,7 @@ export async function fetchConjunctions(
       count: cached.events.length,
       fromCache: true,
       isFresh: ageMs <= CACHE_TTL_MS,
-      lastUpdatedAt: cached.timestamp,
+      lastUpdatedAt: cached.lastUpdatedAt,
     };
 
     // Refresh in background; surface results via callback

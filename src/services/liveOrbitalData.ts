@@ -9,6 +9,7 @@ const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
 type CachedEnvelope = {
   timestamp: number;
+  lastUpdatedAt: number | null;
   data: LiveOrbitalData;
 };
 
@@ -39,15 +40,16 @@ function readCache(): CachedEnvelope | null {
   }
 }
 
-function writeCache(data: LiveOrbitalData) {
+function writeCache(data: LiveOrbitalData, lastUpdatedAt: number | null = null) {
   const payload: CachedEnvelope = {
     timestamp: Date.now(),
+    lastUpdatedAt,
     data,
   };
   localStorage.setItem(CACHE_KEY, JSON.stringify(payload));
 }
 
-async function fetchLiveMetrics(): Promise<LiveOrbitalData> {
+async function fetchLiveMetrics(): Promise<{ data: LiveOrbitalData; lastUpdatedAt: number | null }> {
   const response = await fetch("/api/spacetrack/satcat");
 
   if (response.status === 503) {
@@ -60,24 +62,32 @@ async function fetchLiveMetrics(): Promise<LiveOrbitalData> {
     throw new Error(`Orbital data request failed with status ${response.status}`);
   }
 
-  const metrics = (await response.json()) as LiveOrbitalData;
+  const body = await response.json();
+  const metrics = {
+    totalTracked: body.totalTracked,
+    addedLast30Days: body.addedLast30Days,
+    debrisToActiveRatio: body.debrisToActiveRatio,
+    highestRiskShell: body.highestRiskShell,
+  } as LiveOrbitalData;
+  
   if (!metrics || typeof metrics.totalTracked !== "number") {
     throw new Error("Orbital data endpoint returned an invalid payload.");
   }
 
-  return metrics;
+  const lastUpdatedAt = body.lastUpdatedAt ? Date.parse(body.lastUpdatedAt) : null;
+  return { data: metrics, lastUpdatedAt };
 }
 
 async function fetchAndCacheLiveMetrics(): Promise<LiveOrbitalResponse> {
   try {
-    const metrics = await fetchLiveMetrics();
-    writeCache(metrics);
+    const { data: metrics, lastUpdatedAt } = await fetchLiveMetrics();
+    writeCache(metrics, lastUpdatedAt);
 
     return {
       data: metrics,
       isFresh: true,
       fromCache: false,
-      lastUpdatedAt: Date.now(),
+      lastUpdatedAt,
     };
   } catch (error) {
     const cached = readCache();
@@ -92,7 +102,7 @@ async function fetchAndCacheLiveMetrics(): Promise<LiveOrbitalResponse> {
       data: cached.data,
       isFresh,
       fromCache: true,
-      lastUpdatedAt: cached.timestamp,
+      lastUpdatedAt: cached.lastUpdatedAt,
       error: error instanceof Error ? error.message : "Unknown fetch error",
     };
   }
@@ -109,7 +119,7 @@ export async function fetchLiveOrbitalEnvironment(
       data: cached.data,
       isFresh: ageMs <= CACHE_TTL_MS,
       fromCache: true,
-      lastUpdatedAt: cached.timestamp,
+      lastUpdatedAt: cached.lastUpdatedAt,
     };
 
     void fetchAndCacheLiveMetrics().then((freshResponse) => {
