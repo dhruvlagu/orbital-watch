@@ -34,36 +34,31 @@ function buildMetrics(records) {
   const now = Date.now();
   const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
 
-  const totalTracked = Array.isArray(records) ? records.length : 0;
+  const inOrbit = Array.isArray(records)
+    ? records.filter((r) => !r?.DECAY || r.DECAY.trim() === "")
+    : [];
 
-  const addedLast30Days = Array.isArray(records)
-    ? records.filter((r) => {
-        if (!r?.LAUNCH) return false;
-        const launchTime = Date.parse(r.LAUNCH);
-        return Number.isFinite(launchTime) && launchTime >= thirtyDaysAgo;
-      }).length
-    : 0;
+  const totalTracked = inOrbit.length;
 
-  const debrisCount = Array.isArray(records)
-    ? records.filter((r) => (r?.OBJECT_TYPE || "").toUpperCase() === "DEBRIS").length
-    : 0;
+  const addedLast30Days = inOrbit.filter((r) => {
+    if (!r?.LAUNCH) return false;
+    const launchTime = Date.parse(r.LAUNCH);
+    return Number.isFinite(launchTime) && launchTime >= thirtyDaysAgo;
+  }).length;
 
-  const activeSatellites = Array.isArray(records)
-    ? records.filter((r) => {
-        const objectType = (r?.OBJECT_TYPE || "").toUpperCase();
-        if (objectType !== "PAYLOAD") return false;
-        const isCurrent = (r?.CURRENT || "").toUpperCase() === "Y";
-        const notDecayed = !r?.DECAY || r.DECAY.trim() === "";
-        return isCurrent || notDecayed;
-      }).length
-    : 0;
+  const debrisCount = inOrbit.filter(
+    (r) => (r?.OBJECT_TYPE || "").toUpperCase() === "DEBRIS",
+  ).length;
+
+  const activeSatellites = inOrbit.filter(
+    (r) => (r?.OBJECT_TYPE || "").toUpperCase() === "PAYLOAD",
+  ).length;
 
   const debrisToActiveRatio =
     activeSatellites > 0
-      ? `${Math.max(1, Math.round(debrisCount / activeSatellites))}:1`
+      ? `${Math.max(1, Math.round(debrisCount / activeSatellites))}:1` 
       : "N/A";
 
-  // Determine the highest FILE number in the batch for incremental future queries
   let maxFileNumber = null;
   if (Array.isArray(records)) {
     for (const r of records) {

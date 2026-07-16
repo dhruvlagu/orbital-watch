@@ -458,15 +458,20 @@ export default function CollisionWatchPage() {
 
             {/* Live / cache badge */}
             <div className="cw__statusBadge">
-              {loading ? null : payload.isFresh && !payload.fromCache ? (
-                <span className="badge badge--blue">
-                  UPDATED 3X DAILY
-                </span>
-              ) : payload.lastUpdatedAt ? (
-                <span className="cw__cacheLabel">
-                  Last updated: {hoursAgo(payload.lastUpdatedAt)}
-                </span>
-              ) : null}
+              {loading ? null : (
+                <>
+                  {payload.isFresh && !payload.fromCache && (
+                    <span className="badge badge--blue">
+                      UPDATED 3X DAILY
+                    </span>
+                  )}
+                  {payload.lastUpdatedAt && (
+                    <span className="cw__cacheLabel">
+                      Last updated: {hoursAgo(payload.lastUpdatedAt)}
+                    </span>
+                  )}
+                </>
+              )}
             </div>
           </div>
 
@@ -535,7 +540,7 @@ export default function CollisionWatchPage() {
           </div>
 
           {/* ── What Is Pc? ───────────────────────────────────────────────── */}
-          <div className="card cw__explainerCard reveal-item">
+          <div id="what-is-pc" className="card cw__explainerCard reveal-item">
             <div className="cw__explainerHeader">
               <svg
                 width="20"
@@ -552,7 +557,7 @@ export default function CollisionWatchPage() {
                 <line x1="12" y1="16" x2="12" y2="12" />
                 <line x1="12" y1="8" x2="12.01" y2="8" />
               </svg>
-              <h3 id="what-is-pc" className="cw__explainerTitle">What Is Pc?</h3>
+              <h3 className="cw__explainerTitle">What Is Pc?</h3>
             </div>
             <p className="cw__explainerBody">
               <strong>Pc (probability of collision)</strong> is not the literal

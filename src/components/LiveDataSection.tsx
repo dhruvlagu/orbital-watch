@@ -146,29 +146,23 @@ export default function LiveDataSection({ variant = "standalone" }: LiveDataSect
                 <div className="liveDataCard__skeletonLabel" />
               </div>
             ))
-          : payload.error
-            ? (
-              <div className="card liveDataCard liveData__errorState">
-                <div className="liveData__errorHeader">
-                  <WarningIcon />
-                  <p className="liveData__errorText">
-                    Data unavailable — displaying last cached data.
-                    <br />
-                    Space-Track.org cache may be temporarily empty.
-                  </p>
-                </div>
-                {payload.lastUpdatedAt && (
-                  <p className="liveData__errorMeta">Last updated: {hoursAgo(payload.lastUpdatedAt)}</p>
-                )}
-              </div>
-            )
-            : metricCards.map((metric) => (
+          : metricCards.map((metric) => (
               <div className="card liveDataCard" key={metric.label}>
                 <div className="liveDataCard__value">{metric.value}</div>
                 <div className="liveDataCard__label">{metric.label}</div>
               </div>
             ))}
       </div>
+
+      {/* Error banner - shown below cards when there's an error and NO cached data */}
+      {!loading && payload.error && !payload.lastUpdatedAt && (
+        <div className="liveData__errorBanner" role="alert">
+          <WarningIcon />
+          <p className="liveData__errorBannerText">
+            {payload.error}
+          </p>
+        </div>
+      )}
     </>
   );
 
