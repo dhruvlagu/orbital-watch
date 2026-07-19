@@ -235,6 +235,7 @@ export default function CollisionWatchPage() {
   const [payload, setPayload] = useState<ConjunctionResponse>(FALLBACK_RESPONSE);
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
   const [sortMode, setSortMode] = useState<"SOONEST" | "HIGHEST_RISK">("SOONEST");
+  const [timeTick, setTimeTick] = useState(Date.now());
   const isMountedRef = useRef(true);
   const gridRef = useRef<HTMLDivElement>(null);
 
@@ -340,9 +341,23 @@ export default function CollisionWatchPage() {
 
   const hasEvents = payload.events.length > 0;
 
+  // Filter out events whose TCA has already passed (client-side, real-time)
+  const activeEvents = useMemo(
+    () => payload.events.filter((e) => e.tcaMs > Date.now()),
+    [payload.events, timeTick],
+  );
+
+  // Periodic tick to force activeEvents re-evaluation (same 60s interval as CountdownCell)
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setTimeTick(Date.now());
+    }, 60_000);
+    return () => window.clearInterval(id);
+  }, []);
+
   // Memoize to avoid re-sorting on every render; support client-side sort modes
   const sortedEvents = useMemo(() => {
-    const events = [...payload.events];
+    const events = [...activeEvents];
     if (sortMode === "SOONEST") {
       return events.sort((a, b) => a.tcaMs - b.tcaMs);
     }
@@ -354,7 +369,7 @@ export default function CollisionWatchPage() {
       if (pa === pb) return a.tcaMs - b.tcaMs;
       return pb - pa;
     });
-  }, [payload.events, sortMode]);
+  }, [activeEvents, sortMode]);
 
   return (
     <>
@@ -496,7 +511,7 @@ export default function CollisionWatchPage() {
                 className="cw__summary"
                 style={{ color: "var(--text-secondary)", fontSize: "0.9rem", textAlign: "left" }}
               >
-                {payload.events.length} conjunctions tracked · {payload.events.filter((e) => e.riskTier === "ELEVATED").length} at elevated risk
+                {activeEvents.length} conjunctions tracked · {activeEvents.filter((e) => e.riskTier === "ELEVATED").length} at elevated risk
               </div>
 
               <div style={{ display: "flex", gap: 8 }} role="tablist" aria-label="Sort events">

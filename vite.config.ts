@@ -240,7 +240,7 @@ export default defineConfig(({ mode }) => {
               res.statusCode = 200;
               res.setHeader("Content-Type", "application/json");
               res.setHeader("Cache-Control", "s-maxage=3600, stale-while-revalidate");
-              res.end(JSON.stringify(payload));
+              res.end(JSON.stringify({ records: payload, lastUpdatedAt: new Date().toISOString() }));
             } catch (error) {
               res.statusCode = 500;
               res.setHeader("Content-Type", "application/json");
