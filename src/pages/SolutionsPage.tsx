@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
 import { useCardSpotlight } from "../hooks/useCardSpotlight";
+import { useMagneticButton } from "../hooks/useMagneticButton";
 import StarfieldCanvas from "../components/StarfieldCanvas";
 
 // ─── SSR Audit Data ───────────────────────────────────────────────────────────
@@ -190,6 +191,7 @@ function useRevealOnScroll(selector: string, threshold = 0.15) {
 }
 
 // ─── Page Component ────────────────────────────────────────────────────────────
+// MAGNETIC BUTTON AUDIT: "Get Involved →" button uses magnetic effect
 export default function SolutionsPage() {
   useDocumentMetadata(
     "Solutions | ADR Technology & Debris Removal",
@@ -200,7 +202,9 @@ export default function SolutionsPage() {
   const adrRef = useRef<HTMLDivElement>(null);
   const economicsRef = useRef<HTMLDivElement>(null);
   const auditRef = useRef<HTMLDivElement>(null);
+  const getInvolvedButtonRef = useRef<HTMLAnchorElement>(null);
 
+  useMagneticButton(getInvolvedButtonRef);
   useCardSpotlight(sovereigntyRef);
   useCardSpotlight(adrRef);
   useCardSpotlight(economicsRef);
@@ -492,7 +496,7 @@ export default function SolutionsPage() {
           Explore how you can support space sustainability efforts and advocate for LEO protection.
         </p>
         <div className="crisisCTA__actions">
-          <Link className="btn btn--primary" to="/get-involved">
+          <Link ref={getInvolvedButtonRef} className="btn btn--primary" to="/get-involved">
             Get Involved →
           </Link>
           <Link className="btn btn--secondary" to="/policy">

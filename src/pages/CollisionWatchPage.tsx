@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import StarfieldCanvas from "../components/StarfieldCanvas";
 import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
 import { useCardSpotlight } from "../hooks/useCardSpotlight";
+import { useMagneticButton } from "../hooks/useMagneticButton";
 import {
   fetchConjunctions,
   type ConjunctionEvent,
@@ -167,7 +168,7 @@ function ConjunctionCard({ event }: { event: ConjunctionEvent }) {
       {/* Miss distance */}
       <div className="cw__metaRow">
         <div className="cw__metaItem">
-          <span className="cw__metaLabel">Miss Distance</span>
+          <span className="cw__metaLabel">Predicted Miss Distance</span>
           <span
             className="cw__metaValue"
             style={{ color: dist.urgent ? "var(--accent-amber)" : undefined }}
@@ -225,6 +226,7 @@ const FALLBACK_RESPONSE: ConjunctionResponse = {
   lastUpdatedAt: null,
 };
 
+// MAGNETIC BUTTON AUDIT: "Try the Impact Calculator →" button uses magnetic effect
 export default function CollisionWatchPage() {
   useDocumentMetadata(
     "Collision Watch | Conjunction Alerts | Orbital Watch",
@@ -238,6 +240,9 @@ export default function CollisionWatchPage() {
   const [timeTick, setTimeTick] = useState(Date.now());
   const isMountedRef = useRef(true);
   const gridRef = useRef<HTMLDivElement>(null);
+  const physicsButtonRef = useRef<HTMLAnchorElement>(null);
+
+  useMagneticButton(physicsButtonRef);
 
   useCardSpotlight(gridRef);
 
@@ -459,7 +464,7 @@ export default function CollisionWatchPage() {
             <div>
               <span className="cw__sectionLabel">UPCOMING EVENTS</span>
               <h2 className="cw__sectionTitle">Upcoming Close Approaches</h2>
-              <p className="cw__sectionSubtitle">
+              <div className="cw__sectionSubtitle">
                 Default sort: Soonest-first. Toggle to "Highest Risk" to sort by Pc
                 <span className="tooltipContainer" style={{ marginLeft: 0 }}>
                   <span className="infoIcon" tabIndex={0} aria-label="Pc definition">ⓘ</span>
@@ -468,7 +473,7 @@ export default function CollisionWatchPage() {
                   </div>
                 </span>
                 . Pc values are from the U.S. Space Surveillance Network.
-              </p>
+              </div>
             </div>
 
             {/* Live / cache badge */}
@@ -482,7 +487,7 @@ export default function CollisionWatchPage() {
                   )}
                   {payload.lastUpdatedAt && (
                     <span className="cw__cacheLabel">
-                      Last updated: {hoursAgo(payload.lastUpdatedAt)}
+                      <span className="cw__liveDot" /> Countdown times are live · Conjunction data last refreshed: {hoursAgo(payload.lastUpdatedAt)}
                     </span>
                   )}
                 </>
@@ -499,7 +504,7 @@ export default function CollisionWatchPage() {
                 <line x1="12" y1="17" x2="12.01" y2="17" />
               </svg>
               {payload.lastUpdatedAt
-                ? `Fetch failed — showing cached data from ${hoursAgo(payload.lastUpdatedAt)}.`
+                ? `Fetch failed — showing the last refreshed conjunction data, from ${hoursAgo(payload.lastUpdatedAt)}. Countdown times shown are still calculated live against this data.`
                 : "No conjunction data currently available — cache may be empty."}
             </div>
           )}
@@ -543,7 +548,7 @@ export default function CollisionWatchPage() {
                 <h3>No conjunction data available</h3>
                 <p>
                   {payload.lastUpdatedAt
-                    ? `Last cached results are from ${hoursAgo(payload.lastUpdatedAt)}. Check back shortly.`
+                    ? `Last refreshed conjunction data is from ${hoursAgo(payload.lastUpdatedAt)}. Check back shortly for the next scheduled update.`
                     : "Space-Track.org may be temporarily unreachable. This data updates a few times daily."}
                 </p>
               </div>
@@ -584,6 +589,45 @@ export default function CollisionWatchPage() {
               A Pc of 1×10⁻⁴ (0.01%) is considered operationally significant
               and typically triggers avoidance maneuver planning.
             </p>
+            <p className="cw__explainerBody" style={{ marginTop: "16px" }}>
+              <strong>A common misconception: a smaller miss distance doesn't
+              always mean a higher Pc.</strong> Pc depends on three things
+              together — miss distance, the combined physical size of both
+              objects, and how *precisely* their positions are actually known.
+              An object with a longer tracking history and precise orbit
+              determination can have a moderate miss distance but very low Pc,
+              because its position is tightly known. An object with sparse or
+              older tracking data can have a larger miss distance but higher Pc,
+              because its true position could plausibly be anywhere within a
+              wider uncertainty region — some of which may overlap the collision
+              zone even at a seemingly comfortable distance. Counterintuitively,
+              Pc can decrease again at very extreme uncertainty, since the same
+              probability gets spread across such a large area that its
+              concentration over the actual collision zone thins out. This is
+              why sorting by "Highest Risk" (Pc) on this page sometimes surfaces
+              an event with a larger miss distance above one with a smaller
+              miss distance — that's expected behavior, not an error.
+            </p>
+            <div style={{ display: "flex", gap: "32px", marginTop: "24px", flexWrap: "wrap" }}>
+              <div style={{ flex: 1, minWidth: "200px" }}>
+                <svg width="100%" height="120" viewBox="0 0 200 120" aria-hidden="true">
+                  <circle cx="60" cy="60" r="20" fill="var(--accent-blue)" opacity="0.2" />
+                  <circle cx="140" cy="60" r="20" fill="var(--accent-blue)" opacity="0.2" />
+                  <circle cx="60" cy="60" r="4" fill="var(--accent-blue)" />
+                  <circle cx="140" cy="60" r="4" fill="var(--accent-blue)" />
+                  <text x="100" y="100" textAnchor="middle" fontSize="11" fill="var(--text-secondary)" style={{ fontFamily: "system-ui, sans-serif" }}>Precisely tracked: small uncertainty cloud</text>
+                </svg>
+              </div>
+              <div style={{ flex: 1, minWidth: "200px" }}>
+                <svg width="100%" height="120" viewBox="0 0 200 120" aria-hidden="true">
+                  <circle cx="60" cy="60" r="45" fill="var(--accent-amber)" opacity="0.2" />
+                  <circle cx="140" cy="60" r="45" fill="var(--accent-amber)" opacity="0.2" />
+                  <circle cx="60" cy="60" r="4" fill="var(--accent-amber)" />
+                  <circle cx="140" cy="60" r="4" fill="var(--accent-amber)" />
+                  <text x="100" y="100" textAnchor="middle" fontSize="11" fill="var(--text-secondary)" style={{ fontFamily: "system-ui, sans-serif" }}>Poorly tracked: large uncertainty cloud</text>
+                </svg>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -597,7 +641,7 @@ export default function CollisionWatchPage() {
           distances of hundreds of metres still matter enormously.
         </p>
         <div className="crisisCTA__actions">
-          <Link className="btn btn--primary" to="/physics">
+          <Link ref={physicsButtonRef} className="btn btn--primary" to="/physics">
             Try the Impact Calculator →
           </Link>
           <Link className="btn btn--secondary" to="/crisis">

@@ -3,7 +3,9 @@ import { Link } from "react-router-dom";
 import StarfieldCanvas from "../components/StarfieldCanvas";
 import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
 import { useCardSpotlight } from "../hooks/useCardSpotlight";
+import { useMagneticButton } from "../hooks/useMagneticButton";
 
+// MAGNETIC BUTTON AUDIT: "About the Project →" button uses magnetic effect
 export default function GetInvolvedPage() {
   useDocumentMetadata(
     "Get Involved | Space Stewardship & Advocacy",
@@ -14,7 +16,9 @@ export default function GetInvolvedPage() {
   const [showInstaTip, setShowInstaTip] = useState(false);
   const actionsGridRef = useRef<HTMLDivElement>(null);
   const orgsGridRef = useRef<HTMLDivElement>(null);
+  const aboutButtonRef = useRef<HTMLAnchorElement>(null);
 
+  useMagneticButton(aboutButtonRef);
   useCardSpotlight(actionsGridRef);
   useCardSpotlight(orgsGridRef);
 
@@ -368,7 +372,7 @@ export default function GetInvolvedPage() {
           and creators of the Orbital Watch platform.
         </p>
         <div className="crisisCTA__actions">
-          <Link className="btn btn--primary" to="/about">
+          <Link ref={aboutButtonRef} className="btn btn--primary" to="/about">
             About the Project →
           </Link>
           <Link className="btn btn--secondary" to="/solutions">

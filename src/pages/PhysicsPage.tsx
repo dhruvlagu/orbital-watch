@@ -2,12 +2,14 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
 import { useCardSpotlight } from "../hooks/useCardSpotlight";
+import { useMagneticButton } from "../hooks/useMagneticButton";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarController, BarElement, Tooltip, Legend } from "chart.js";
 import { Bar } from "react-chartjs-2";
 import KesslerSimulation from "../components/KesslerSimulation";
 
 ChartJS.register(CategoryScale, LinearScale, BarController, BarElement, Tooltip, Legend);
 
+// MAGNETIC BUTTON AUDIT: "Read Policy Pathways →" button uses magnetic effect
 export default function PhysicsPage() {
   useDocumentMetadata(
     "The Physics | Kessler Simulator & Collision Energy",
@@ -23,7 +25,9 @@ export default function PhysicsPage() {
   const speedCalloutRef = useRef<HTMLDivElement>(null);
   const calculatorRef = useRef<HTMLDivElement>(null);
   const technicalCardRef = useRef<HTMLDivElement>(null);
+  const policyButtonRef = useRef<HTMLAnchorElement>(null);
 
+  useMagneticButton(policyButtonRef);
   useCardSpotlight(speedCalloutRef);
   useCardSpotlight(calculatorRef);
   useCardSpotlight(technicalCardRef);
@@ -464,7 +468,7 @@ ESA Space Debris User's Handbook`}</pre>
           See why international space law is currently failing to stop the cascade.
         </p>
         <div className="crisisCTA__actions">
-          <Link className="btn btn--primary" to="/policy">
+          <Link ref={policyButtonRef} className="btn btn--primary" to="/policy">
             Read Policy Pathways →
           </Link>
           <Link className="btn btn--secondary" to="/crisis">

@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import LiveDataSection from "../components/LiveDataSection";
 import StarfieldCanvas from "../components/StarfieldCanvas";
 import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
 import { useCardSpotlight } from "../hooks/useCardSpotlight";
-import { fetchConjunctions } from "../services/conjunctionData";
+import { fetchConjunctions, type ConjunctionResponse } from "../services/conjunctionData";
 
 const STATS_GROUP = (
   <div className="quickStats__group">
@@ -34,7 +34,8 @@ export default function HomePage() {
   );
 
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
-  const [conjunctionCount, setConjunctionCount] = useState<number | null>(null);
+  const [conjunctionData, setConjunctionData] = useState<ConjunctionResponse | null>(null);
+  const [timeTick, setTimeTick] = useState(Date.now());
   const exploreGridRef = useRef<HTMLDivElement>(null);
 
   useCardSpotlight(exploreGridRef);
@@ -47,18 +48,32 @@ export default function HomePage() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Lightweight conjunction count fetch — just the count, no heavy rendering
+  // Lightweight conjunction data fetch — filter for active events client-side
   useEffect(() => {
     let isCancelled = false;
     fetchConjunctions((fresh) => {
-      if (!isCancelled) setConjunctionCount(fresh.count);
+      if (!isCancelled) setConjunctionData(fresh);
     }).then((response) => {
-      if (!isCancelled) setConjunctionCount(response.count);
+      if (!isCancelled) setConjunctionData(response);
     }).catch(() => {
-      // Count is optional; don't surface errors on the home page
+      // Data is optional; don't surface errors on the home page
     });
     return () => { isCancelled = true; };
   }, []);
+
+  // Periodic tick to force active count re-evaluation (same 60s interval as CollisionWatchPage)
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setTimeTick(Date.now());
+    }, 60_000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  // Filter out events whose TCA has already passed
+  const activeConjunctionCount = useMemo(() => {
+    if (!conjunctionData) return null;
+    return conjunctionData.events.filter((e) => e.tcaMs > Date.now()).length;
+  }, [conjunctionData, timeTick]);
 
   const handleScrollIndicatorClick = () => {
     window.scrollTo({
@@ -98,7 +113,7 @@ export default function HomePage() {
                   </div>
                   <div className="cw__teaserCard__right" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                     <span className="cw__teaserCard__count" style={{ fontSize: "20px", color: "var(--accent-blue)" }}>
-                      {conjunctionCount !== null ? conjunctionCount : "—"}
+                      {activeConjunctionCount !== null ? activeConjunctionCount : "—"}
                     </span>
                     <span className="cw__teaserCard__arrow" aria-hidden="true" style={{ margin: 0 }}>→</span>
                   </div>

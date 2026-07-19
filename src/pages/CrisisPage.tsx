@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
 import { useCardSpotlight } from "../hooks/useCardSpotlight";
+import { useMagneticButton } from "../hooks/useMagneticButton";
 import { fetchLiveOrbitalEnvironment } from "../services/liveOrbitalData";
 import {
   CategoryScale,
@@ -1117,6 +1118,7 @@ function getInitialLiveCount(): number {
   return 27000;
 }
 
+// MAGNETIC BUTTON AUDIT: "Explore The Physics" button uses magnetic effect
 export default function CrisisPage() {
   useDocumentMetadata(
     "The Crisis | Space Debris History & Orbital Risks",
@@ -1125,9 +1127,11 @@ export default function CrisisPage() {
 
   const chartRef = useRef<HTMLDivElement | null>(null);
   const timelineRef = useRef<HTMLDivElement | null>(null);
+  const physicsButtonRef = useRef<HTMLAnchorElement>(null);
   const [chartVisible, setChartVisible] = useState(false);
   const [liveCount, setLiveCount] = useState<number>(getInitialLiveCount);
 
+  useMagneticButton(physicsButtonRef);
   useCardSpotlight(timelineRef);
 
   useEffect(() => {
@@ -1312,7 +1316,7 @@ export default function CrisisPage() {
         <h3>What Comes Next</h3>
         <p>The science is clear. The governance gap is not. Explore the next two fronts.</p>
         <div className="crisisCTA__actions">
-          <Link className="btn btn--primary" to="/physics">
+          <Link ref={physicsButtonRef} className="btn btn--primary" to="/physics">
             Explore The Physics
           </Link>
           <Link className="btn btn--secondary" to="/policy">

@@ -4,6 +4,7 @@ import {
   type LiveOrbitalResponse,
 } from "../services/liveOrbitalData";
 import { useCountUp } from "../hooks/useCountUp";
+import { useCardSpotlight } from "../hooks/useCardSpotlight";
 
 function hoursAgo(timestamp: number | null) {
   if (!timestamp) return "unknown";
@@ -44,6 +45,9 @@ export default function LiveDataSection({ variant = "standalone" }: LiveDataSect
   const [loading, setLoading] = useState(true);
   const [payload, setPayload] = useState<LiveOrbitalResponse>(FALLBACK);
   const isMountedRef = useRef(true);
+  const gridRef = useRef<HTMLDivElement>(null);
+
+  useCardSpotlight(gridRef);
 
   useEffect(() => {
     return () => {
@@ -138,7 +142,7 @@ export default function LiveDataSection({ variant = "standalone" }: LiveDataSect
         </div>
       </div>
 
-      <div className="liveData__grid">
+      <div className="liveData__grid" ref={gridRef}>
         {loading
           ? Array.from({ length: 4 }).map((_, idx) => (
               <div className="card liveDataCard liveDataCard--skeleton" key={idx}>

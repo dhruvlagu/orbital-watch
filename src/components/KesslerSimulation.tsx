@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useMagneticButton } from "../hooks/useMagneticButton";
 
 interface Debris {
   id: string;
@@ -9,11 +10,15 @@ interface Debris {
   size: number;
 }
 
+// MAGNETIC BUTTON AUDIT: "Trigger Cascade" button uses magnetic effect
 export default function KesslerSimulation() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [debris, setDebris] = useState<Debris[]>([]);
   const [isRunning, setIsRunning] = useState(false);
   const animationRef = useRef<number>();
+  const triggerButtonRef = useRef<HTMLButtonElement>(null);
+
+  useMagneticButton(triggerButtonRef);
 
   const initialDebris: Debris[] = Array.from({ length: 15 }, (_, i) => {
     const angle = (i / 15) * Math.PI * 2;
@@ -183,7 +188,7 @@ export default function KesslerSimulation() {
       <canvas ref={canvasRef} className="simulationCanvas" />
       <div className="simulationLabel simulationLabel--bottom">Each click represents one uncontrolled collision event</div>
       <div className="simulationControls">
-        <button className="btn btn--primary" onClick={triggerCascade} disabled={isRunning}>
+        <button ref={triggerButtonRef} className="btn btn--primary" onClick={triggerCascade} disabled={isRunning}>
           {isRunning ? "Cascade Running..." : "Trigger Cascade"}
         </button>
         <button className="btn btn--secondary" onClick={reset}>
