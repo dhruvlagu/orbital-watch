@@ -257,7 +257,7 @@ export default function GetInvolvedPage() {
                 displayUrl: "planetary.org",
               },
             ].map((org, i) => (
-              <div key={org.name} className="card orgCard reveal-item" style={{ animationDelay: `${i * 0.1}s` }}>
+              <div key={org.name} className="card orgCard reveal-item" style={{ ["--reveal-i" as any]: Math.min(i, 8) }}>
                 <div className="orgCard__header">
                   <h3 className="orgCard__name">{org.name}</h3>
                 </div>

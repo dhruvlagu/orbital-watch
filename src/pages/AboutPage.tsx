@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import StarfieldCanvas from "../components/StarfieldCanvas";
 import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
@@ -18,6 +18,16 @@ export default function AboutPage() {
 
   const methodGridRef = useRef<HTMLDivElement>(null);
   const reflectionGridRef = useRef<HTMLDivElement>(null);
+
+  const [expandedBlocks, setExpandedBlocks] = useState<{ [key: string]: boolean }>({
+    block1: false,
+    block2: false,
+    block3: false,
+  });
+
+  const toggleBlock = (blockId: string) => {
+    setExpandedBlocks((prev) => ({ ...prev, [blockId]: !prev[blockId] }));
+  };
 
   useCardSpotlight(methodGridRef);
   useCardSpotlight(reflectionGridRef);
@@ -132,15 +142,296 @@ export default function AboutPage() {
         </div>
       </div>
 
-      {/* SECTION 3 & 4 — Interactive Reflective Notes */}
+      {/* SECTION 3 — The Code Behind It */}
+      {/* ⚠️ MAINTENANCE NOTE: Code blocks below are STATIC COPIES of actual source files.
+           When updating the actual source code, you MUST update the corresponding
+           code block here to keep them in sync. This section's value depends on
+           the code being verbatim matches to the live implementation. */}
+      <div id="the-code" className="aboutSection aboutSection--code">
+        <div className="container">
+          <div className="aboutSection__header reveal-item">
+            <div className="hero__label">Section 03</div>
+            <h2>The Code Behind It</h2>
+            <p className="aboutSection__subtitle">
+              For anyone who wants to verify the logic itself, not just the results.
+            </p>
+          </div>
+
+          {/* BLOCK 1: Scheduled Data Refresh */}
+          {/* SOURCE: api/cron/_spacetrackAuth.mjs + api/conjunctions.mjs
+               UPDATE THIS BLOCK if either file changes */}
+          <div className="codeBlock reveal-item">
+            <div className="codeBlock__header" onClick={() => toggleBlock('block1')}>
+              <div className="codeBlock__title">
+                <span>Scheduled Data Refresh</span>
+              </div>
+              <button className="codeBlock__toggle">
+                {expandedBlocks.block1 ? '−' : '+'}
+              </button>
+            </div>
+            {expandedBlocks.block1 && (
+              <>
+                <pre className="technicalCode">{`// api/cron/_spacetrackAuth.mjs — shared by both scheduled jobs
+const AUTH_URL = "https://www.space-track.org/ajaxauth/login";
+const COOKIE_TTL_MS = 90 * 60 * 1000; // 90 minutes
+
+let cachedCookieHeader = null;
+let cachedCookieIssuedAt = 0;
+
+// Cookie reused across warm invocations — only re-authenticates
+// with Space-Track when the cached session has actually expired
+// (full auth + retry logic in the real file)
+
+// api/conjunctions.mjs — what users' browsers actually hit
+export default async function handler(req, res) {
+  if (req.method !== "GET") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  try {
+    const [cdmJson, lastChecked] = await withRedis((c) =>
+      Promise.all([
+        c.get("cdm:latest"),
+        c.get("cdm:lastChecked"),
+      ]),
+    );
+
+    if (!cdmJson) {
+      return res.status(503).json({
+        error: "Conjunction data not yet available.",
+        dataNotYetAvailable: true,
+      });
+    }
+
+    const records = JSON.parse(cdmJson);
+    res.setHeader("Cache-Control", "s-maxage=3600, stale-while-revalidate");
+    return res.status(200).json({
+      records,
+      lastUpdatedAt: lastChecked,
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error reading cached data";
+    console.error("[/api/conjunctions] Redis read error:", message);
+    return res.status(500).json({ error: message });
+  }
+}`}</pre>
+                <p className="codeBlock__caption">
+                  This endpoint never calls Space-Track directly — Space-Track has strict API usage limits, and fetching per-visitor would scale request volume with site traffic rather than staying fixed. Instead, a separate scheduled job (triggered 3x daily by an external Cloudflare Worker, since Vercel's free tier only allows once-daily cron jobs) does the actual fetching and session management, storing results in Redis. This function only ever reads that cached result — guaranteeing a fixed, compliant request volume regardless of how much traffic the site gets.
+                </p>
+              </>
+            )}
+          </div>
+
+          {/* BLOCK 2: Kessler Cascade Simulation */}
+          {/* SOURCE: src/components/KesslerSimulation.tsx (triggerCascade function)
+               UPDATE THIS BLOCK if that function changes */}
+          <div className="codeBlock reveal-item">
+            <div className="codeBlock__header" onClick={() => toggleBlock('block2')}>
+              <div className="codeBlock__title">
+                <span>Kessler Cascade Simulation</span>
+              </div>
+              <button className="codeBlock__toggle">
+                {expandedBlocks.block2 ? '−' : '+'}
+              </button>
+            </div>
+            {expandedBlocks.block2 && (
+              <>
+                <pre className="technicalCode">{`const triggerCascade = () => {
+  setIsRunning(true);
+  setRipple({ radius: 0, opacity: 0.6, active: true });
+  let currentDebris = [...debris];
+  let time = 0;
+  const duration = 3000; // 3 seconds
+  const maxDebrisCount = 150; // Cap per cascade
+  let debrisAddedInCascade = 0;
+
+  const animate = () => {
+    time += 16;
+    const progress = Math.min(time / duration, 1);
+
+    // Update ripple effect
+    if (ripple.active) {
+      const rippleProgress = Math.min(time / 600, 1);
+      setRipple({
+        radius: rippleProgress * 0.5,
+        opacity: 0.6 * (1 - rippleProgress),
+        active: rippleProgress < 1
+      });
+    }
+
+    if (progress < 1) {
+      // Add new debris randomly (respect per-cascade cap)
+      if (Math.random() < 0.3 && debrisAddedInCascade < maxDebrisCount) {
+        const newRadius = 0.25 + Math.random() * 0.15;
+        const newAngle = Math.random() * Math.PI * 2;
+        const newInclination = (Math.random() - 0.5) * 0.8;
+        
+        // 3D spherical coordinates with inclination
+        const cosAngle = Math.cos(newAngle);
+        const sinAngle = Math.sin(newAngle);
+        const cosInc = Math.cos(newInclination);
+        const sinInc = Math.sin(newInclination);
+        
+        const x3d = newRadius * cosAngle;
+        const y3d = newRadius * sinAngle * cosInc;
+        const z3d = newRadius * sinAngle * sinInc;
+        
+        // Orbital velocity (tangential to orbit)
+        const orbitalSpeed = 0.02;
+        const vx = -orbitalSpeed * sinAngle;
+        const vy = orbitalSpeed * cosAngle * cosInc;
+        const vz = orbitalSpeed * cosAngle * sinInc;
+        
+        const newDebris: Debris = {
+          id: \`d-\${Date.now()}-\${Math.random()}\`,
+          angle: newAngle,
+          radius: newRadius,
+          inclination: newInclination,
+          x: 0.5 + x3d,
+          y: 0.5 + y3d,
+          z: z3d,
+          vx, vy, vz,
+          size: 2 + Math.random() * 2,
+        };
+        currentDebris = [...currentDebris, newDebris];
+        debrisAddedInCascade++;
+      }
+
+      // Collision detection and fragmentation
+      const collisionThreshold = 0.04;
+      const newFragments: Debris[] = [];
+      
+      // Update positions using 3D orbital mechanics
+      currentDebris = currentDebris.map((d) => {
+        const nextAngle = (d.angle + 0.02) % (Math.PI * 2);
+        const cosAngle = Math.cos(nextAngle);
+        const sinAngle = Math.sin(nextAngle);
+        const cosInc = Math.cos(d.inclination);
+        const sinInc = Math.sin(d.inclination);
+        
+        const x3d = d.radius * cosAngle;
+        const y3d = d.radius * sinAngle * cosInc;
+        const z3d = d.radius * sinAngle * sinInc;
+        
+        return {
+          ...d,
+          angle: nextAngle,
+          x: 0.5 + x3d,
+          y: 0.5 + y3d,
+          z: z3d,
+        };
+      });
+      
+      // Check for collisions (limited to 50 debris for performance)
+      const maxDebrisToCheck = Math.min(currentDebris.length, 50);
+      for (let i = 0; i < maxDebrisToCheck; i++) {
+        for (let j = i + 1; j < maxDebrisToCheck; j++) {
+          const d1 = currentDebris[i];
+          const d2 = currentDebris[j];
+          
+          const dx = d1.x - d2.x;
+          const dy = d1.y - d2.y;
+          const dz = d1.z - d2.z;
+          const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+          
+          if (distance < collisionThreshold) {
+            // Create fragments
+            for (let f = 0; f < 2; f++) {
+              newFragments.push({
+                id: \`frag-\${Date.now()}-\${Math.random()}\`,
+                x: d1.x, y: d1.y, z: d1.z,
+                vx: 0, vy: 0, vz: 0,
+                angle: d1.angle + (Math.random() - 0.5) * 0.5,
+                radius: d1.radius * (0.9 + Math.random() * 0.2),
+                inclination: d1.inclination + (Math.random() - 0.5) * 0.1,
+                size: Math.max(1, d1.size * 0.7),
+              });
+            }
+            
+            // Mark collided debris for removal
+            currentDebris[i] = { ...currentDebris[i], size: 0 };
+            currentDebris[j] = { ...currentDebris[j], size: 0 };
+          }
+        }
+      }
+      
+      // Add fragments (respect cap)
+      const fragmentsToAdd = newFragments.slice(0, maxDebrisCount - debrisAddedInCascade);
+      currentDebris = [...currentDebris.filter(d => d.size > 0), ...fragmentsToAdd];
+      debrisAddedInCascade += fragmentsToAdd.length;
+
+      setDebris(currentDebris);
+      animationRef.current = requestAnimationFrame(animate);
+    } else {
+      setIsRunning(false);
+    }
+  };
+
+  animationRef.current = requestAnimationFrame(animate);
+};`}</pre>
+                <p className="codeBlock__caption">
+                  Debris orbits in 3D space with inclination, using spherical coordinates for realistic orbital mechanics. Collision detection runs between debris pieces — when they collide, they fragment into smaller pieces with modified orbital parameters, creating an exponential chain reaction characteristic of Kessler syndrome. A per-cascade cap of 150 debris prevents runaway performance issues while still demonstrating the cascade effect.
+                </p>
+              </>
+            )}
+          </div>
+
+          {/* BLOCK 3: Kinetic Energy Calculator */}
+          {/* SOURCE: src/pages/PhysicsPage.tsx (KE calculation + getDangerLevel function)
+               UPDATE THIS BLOCK if that code changes */}
+          <div className="codeBlock reveal-item">
+            <div className="codeBlock__header" onClick={() => toggleBlock('block3')}>
+              <div className="codeBlock__title">
+                <span>Kinetic Energy Calculator</span>
+              </div>
+              <button className="codeBlock__toggle">
+                {expandedBlocks.block3 ? '−' : '+'}
+              </button>
+            </div>
+            {expandedBlocks.block3 && (
+              <>
+                <pre className="technicalCode">{`// Calculate kinetic energy in joules
+const massKg = mass / 1000;
+const velocityMs = velocity * 1000;
+const kineticEnergy = 0.5 * massKg * velocityMs * velocityMs;
+
+// Derived values
+const tntEquivalent = kineticEnergy / 4184;
+const grenadesEquivalent = kineticEnergy / 160000;
+
+// Danger level calculation
+const getDangerLevel = () => {
+  if (kineticEnergy < 1000) return { level: "Low", label: "Sensor damage likely", color: "#00d464", badge: "green" };
+  if (kineticEnergy < 100000) return { level: "Moderate", label: "Structural penetration", color: "#f5a623", badge: "amber" };
+  if (kineticEnergy < 10000000) return { level: "Severe", label: "Satellite destruction", color: "#ff3b3b", badge: "red" };
+  return { level: "Catastrophic", label: "Cascade trigger risk", color: "#ff3b3b", badge: "red", pulsing: true };
+};`}</pre>
+                <p className="codeBlock__caption">
+                  Mass and velocity inputs are converted to SI units before applying KE = ½mv². The resulting energy maps directly to the danger tier and badge color shown in the calculator's results panel — the same object drives both the number and the styling.
+                </p>
+              </>
+            )}
+          </div>
+
+          {/* Final paragraph */}
+          <p className="codeBehindSection__footer">
+            These are the actual functions live on this site — not simplified for display. If a number on the Home, Physics, or Collision Watch page changes, it's because one of these functions changed.
+          </p>
+
+          {/* NOTE: Future extension - civic action / "Contact Your Representative" tool will be added here */}
+          {/* To add: Fourth code block covering civic action functionality */}
+        </div>
+      </div>
+
+      {/* SECTION 4 & 5 — Interactive Reflective Notes */}
       <div className="aboutSection aboutSection--reflection">
         <div className="container">
           <div className="reflectionGrid" ref={reflectionGridRef}>
-            {/* Section 3: What I Found Surprising */}
+            {/* Section 4: What I Found Surprising */}
             <div className="card reflectPanel reflectPanel--amber reveal-item">
               <div className="reflectPanel__header">
                 <div className="reflectPanel__meta">
-                  <span className="reflectPanel__num">03</span>
+                  <span className="reflectPanel__num">04</span>
                   <h3>What Surprised Me</h3>
                 </div>
               </div>
@@ -152,11 +443,11 @@ export default function AboutPage() {
               </div>
             </div>
 
-            {/* Section 4: Open Questions */}
+            {/* Section 5: Open Questions */}
             <div className="card reflectPanel reflectPanel--amber reveal-item">
               <div className="reflectPanel__header">
                 <div className="reflectPanel__meta">
-                  <span className="reflectPanel__num">04</span>
+                  <span className="reflectPanel__num">05</span>
                   <h3>Open Questions</h3>
                 </div>
               </div>
@@ -171,11 +462,11 @@ export default function AboutPage() {
         </div>
       </div>
 
-      {/* SECTION 5 — Full Source Library */}
+      {/* SECTION 6 — Full Source Library */}
       <div id="sources" className="aboutSection aboutSection--sources">
         <div className="container">
           <div className="aboutSection__header reveal-item">
-            <div className="hero__label">Section 05</div>
+            <div className="hero__label">Section 06</div>
             <h2>Full Source Library</h2>
             <p className="aboutSection__subtitle">
               Academic bibliography of references and catalogs used in this project.

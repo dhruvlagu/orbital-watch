@@ -132,12 +132,12 @@ function CountdownCell({ tcaMs }: { tcaMs: number }) {
   );
 }
 
-function ConjunctionCard({ event }: { event: ConjunctionEvent }) {
+function ConjunctionCard({ event, index }: { event: ConjunctionEvent; index?: number }) {
   const dist = formatMissDistance(event.missDistanceM);
   const pcFormatted = event.pc === null ? "Not publicly disclosed" : formatPc(event.pc);
 
   return (
-    <article className="card cw__card reveal-item">
+    <article className="card cw__card reveal-item" style={{ ["--reveal-i" as any]: Math.min(index ?? 0, 8) }}>
       {/* Object names */}
       <div className="cw__objects">
         <span className="cw__satName">{event.sat1Name}</span>
@@ -322,7 +322,8 @@ export default function CollisionWatchPage() {
       e.preventDefault();
       const el = document.getElementById("what-is-pc");
       if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        const y = el.getBoundingClientRect().top + window.scrollY - 100;
+        window.scrollTo({ top: y, behavior: "smooth" });
         // update the hash without jumping
         if (history && typeof history.replaceState === "function") {
           history.replaceState(null, "", "#what-is-pc");
@@ -333,11 +334,14 @@ export default function CollisionWatchPage() {
     const anchors = Array.from(document.querySelectorAll<HTMLAnchorElement>(selector));
     anchors.forEach((a) => a.addEventListener("click", handler));
 
-    // If page loaded with hash, scroll to center
+    // If page loaded with hash, scroll to start
     if (window.location.hash === "#what-is-pc") {
       setTimeout(() => {
         const el = document.getElementById("what-is-pc");
-        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+        if (el) {
+          const y = el.getBoundingClientRect().top + window.scrollY - 100;
+          window.scrollTo({ top: y, behavior: "smooth" });
+        }
       }, 120);
     }
 
@@ -487,7 +491,7 @@ export default function CollisionWatchPage() {
                   )}
                   {payload.lastUpdatedAt && (
                     <span className="cw__cacheLabel">
-                      <span className="cw__liveDot" /> Countdown times are live · Conjunction data last refreshed: {hoursAgo(payload.lastUpdatedAt)}
+                      Countdown times are live · Conjunction data last refreshed: {hoursAgo(payload.lastUpdatedAt)}
                     </span>
                   )}
                 </>
@@ -553,8 +557,8 @@ export default function CollisionWatchPage() {
                 </p>
               </div>
             ) : (
-              sortedEvents.map((event) => (
-                <ConjunctionCard key={event.id} event={event} />
+              sortedEvents.map((event, index) => (
+                <ConjunctionCard key={event.id} event={event} index={index} />
               ))
             )}
           </div>
@@ -608,7 +612,7 @@ export default function CollisionWatchPage() {
               an event with a larger miss distance above one with a smaller
               miss distance — that's expected behavior, not an error.
             </p>
-            <div style={{ display: "flex", gap: "32px", marginTop: "24px", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: "32px", marginTop: "24px", flexWrap: "wrap", justifyContent: "center" }}>
               <div style={{ flex: 1, minWidth: "200px" }}>
                 <svg width="100%" height="120" viewBox="0 0 200 120" aria-hidden="true">
                   <circle cx="60" cy="60" r="20" fill="var(--accent-blue)" opacity="0.2" />

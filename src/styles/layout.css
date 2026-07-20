@@ -1294,6 +1294,19 @@
   padding-bottom: 84px;
 }
 
+/* Scroll-reveal base (shared across pages) */
+.reveal-item {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+  transition-delay: calc(var(--reveal-i, 0) * 90ms);
+}
+
+.reveal-item.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .policyHero {
   min-height: 52vh;
   display: grid;
@@ -2357,6 +2370,7 @@
   padding: 1px;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;

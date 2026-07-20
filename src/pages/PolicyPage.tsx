@@ -388,10 +388,11 @@ export default function PolicyPage() {
         </div>
 
         <div className="policyTimeline" ref={timelineRef}>
-          {treaties.map((treaty) => (
+          {treaties.map((treaty, index) => (
             <article
               className={treaty.isMissing ? "card policyTreatyCard reveal-item is-missing" : "card policyTreatyCard reveal-item"}
               key={`${treaty.year}-${treaty.name}`}
+              style={{ ["--reveal-i" as any]: Math.min(index, 8) }}
             >
               <div className="policyTreatyCard__year">{treaty.year}</div>
               <div className="policyTreatyCard__body">
@@ -450,8 +451,8 @@ export default function PolicyPage() {
               </tr>
             </thead>
             <tbody>
-              {sortedScores.map((score) => (
-                <tr key={score.nation}>
+              {sortedScores.map((score, index) => (
+                <tr key={score.nation} className="reveal-item" style={{ ["--reveal-i" as any]: Math.min(index, 8) }}>
                   <th scope="row">{score.nation}</th>
                   <td>
                     <ScoreCell value={score.mitigation} note={score.mitigationNote} />

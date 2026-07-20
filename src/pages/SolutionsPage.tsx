@@ -171,24 +171,6 @@ function SSRGauge({ score, total }: { score: number; total: number }) {
   );
 }
 
-// ─── Scroll-reveal hook ────────────────────────────────────────────────────────
-function useRevealOnScroll(selector: string, threshold = 0.15) {
-  useEffect(() => {
-    const elements = document.querySelectorAll<HTMLElement>(selector);
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-visible");
-          }
-        });
-      },
-      { threshold }
-    );
-    elements.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, [selector]);
-}
 
 // ─── Page Component ────────────────────────────────────────────────────────────
 // MAGNETIC BUTTON AUDIT: "Get Involved →" button uses magnetic effect
@@ -210,7 +192,22 @@ export default function SolutionsPage() {
   useCardSpotlight(economicsRef);
   useCardSpotlight(auditRef);
 
-  useRevealOnScroll(".sol-reveal");
+  // Scroll-reveal IntersectionObserver — identical pattern to other pages
+  useEffect(() => {
+    const elements = document.querySelectorAll<HTMLElement>(".reveal-item");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+          }
+        });
+      },
+      { threshold: 0.15 }
+    );
+    elements.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <section className="solutionsPage">
@@ -237,12 +234,12 @@ export default function SolutionsPage() {
       {/* ── Section 1: Sovereignty Trap ──────────────────────────────────────── */}
       <div className="solSection solSection--sovereignty">
         <div className="container">
-          <div className="solSection__header sol-reveal">
+          <div className="solSection__header reveal-item">
             <div className="hero__label">Section 01</div>
             <h2>Why We Can't Just Clean It Up</h2>
           </div>
 
-          <div className="sovereigntyCallout sol-reveal">
+          <div className="sovereigntyCallout reveal-item">
             <div className="sovereigntyCallout__icon" aria-hidden="true">⚠️</div>
             <p className="sovereigntyCallout__text">
               "The same robot arm that removes dead satellite debris could
@@ -252,7 +249,7 @@ export default function SolutionsPage() {
             </p>
           </div>
 
-          <div className="sovereigntyGrid sol-reveal" ref={sovereigntyRef}>
+          <div className="sovereigntyGrid reveal-item" ref={sovereigntyRef}>
             <div className="card sovereigntyCard">
               <div className="sovereigntyCard__label">THE LEGAL REALITY</div>
               <h3 className="sovereigntyCard__title">Article VIII &amp; the Sovereignty Trap</h3>
@@ -313,7 +310,7 @@ export default function SolutionsPage() {
       {/* ── Section 2: ADR Missions ───────────────────────────────────────────── */}
       <div className="solSection solSection--adr">
         <div className="container">
-          <div className="solSection__header sol-reveal">
+          <div className="solSection__header reveal-item">
             <div className="hero__label">Section 02</div>
             <h2>The Space Tow Trucks</h2>
             <p className="solSection__subtitle">
@@ -322,10 +319,11 @@ export default function SolutionsPage() {
           </div>
 
           <div className="adrGrid" ref={adrRef}>
-            {adrMissions.map((mission) => (
+            {adrMissions.map((mission, index) => (
               <article
                 key={mission.name}
-                className={`card adrCard adrCard--${mission.accentColor} sol-reveal`}
+                className={`card adrCard adrCard--${mission.accentColor} reveal-item`}
+                style={{ ["--reveal-i" as any]: Math.min(index, 8) }}
               >
                 <div className="adrCard__header">
                   <div>
@@ -368,7 +366,7 @@ export default function SolutionsPage() {
       {/* ── Section 3: Economics ─────────────────────────────────────────────── */}
       <div className="solSection solSection--economics">
         <div className="container">
-          <div className="solSection__header sol-reveal">
+          <div className="solSection__header reveal-item">
             <div className="hero__label">Section 03</div>
             <h2>The Tragedy of the Commons</h2>
             <p className="solSection__subtitle">
@@ -381,8 +379,8 @@ export default function SolutionsPage() {
             {economicsPanels.map((panel, i) => (
               <div
                 key={panel.title}
-                className={`card economicsCard economicsCard--${panel.accent} sol-reveal`}
-                style={{ animationDelay: `${i * 0.1}s` }}
+                className={`card economicsCard economicsCard--${panel.accent} reveal-item`}
+                style={{ ["--reveal-i" as any]: Math.min(i, 8) }}
               >
                 <div className="economicsCard__icon" aria-hidden="true">{panel.icon}</div>
                 <h3 className="economicsCard__title">{panel.title}</h3>
@@ -403,7 +401,7 @@ export default function SolutionsPage() {
       {/* ── Section 4: SSR Audit ──────────────────────────────────────────────── */}
       <div className="solSection solSection--audit">
         <div className="container">
-          <div className="solSection__header sol-reveal">
+          <div className="solSection__header reveal-item">
             <div className="hero__label">Section 04</div>
             <h2>What Does Responsible Look Like?</h2>
             <p className="solSection__subtitle">
@@ -417,7 +415,7 @@ export default function SolutionsPage() {
             </p>
           </div>
 
-          <div className="auditLayout sol-reveal" ref={auditRef}>
+          <div className="auditLayout reveal-item" ref={auditRef}>
             {/* Checklist */}
             <div className="card auditCard">
               <div className="auditCard__header">
@@ -426,7 +424,7 @@ export default function SolutionsPage() {
               </div>
               <ul className="auditList" aria-label="SSR audit criteria">
                 {auditCriteria.map((item, i) => (
-                  <li key={i} className={`auditList__item ${item.pass ? "auditList__item--pass" : "auditList__item--fail"}`}>
+                  <li key={i} className={`auditList__item auditList__item--reveal ${item.pass ? "auditList__item--pass" : "auditList__item--fail"}`} style={{ ["--reveal-i" as any]: Math.min(i, 8) }}>
                     <span className="auditList__icon" aria-hidden="true">
                       {item.pass ? "✅" : "❌"}
                     </span>
@@ -489,7 +487,7 @@ export default function SolutionsPage() {
       </div>
 
       {/* ── CTA ──────────────────────────────────────────────────────────────── */}
-      <div className="container crisisCTA sol-reveal" style={{ marginBottom: "60px" }}>
+      <div className="container crisisCTA reveal-item" style={{ marginBottom: "60px" }}>
         <h3>From Solutions to Action</h3>
         <p>
           Technology and scoring systems are only designs until they are implemented.
