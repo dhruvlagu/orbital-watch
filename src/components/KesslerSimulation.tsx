@@ -72,7 +72,7 @@ export default function KesslerSimulation() {
     setRipple({ radius: 0, opacity: 0.6, active: true });
     let currentDebris = [...debris];
     let time = 0;
-    const duration = 3000; // 3 seconds
+    const duration = 2000; // 2 seconds
     const maxDebrisCount = 150; // Cap per cascade
     let debrisAddedInCascade = 0; // Track debris added during this cascade
 
@@ -92,7 +92,7 @@ export default function KesslerSimulation() {
 
       if (progress < 1) {
         // Add new debris randomly every few frames (respect per-cascade cap)
-        if (Math.random() < 0.3 && debrisAddedInCascade < maxDebrisCount) {
+        if (Math.random() < 0.5 && debrisAddedInCascade < maxDebrisCount) {
           const newRadius = 0.25 + Math.random() * 0.15;
           const newAngle = Math.random() * Math.PI * 2;
           const newInclination = (Math.random() - 0.5) * 0.8;

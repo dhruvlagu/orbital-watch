@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import StarfieldCanvas from "../components/StarfieldCanvas";
+import CivicActionSection from "../components/CivicActionSection";
+import { type PolicyAskId } from "../data/policyAsks";
 import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
 import { useCardSpotlight } from "../hooks/useCardSpotlight";
 import { useMagneticButton } from "../hooks/useMagneticButton";
@@ -12,6 +14,10 @@ export default function GetInvolvedPage() {
     "Learn how students, citizens, and policymakers can support orbital sustainability, treaty reform, and public education."
   );
 
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const askParam = (queryParams.get("ask") as PolicyAskId | null) || null;
+
   const [copied, setCopied] = useState(false);
   const [showInstaTip, setShowInstaTip] = useState(false);
   const actionsGridRef = useRef<HTMLDivElement>(null);
@@ -21,6 +27,18 @@ export default function GetInvolvedPage() {
   useMagneticButton(aboutButtonRef);
   useCardSpotlight(actionsGridRef);
   useCardSpotlight(orgsGridRef);
+
+  // Auto-scroll to #contact-rep if hash or askParam is present
+  useEffect(() => {
+    if (location.hash === "#contact-rep" || askParam) {
+      const el = document.getElementById("contact-rep");
+      if (el) {
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: "smooth" });
+        }, 100);
+      }
+    }
+  }, [location.hash, askParam]);
 
   // Scroll Reveal Hook
   useEffect(() => {
@@ -126,12 +144,10 @@ export default function GetInvolvedPage() {
                 Congressional awareness. A five-minute email to your senator about ASAT test bans costs nothing.
               </p>
               <a
-                href="https://www.congress.gov/members/find-your-member"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="#contact-rep"
                 className="btn btn--primary actionCard__btn"
               >
-                Find Your Representative →
+                Contact Your Representative →
               </a>
             </article>
 
@@ -218,6 +234,9 @@ export default function GetInvolvedPage() {
           </div>
         </div>
       </div>
+
+      {/* CIVIC ACTION TOOL */}
+      <CivicActionSection preSelectedAskId={askParam} />
 
       {/* SECTION B — Organizations */}
       <div className="involvedSection involvedSection--orgs">

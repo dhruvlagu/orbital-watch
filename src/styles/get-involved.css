@@ -385,3 +385,457 @@
 .studentCol__list li span a:hover {
   color: #fff;
 }
+
+/* ─────────────────────────────────────────────────────────────
+   CIVIC ACTION SECTION
+   ───────────────────────────────────────────────────────────── */
+
+.civicActionSection {
+  padding: 80px 0 60px;
+  border-top: 1px solid var(--border-subtle);
+  margin-top: 0;
+}
+
+.civicActionHeader {
+  text-align: center;
+  margin-bottom: 56px;
+}
+
+.civicActionHeader h2 {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 700;
+  color: #fff;
+  margin: 12px 0 16px;
+  letter-spacing: -0.02em;
+}
+
+.civicActionSubtitle {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  max-width: 560px;
+  margin: 0 auto;
+  line-height: 1.65;
+}
+
+/* ── Step blocks ── */
+.civicStepBlock {
+  margin-bottom: 48px;
+}
+
+.civicStepTitle {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+
+.civicStepTitle h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0;
+}
+
+.stepBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: rgba(0, 212, 255, 0.12);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  color: var(--accent-blue);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.civicStepDesc {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin: 0 0 20px;
+  line-height: 1.6;
+}
+
+/* ── Policy Ask Picker ── */
+.policyAskPicker {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 700px) {
+  .policyAskPicker {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.policyAskCard {
+  cursor: pointer;
+  padding: 16px 18px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border-subtle);
+  background: var(--bg-card);
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.15s ease;
+  user-select: none;
+  outline: none;
+  position: relative;
+}
+
+.policyAskCard:hover {
+  border-color: rgba(0, 212, 255, 0.4);
+  background: rgba(0, 212, 255, 0.04);
+  transform: translateY(-1px);
+}
+
+.policyAskCard:focus-visible {
+  box-shadow: 0 0 0 2px var(--accent-blue);
+}
+
+.policyAskCard.is-selected {
+  border-color: var(--accent-blue);
+  background: rgba(0, 212, 255, 0.07);
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.12), inset 0 0 16px rgba(0, 212, 255, 0.04);
+}
+
+.policyAskCard__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.policyAskCard__radio {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--border-subtle);
+  background: transparent;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s ease;
+}
+
+.policyAskCard.is-selected .policyAskCard__radio {
+  border-color: var(--accent-blue);
+}
+
+.policyAskCard__radioDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-blue);
+  box-shadow: 0 0 6px var(--accent-blue);
+  animation: dotPop 0.2s ease;
+}
+
+@keyframes dotPop {
+  from { transform: scale(0); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+.policyAskCard__label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.policyAskCard.is-selected .policyAskCard__label {
+  color: var(--accent-blue);
+}
+
+.policyAskCard__summary {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  margin: 0 0 8px;
+  line-height: 1.55;
+}
+
+.policyAskCard__stat {
+  font-size: 0.75rem;
+  color: rgba(0, 212, 255, 0.7);
+  background: rgba(0, 212, 255, 0.06);
+  border: 1px solid rgba(0, 212, 255, 0.15);
+  border-radius: 6px;
+  padding: 5px 8px;
+  line-height: 1.4;
+}
+
+.policyAskCard__statIcon {
+  margin-right: 4px;
+}
+
+/* ── Zip Lookup Form ── */
+.zipLookupForm {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: flex-end;
+}
+
+.zipFormGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.zipLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.zipInput {
+  height: 42px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+  font-size: 0.95rem;
+  font-family: inherit;
+  width: 200px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  outline: none;
+}
+
+.zipInput::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.zipInput:focus {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.15);
+}
+
+.zipSubmitBtn {
+  height: 42px;
+  align-self: flex-end;
+  white-space: nowrap;
+}
+
+/* ── Error Banner ── */
+.civicErrorBanner {
+  margin-top: 14px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: rgba(255, 77, 77, 0.08);
+  border: 1px solid rgba(255, 77, 77, 0.25);
+  color: #ff9999;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+/* ── Rep Dashboard ── */
+.repDashboardBlock {
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.04) 0%, transparent 60%);
+  border: 1px solid rgba(0, 212, 255, 0.12);
+  border-radius: 16px;
+  padding: 28px 28px 24px;
+}
+
+/* ── District Disclaimer ── */
+.districtDisclaimer {
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: rgba(0, 212, 255, 0.05);
+  border: 1px solid rgba(0, 212, 255, 0.18);
+  color: rgba(0, 212, 255, 0.8);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.districtDisclaimer a {
+  color: var(--accent-blue);
+  text-decoration: underline;
+}
+
+/* ── Nudge Banner ── */
+.nudgeBanner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: rgba(255, 176, 0, 0.07);
+  border: 1px solid rgba(255, 176, 0, 0.28);
+  animation: nudgeSlideIn 0.3s ease;
+}
+
+@keyframes nudgeSlideIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.nudgeIcon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.nudgeText {
+  font-size: 0.87rem;
+  color: rgba(255, 200, 80, 0.9);
+  line-height: 1.55;
+}
+
+.nudgeText strong {
+  color: #ffce54;
+}
+
+/* ── Message Textarea ── */
+.messageTextareaWrapper {
+  margin-bottom: 20px;
+}
+
+.messageTextareaLabel {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.messageTextarea {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.88rem;
+  font-family: "Courier New", monospace;
+  line-height: 1.65;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+}
+
+.messageTextarea:focus {
+  border-color: rgba(0, 212, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+}
+
+/* ── Action Buttons Row ── */
+.civicActionsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.copyMsgBtn {
+  white-space: nowrap;
+}
+
+.copyMsgBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.contextualBtnWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.contextualBtn.is-disabled {
+  opacity: 0.4;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.contextualNote {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  max-width: 340px;
+}
+
+/* ── Supplementary Contact ── */
+.supplementaryContactInfo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.contactDetailItem {
+  font-size: 0.83rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.contactDetailItem strong {
+  color: rgba(255, 255, 255, 0.65);
+  margin-right: 4px;
+}
+
+/* ── Policy Ask Link (on PolicyPage Reform Simulator) ── */
+.policyAskLinkWrapper {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(0, 212, 255, 0.2);
+}
+
+.policyAskLink {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent-blue);
+  text-decoration: none;
+  gap: 4px;
+  transition: color 0.2s ease, gap 0.2s ease;
+  letter-spacing: 0.01em;
+}
+
+.policyAskLink:hover {
+  color: #fff;
+  gap: 8px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .repDashboardBlock {
+    padding: 18px 16px;
+  }
+
+  .zipInput {
+    width: 100%;
+  }
+
+  .zipLookupForm {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .zipSubmitBtn {
+    width: 100%;
+  }
+
+  .civicActionsRow {
+    flex-direction: column;
+  }
+}

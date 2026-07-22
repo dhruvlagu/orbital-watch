@@ -254,8 +254,120 @@ export default defineConfig(({ mode }) => {
             }
           };
 
+          const handleRepresentativeRoute = async (req: any, res: any) => {
+            try {
+              const urlObj = new URL(req.url || "", `http://${req.headers.host || "localhost"}`);
+              const zip = urlObj.searchParams.get("zip") || urlObj.searchParams.get("q");
+              if (!zip) {
+                res.statusCode = 400;
+                res.setHeader("Content-Type", "application/json");
+                res.end(JSON.stringify({ error: "Missing or invalid zip code parameter." }));
+                return;
+              }
+
+              const apiKey = env.GEOCODIO_API_KEY || process.env.GEOCODIO_API_KEY;
+              if (!apiKey) {
+                res.statusCode = 500;
+                res.setHeader("Content-Type", "application/json");
+                res.end(JSON.stringify({ error: "Missing GEOCODIO_API_KEY environment variable." }));
+                return;
+              }
+
+              const geocodioUrl = `https://api.geocod.io/v1.9/geocode?q=${encodeURIComponent(zip.trim())}&fields=cd&api_key=${apiKey}`;
+              const apiRes = await fetch(geocodioUrl);
+              if (!apiRes.ok) {
+                res.statusCode = 502;
+                res.setHeader("Content-Type", "application/json");
+                res.end(JSON.stringify({ error: "Unable to reach address lookup service." }));
+                return;
+              }
+
+              const data: any = await apiRes.json();
+              const results = data.results;
+
+              if (!Array.isArray(results) || results.length === 0) {
+                res.statusCode = 200;
+                res.setHeader("Content-Type", "application/json");
+                res.end(JSON.stringify({ noMatch: true, message: "No match found for this zip code." }));
+                return;
+              }
+
+              let bestDistrict: any = null;
+              let maxProportion = -1;
+
+              for (const result of results) {
+                const districts = result.fields?.congressional_districts;
+                if (Array.isArray(districts) && districts.length > 0) {
+                  for (const dist of districts) {
+                    const prop = typeof dist.proportion === "number" ? dist.proportion : 1;
+                    if (prop > maxProportion) {
+                      maxProportion = prop;
+                      bestDistrict = dist;
+                    }
+                  }
+                }
+              }
+
+              if (!bestDistrict) {
+                res.statusCode = 200;
+                res.setHeader("Content-Type", "application/json");
+                res.end(JSON.stringify({ noMatch: true, message: "No congressional district found for this zip code." }));
+                return;
+              }
+
+              const legislators = bestDistrict.current_legislators;
+              if (!Array.isArray(legislators) || legislators.length === 0) {
+                res.statusCode = 200;
+                res.setHeader("Content-Type", "application/json");
+                res.end(JSON.stringify({ noMatch: true, message: "No legislators found for this district." }));
+                return;
+              }
+
+              const rep = legislators.find((l: any) => l.type === "representative");
+              if (!rep) {
+                res.statusCode = 200;
+                res.setHeader("Content-Type", "application/json");
+                res.end(JSON.stringify({ noMatch: true, message: "No House representative found for this district." }));
+                return;
+              }
+
+              const bio = rep.bio || {};
+              const contact = rep.contact || {};
+              const firstName = bio.first_name || "";
+              const lastName = bio.last_name || "";
+              const representativeName = `${firstName} ${lastName}`.trim() || "Representative";
+              const districtNumber = typeof bestDistrict.district_number === "number"
+                ? bestDistrict.district_number
+                : parseInt(bestDistrict.district_number || "0", 10);
+
+              const matchProportion = maxProportion > 0 ? maxProportion : 1;
+              const isAmbiguousMatch = matchProportion < 0.9;
+
+              res.statusCode = 200;
+              res.setHeader("Content-Type", "application/json");
+              res.end(JSON.stringify({
+                representativeName,
+                district: districtNumber,
+                matchProportion,
+                isAmbiguousMatch,
+                contact: {
+                  contactForm: contact.contact_form || null,
+                  officialSite: contact.url || null,
+                  phone: contact.phone || null,
+                  mailingAddress: contact.address || null,
+                },
+              }));
+            } catch (err: any) {
+              res.statusCode = 500;
+              res.setHeader("Content-Type", "application/json");
+              res.end(JSON.stringify({ error: err?.message || "Failed to perform representative lookup." }));
+            }
+          };
+
           server.middlewares.use("/api/spacetrack/conjunctions", handleConjunctionsRoute);
           server.middlewares.use("/api/conjunctions", handleConjunctionsRoute);
+          server.middlewares.use("/api/spacetrack/representative", handleRepresentativeRoute);
+          server.middlewares.use("/api/representative", handleRepresentativeRoute);
         },
       },
     ],

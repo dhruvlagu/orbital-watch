@@ -88,6 +88,23 @@ export default function PhysicsPage() {
   const handleMassPreset = (value: number) => setMass(value);
   const handleVelocityPreset = (value: number) => setVelocity(value);
 
+  // Exponential slider logic for Mass (Power-4 / Quartic scale)
+  // Range: 0.1g to 100,000g
+  const MIN_MASS = 0.1;
+  const MAX_MASS = 100000;
+
+  // Convert mass value to slider position (0-100)
+  const massToSlider = (val: number) => {
+    const normalized = (val - MIN_MASS) / (MAX_MASS - MIN_MASS);
+    return Math.pow(normalized, 1 / 4) * 100;
+  };
+
+  // Convert slider position (0-100) to mass value
+  const sliderToMass = (pos: number) => {
+    const normalized = pos / 100;
+    return MIN_MASS + Math.pow(normalized, 4) * (MAX_MASS - MIN_MASS);
+  };
+
   const chartLabels = isMobileChart
     ? ["Bullet", "1cm (1g)", "1cm (5g)", "Grenade", "Tennis ball"]
     : [
@@ -256,16 +273,19 @@ export default function PhysicsPage() {
               <div className="sliderGroup">
                 <div className="sliderHeader">
                   <label className="sliderLabel">Object Mass</label>
-                  <span className="sliderValue">{mass.toFixed(1)}g</span>
+                  <span className="sliderValue">
+                    {mass >= 1000 ? `${(mass / 1000).toFixed(2)} kg` : `${mass.toFixed(1)} g`}
+                  </span>
                 </div>
                 <input
                   type="range"
-                  min="0.1"
-                  max="10000"
-                  step="0.1"
-                  value={mass}
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  value={massToSlider(mass)}
                   onChange={(e) => {
-                    const nextMass = parseFloat(e.target.value);
+                    const pos = parseFloat(e.target.value);
+                    const nextMass = sliderToMass(pos);
                     setMass(nextMass);
                     trackCalculatorUsage(nextMass, velocity);
                   }}

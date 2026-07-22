@@ -17,6 +17,10 @@
       "destination": "/api/conjunctions"
     },
     {
+      "source": "/api/spacetrack/representative",
+      "destination": "/api/representative"
+    },
+    {
       "source": "/((?!sitemap\\.xml|robots\\.txt|favicon\\.ico|og-image\\.png|apple-touch-icon\\.png|favicon\\.svg).*)",
       "destination": "/index.html"
     }

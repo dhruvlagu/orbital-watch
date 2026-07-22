@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useCountUp } from "../hooks/useCountUp";
 import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
 import { useCardSpotlight } from "../hooks/useCardSpotlight";
+import { type PolicyAskId } from "../data/policyAsks";
 
 type Policy = {
   id: string;
@@ -42,6 +43,14 @@ const policyOptions: Policy[] = [
     tooltip: "Currently only ~30% of global launches are FCC-licensed; global extension covers the remaining 70%",
   },
 ];
+
+const toggleToAskIdMap: Record<string, PolicyAskId> = {
+  iadc: "iadc_binding",
+  asat: "asat_ban",
+  adr: "adr_authority",
+  fiveyear: "global_5year",
+};
+
 // Consolidated useCountValue helper to useCountUp hook
 
 type EnforcementTone = "red" | "amber" | "green";
@@ -564,6 +573,17 @@ export default function PolicyPage() {
                       </span>
                     )}
                   </div>
+                  {isOn && toggleToAskIdMap[policy.id] ? (
+                    <div className="policyAskLinkWrapper">
+                      <Link
+                        to={`/get-involved?ask=${toggleToAskIdMap[policy.id]}#contact-rep`}
+                        className="policyAskLink"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Ask your representative to support this →
+                      </Link>
+                    </div>
+                  ) : null}
                 </div>
               );
             })}
