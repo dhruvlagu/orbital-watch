@@ -11,6 +11,7 @@ const PolicyPage = lazy(() => import("./pages/PolicyPage"));
 const SolutionsPage = lazy(() => import("./pages/SolutionsPage"));
 const GetInvolvedPage = lazy(() => import("./pages/GetInvolvedPage"));
 const AboutPage = lazy(() => import("./pages/AboutPage"));
+const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 
 export default function App() {
   const location = useLocation();
@@ -67,7 +68,7 @@ export default function App() {
           <Route path="/solutions" element={<SolutionsPage />} />
           <Route path="/get-involved" element={<GetInvolvedPage />} />
           <Route path="/about" element={<AboutPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
     </>

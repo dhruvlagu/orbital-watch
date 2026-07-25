@@ -1,6 +1,18 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "redirects": [
+    {
+      "source": "/the-crisis",
+      "destination": "/crisis",
+      "permanent": true
+    },
+    {
+      "source": "/the-physics",
+      "destination": "/physics",
+      "permanent": true
+    }
+  ],
   "crons": [
     {
       "path": "/api/cron/refresh-satcat",
@@ -19,10 +31,6 @@
     {
       "source": "/api/spacetrack/representative",
       "destination": "/api/representative"
-    },
-    {
-      "source": "/((?!sitemap\\.xml|robots\\.txt|favicon\\.ico|og-image\\.png|apple-touch-icon\\.png|favicon\\.svg).*)",
-      "destination": "/index.html"
     }
   ]
 }

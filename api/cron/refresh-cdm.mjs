@@ -34,6 +34,20 @@ function isAuthorized(req) {
   return authHeader === `Bearer ${cronSecret}`;
 }
 
+async function logExecution({ success, error, fetched, stored }) {
+  await withRedis(async (c) => {
+    const logEntry = JSON.stringify({
+      timestamp: new Date().toISOString(),
+      success,
+      error,
+      fetched,
+      stored,
+    });
+    await c.lPush("cdm:executionLog", logEntry);
+    await c.lTrim("cdm:executionLog", 0, 19);
+  });
+}
+
 // ─── Deduplicate CDM records ──────────────────────────────────────────────────
 
 /**
@@ -93,14 +107,19 @@ async function fetchCdmRecords(cookieHeader) {
 // ─── Handler ──────────────────────────────────────────────────────────────────
 
 export default async function handler(req, res) {
-  if (!isAuthorized(req)) {
-    return res.status(401).json({ error: "Unauthorized — invalid or missing CRON_SECRET." });
-  }
-
-  console.log("[refresh-cdm] Starting CDM refresh...");
-  const startedAt = Date.now();
-
+  let success = false;
+  let error = null;
+  let fetched = null;
+  let stored = null;
   try {
+    if (!isAuthorized(req)) {
+      error = "Unauthorized — invalid or missing CRON_SECRET.";
+      return res.status(401).json({ error: "Unauthorized — invalid or missing CRON_SECRET." });
+    }
+
+    console.log("[refresh-cdm] Starting CDM refresh...");
+    const startedAt = Date.now();
+
     // 1. Get a fresh (or cached) session cookie
     let cookieHeader = await getValidSessionCookie();
 
@@ -123,7 +142,8 @@ export default async function handler(req, res) {
       throw new Error("Space-Track CDM returned an unexpected non-array payload.");
     }
 
-    console.log(`[refresh-cdm] Fetched ${newRecords.length} new CDM records from Space-Track.`);
+    fetched = newRecords.length;
+    console.log(`[refresh-cdm] Fetched ${fetched} new CDM records from Space-Track.`);
 
     // 3. Read existing stored records from Redis
     const existingJson = await withRedis((c) => c.get("cdm:latest"));
@@ -147,17 +167,28 @@ export default async function handler(req, res) {
     });
 
     const durationMs = Date.now() - startedAt;
+    stored = filtered.length;
     console.log(`[refresh-cdm] Done. durationMs=${durationMs}`);
 
+    success = true;
     return res.status(200).json({
       ok: true,
-      stored: filtered.length,
-      fetched: newRecords.length,
+      stored,
+      fetched,
       durationMs,
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    console.error("[refresh-cdm] ERROR:", message);
-    return res.status(500).json({ ok: false, error: message });
+    error = err instanceof Error ? err.message : String(err);
+    console.error("[refresh-cdm] ERROR:", error);
+    return res.status(500).json({ ok: false, error });
+  } finally {
+    try {
+      await logExecution({ success, error, fetched, stored });
+    } catch (logError) {
+      console.error(
+        "[refresh-cdm] Failed to write execution log:",
+        logError instanceof Error ? logError.message : String(logError),
+      );
+    }
   }
 }

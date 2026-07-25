@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "build": "tsc -b && vite build && node scripts/prerender.mjs",
+    "preview": "vite preview",
+    "prerender": "node scripts/prerender.mjs"
   },
   "dependencies": {
     "chart.js": "^4.5.1",
@@ -18,10 +19,12 @@
     "redis": "^6.1.0"
   },
   "devDependencies": {
+    "@sparticuz/chromium": "^149.0.0",
     "@types/node": "^22.18.1",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",
+    "puppeteer-core": "^25.3.0",
     "typescript": "^5.6.3",
     "vite": "^5.4.10"
   }

@@ -28,6 +28,19 @@ function isAuthorized(req) {
   return authHeader === `Bearer ${cronSecret}`;
 }
 
+async function logExecution({ success, error, metrics }) {
+  await withRedis(async (c) => {
+    const logEntry = JSON.stringify({
+      timestamp: new Date().toISOString(),
+      success,
+      error,
+      totalTracked: metrics?.totalTracked ?? null,
+    });
+    await c.lPush("satcat:executionLog", logEntry);
+    await c.lTrim("satcat:executionLog", 0, 19);
+  });
+}
+
 // ─── Metrics ──────────────────────────────────────────────────────────────────
 
 function buildMetrics(records) {
@@ -112,14 +125,18 @@ async function fetchSatcatRecords(cookieHeader, fileNumber) {
 // ─── Handler ──────────────────────────────────────────────────────────────────
 
 export default async function handler(req, res) {
-  if (!isAuthorized(req)) {
-    return res.status(401).json({ error: "Unauthorized — invalid or missing CRON_SECRET." });
-  }
-
-  console.log("[refresh-satcat] Starting SATCAT refresh...");
-  const startedAt = Date.now();
-
+  let success = false;
+  let error = null;
+  let metrics;
   try {
+    if (!isAuthorized(req)) {
+      error = "Unauthorized — invalid or missing CRON_SECRET.";
+      return res.status(401).json({ error: "Unauthorized — invalid or missing CRON_SECRET." });
+    }
+
+    console.log("[refresh-satcat] Starting SATCAT refresh...");
+    const startedAt = Date.now();
+
     // 1. Read last-used file number from Redis
     const storedFileNumber = await withRedis((c) => c.get("satcat:fileNumber"));
     const fileNumber = storedFileNumber ? Number(storedFileNumber) : null;
@@ -146,6 +163,7 @@ export default async function handler(req, res) {
       console.log(
         "[refresh-satcat] Space-Track returned 0 records — no update needed (no new SATCAT entries since last run).",
       );
+      success = true;
       return res.status(200).json({
         ok: true,
         message: "No new SATCAT records since last run.",
@@ -156,7 +174,9 @@ export default async function handler(req, res) {
     console.log(`[refresh-satcat] Fetched ${records.length} records.`);
 
     // 4. Compute metrics and determine new max file number
-    const { metrics, maxFileNumber } = buildMetrics(records);
+    const computed = buildMetrics(records);
+    metrics = computed.metrics;
+    const { maxFileNumber } = computed;
 
     // 5. Persist to Redis
     await withRedis(async (c) => {
@@ -176,6 +196,7 @@ export default async function handler(req, res) {
         `durationMs=${durationMs}`,
     );
 
+    success = true;
     return res.status(200).json({
       ok: true,
       totalTracked: metrics.totalTracked,
@@ -184,8 +205,17 @@ export default async function handler(req, res) {
       durationMs,
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    console.error("[refresh-satcat] ERROR:", message);
-    return res.status(500).json({ ok: false, error: message });
+    error = err instanceof Error ? err.message : String(err);
+    console.error("[refresh-satcat] ERROR:", error);
+    return res.status(500).json({ ok: false, error });
+  } finally {
+    try {
+      await logExecution({ success, error, metrics });
+    } catch (logError) {
+      console.error(
+        "[refresh-satcat] Failed to write execution log:",
+        logError instanceof Error ? logError.message : String(logError),
+      );
+    }
   }
 }
