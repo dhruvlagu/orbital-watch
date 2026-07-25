@@ -54,14 +54,16 @@ export default function CivicActionSection({
     if (!ask) return;
 
     const repName = repResult.representativeName;
-    const statText = ask.supportingStat ? `\n${ask.supportingStat}\n` : "";
+    const statText = ask.supportingStat ? `\n\n${ask.supportingStat}` : "";
     const nameFormatted = userName.trim() ? userName.trim() : "[Your name]";
 
     const generated = `Dear Representative ${repName},
 
-I'm a constituent in your district writing about orbital debris policy. ${ask.askSummary} Specifically, I'd ask you to ${ask.repCanDo}.
-${statText}
-I'd appreciate knowing your office's position on this issue, or any related legislation or oversight efforts you're aware of.
+I'm a constituent in your district, and I'm writing because I care about protecting the space infrastructure our communities rely on. ${ask.askSummary}
+
+I hope you'll ${ask.repCanDo}.${statText}
+
+I'd appreciate knowing your office's position on this issue and any related work you are pursuing.
 
 [Add a sentence about why this matters to you personally — messages with a personal note are far more likely to be read as genuine by congressional staff than a form letter.]
 
@@ -161,6 +163,13 @@ ${zip.trim()}`;
         </p>
       </div>
 
+      <aside className="civicExplainer" aria-labelledby="civic-explainer-title">
+        <h3 id="civic-explainer-title">Why contact your representative?</h3>
+        <p>
+          Orbital debris is an international issue, but Congress helps shape the U.S. response through NASA funding, oversight, space-related legislation, and American leadership in international space discussions.
+        </p>
+      </aside>
+
       {/* STEP 1: Select Policy Ask */}
       <div className="civicStepBlock">
         <div className="civicStepTitle">
@@ -229,7 +238,12 @@ ${zip.trim()}`;
 
           {lookupError ? (
             <div className="civicErrorBanner" role="alert">
-              ⚠️ {lookupError}
+              <svg className="civicBannerIcon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+              {lookupError}
             </div>
           ) : null}
         </div>
@@ -240,13 +254,21 @@ ${zip.trim()}`;
         <div className="civicStepBlock repDashboardBlock reveal-item is-visible">
           <div className="civicStepTitle">
             <span className="stepBadge">Step 3</span>
-            <h3>Your Personalized Message to Rep. {repResult.representativeName}</h3>
+            <h3>
+              Your Personalized Message to Rep. {repResult.representativeName}
+              {repResult.district !== undefined ? ` (District ${repResult.district})` : ""}
+            </h3>
           </div>
 
           {/* Ambiguous match disclaimer */}
           {repResult.isAmbiguousMatch && repResult.matchProportion ? (
             <div className="districtDisclaimer">
-              ℹ️ Based on your zip code&apos;s most likely district (~
+              <svg className="civicBannerIcon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              Based on your zip code&apos;s most likely district (~
               {Math.round(repResult.matchProportion * 100)}% match) — if this doesn&apos;t match your actual representative, you can look up your exact district at{" "}
               <a
                 href="https://www.house.gov/representatives/find-your-representative"
@@ -262,12 +284,26 @@ ${zip.trim()}`;
           {/* Personalization Nudge Banner */}
           {hasPlaceholder ? (
             <div className="nudgeBanner" role="alert">
-              <span className="nudgeIcon">✏️</span>
+              <span className="nudgeIcon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </span>
               <div className="nudgeText">
                 <strong>Personalization Recommended:</strong> Consider adding a personal note before sending — congressional offices weight personalized messages more heavily than identical form letters.
               </div>
             </div>
           ) : null}
+
+          <aside className="whyMattersCallout" aria-labelledby="why-matters-title">
+            <h4 id="why-matters-title">Why this matters</h4>
+            <ul>
+              {policyAsks[selectedAskId].whyItMatters.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </aside>
 
           {/* Editable Textarea */}
           <div className="messageTextareaWrapper">
@@ -287,7 +323,7 @@ ${zip.trim()}`;
           <div className="civicActionsRow">
             <button
               type="button"
-              className="btn btn--secondary copyMsgBtn"
+              className="btn btn--primary copyMsgBtn"
               onClick={handleCopyMessage}
               disabled={hasPlaceholder}
               title={
@@ -296,7 +332,14 @@ ${zip.trim()}`;
                   : "Copy full text to clipboard"
               }
             >
-              {copied ? "✓ Copied to Clipboard!" : "Copy Message"}
+              {copied ? (
+                <>
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline',verticalAlign:'middle',marginRight:'5px'}} aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                  Copied!
+                </>
+              ) : (
+                "Copy Message"
+              )}
             </button>
 
             {/* Contextual Action Button Priority */}
@@ -306,7 +349,7 @@ ${zip.trim()}`;
                   href={repResult.contact.contactForm}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`btn btn--primary contextualBtn ${
+                  className={`btn btn--secondary contextualBtn ${
                     hasPlaceholder ? "is-disabled" : ""
                   }`}
                   onClick={handleContextualActionClick}
@@ -315,7 +358,7 @@ ${zip.trim()}`;
                   Open Official Contact Form →
                 </a>
                 <span className="contextualNote">
-                  Copy your message above, then paste it into the form that opens.
+                  An official contact form is available for this office. Copy your message below, then paste it into the form that opens.
                 </span>
               </div>
             ) : repResult.contact?.officialSite ? (
@@ -324,7 +367,7 @@ ${zip.trim()}`;
                   href={repResult.contact.officialSite}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`btn btn--primary contextualBtn ${
+                  className={`btn btn--secondary contextualBtn ${
                     hasPlaceholder ? "is-disabled" : ""
                   }`}
                   onClick={handleContextualActionClick}
@@ -333,7 +376,7 @@ ${zip.trim()}`;
                   Visit Official Website →
                 </a>
                 <span className="contextualNote">
-                  This office doesn&apos;t have a direct online contact form — copy your message above, then look for a &apos;Contact&apos; link on their site.
+                  This office doesn&apos;t have a direct online contact form — copy your message below, then look for a &apos;Contact&apos; link on their official website.
                 </span>
               </div>
             ) : (

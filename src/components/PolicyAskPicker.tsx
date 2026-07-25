@@ -49,7 +49,13 @@ export default function PolicyAskPicker({
             <p className="policyAskCard__summary">{ask.askSummary}</p>
             {ask.supportingStat ? (
               <div className="policyAskCard__stat">
-                <span className="policyAskCard__statIcon">📈</span> {ask.supportingStat}
+                <span className="policyAskCard__statIcon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
+                    <polyline points="16 7 22 7 22 13"/>
+                  </svg>
+                </span>
+                {ask.supportingStat}
               </div>
             ) : null}
           </div>

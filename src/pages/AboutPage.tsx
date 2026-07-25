@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
+import { useRevealOnScroll } from "../hooks/useRevealOnScroll";
 import { Link } from "react-router-dom";
 import StarfieldCanvas from "../components/StarfieldCanvas";
 import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
@@ -22,6 +23,7 @@ export default function AboutPage() {
   const [expandedBlocks, setExpandedBlocks] = useState<{ [key: string]: boolean }>({
     block1: false,
     block2: false,
+    civicAction: false,
     block3: false,
   });
 
@@ -33,21 +35,7 @@ export default function AboutPage() {
   useCardSpotlight(reflectionGridRef);
 
   // Scroll Reveal Hook
-  useEffect(() => {
-    const elements = document.querySelectorAll<HTMLElement>(".reveal-item");
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-visible");
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-    elements.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
+  useRevealOnScroll(".reveal-item", null, 0.1);
 
   return (
     <section className="aboutPage">
@@ -90,7 +78,13 @@ export default function AboutPage() {
                 </div>
               </div>
               <div className="disclaimerBanner">
-                <span className="disclaimerIcon">⚠️</span>
+                <span className="disclaimerIcon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                  </svg>
+                </span>
                 <span>This website is an independent academic project. It is not affiliated with any space agency, military, or government body.</span>
               </div>
             </div>
@@ -114,22 +108,46 @@ export default function AboutPage() {
               {
                 title: "Primary Data Sources",
                 body: "Orbital debris statistics drawn from ESA Annual Space Environment Report and the Space-Track.org satellite catalog. Data cached via Space-Track.org API.",
-                icon: "📊",
+                icon: (
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                    <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+                  </svg>
+                ),
               },
               {
                 title: "Policy Documents",
                 body: "Treaty text and legal analysis sourced from UNOOSA original documents, FCC ruling records, and UN COPUOS reports.",
-                icon: "📜",
+                icon: (
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                    <polyline points="10 9 9 9 8 9"/>
+                  </svg>
+                ),
               },
               {
                 title: "Academic Papers",
                 body: "Physics calculations validated against Kessler & Cour-Palais (1978) and updated with NASA Orbital Debris Quarterly News data.",
-                icon: "📚",
+                icon: (
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                  </svg>
+                ),
               },
               {
                 title: "Journalism & Context",
                 body: "Background context drawn from Wall Street Journal, Ars Technica, and The Planetary Society, cross-referenced with primary sources.",
-                icon: "📰",
+                icon: (
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <path d="M2 15h10"/><path d="M2 18h10"/><path d="M2 12h10"/>
+                  </svg>
+                ),
               },
             ].map((card, i) => (
               <div key={card.title} className="card methodCard reveal-item" style={{ animationDelay: `${i * 0.1}s` }}>
@@ -376,6 +394,69 @@ export default async function handler(req, res) {
             )}
           </div>
 
+          {/* CIVIC ACTION: Contact Your Representative */}
+          {/* SOURCES: src/components/CivicActionSection.tsx + api/representative.mjs
+               UPDATE THIS BLOCK if either implementation changes */}
+          <div className="codeBlock reveal-item">
+            <div className="codeBlock__header" onClick={() => toggleBlock('civicAction')}>
+              <div className="codeBlock__title">
+                <span>Contact Your Representative</span>
+              </div>
+              <button className="codeBlock__toggle">
+                {expandedBlocks.civicAction ? '−' : '+'}
+              </button>
+            </div>
+            {expandedBlocks.civicAction && (
+              <>
+                <pre className="technicalCode">{`// src/components/CivicActionSection.tsx
+const ask = policyAsks[selectedAskId];
+const generated = \`Dear Representative \${repName},
+
+I'm a constituent in your district, and I'm writing because I care about protecting the space infrastructure our communities rely on. \${ask.askSummary}
+
+I hope you'll \${ask.repCanDo}.\${statText}
+
+[Add a sentence about why this matters to you personally ...]
+
+Thank you for your time,
+\${nameFormatted}
+\${zip.trim()}\`;
+
+const hasPlaceholder = messageText.includes(
+  "[Add a sentence"
+);
+
+const handleCopyMessage = () => {
+  if (hasPlaceholder || !selectedAskId) return;
+  navigator.clipboard.writeText(messageText);
+  trackGA4Event("representative_contact_sent", {
+    ask_id: selectedAskId,
+    action_type: "copy",
+  });
+};
+
+// api/representative.mjs
+const rep = legislators.find((l) => l.type === "representative");
+
+return res.status(200).json({
+  representativeName,
+  district: districtNumber,
+  matchProportion,
+  isAmbiguousMatch,
+  contact: {
+    contactForm: contact.contact_form || null,
+    officialSite: contact.url || null,
+    phone: contact.phone || null,
+    mailingAddress: contact.address || null,
+  },
+});`}</pre>
+                <p className="codeBlock__caption">
+                  This tool turns a selected policy ask and a constituent&apos;s district into an editable message. The browser calls a server-side representative lookup, which selects the House representative from Geocodio&apos;s congressional-district data and returns official contact options only. The copy and contact actions stay disabled until the personal-note placeholder is replaced, while the existing analytics records each generated message and completed action.
+                </p>
+              </>
+            )}
+          </div>
+
           {/* BLOCK 3: Kinetic Energy Calculator */}
           {/* SOURCE: src/pages/PhysicsPage.tsx (KE calculation + getDangerLevel function)
                UPDATE THIS BLOCK if that code changes */}
@@ -418,8 +499,6 @@ const getDangerLevel = () => {
             These are the actual functions live on this site — not simplified for display. If a number on the Home, Physics, or Collision Watch page changes, it's because one of these functions changed.
           </p>
 
-          {/* NOTE: Future extension - civic action / "Contact Your Representative" tool will be added here */}
-          {/* To add: Fourth code block covering civic action functionality */}
         </div>
       </div>
 

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useRevealOnScroll } from "../hooks/useRevealOnScroll";
 import { Link } from "react-router-dom";
 import StarfieldCanvas from "../components/StarfieldCanvas";
 import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
@@ -102,7 +103,14 @@ function RiskBadge({ tier, emergency }: { tier: RiskTier; emergency: boolean }) 
       </div>
       {emergency && (
         <div className="tooltipContainer" style={{ marginLeft: 0 }} onClick={(e) => e.stopPropagation()}>
-          <span className="badge badge--red" tabIndex={0} aria-label="Emergency reportable">⚠ EMERGENCY REPORTABLE</span>
+          <span className="badge badge--red" tabIndex={0} aria-label="Emergency reportable">
+            <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline',verticalAlign:'middle',marginRight:'4px'}} aria-hidden="true">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            EMERGENCY REPORTABLE
+          </span>
           <div className="tooltipText">{emergencyTooltip}</div>
         </div>
       )}
@@ -267,22 +275,8 @@ export default function CollisionWatchPage() {
     });
   };
 
-  // Scroll-reveal IntersectionObserver — identical pattern to CrisisPage
-  useEffect(() => {
-    const elements = document.querySelectorAll<HTMLElement>(".reveal-item");
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-visible");
-          }
-        });
-      },
-      { threshold: 0.1 },
-    );
-    elements.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, [loading]); // re-run after loading resolves so newly mounted cards are observed
+  // Scroll-reveal IntersectionObserver
+  useRevealOnScroll(".reveal-item", loading, 0.1);
 
   useEffect(() => {
     let isCancelled = false;
@@ -548,7 +542,20 @@ export default function CollisionWatchPage() {
             ) : !hasEvents ? (
               // Empty state
               <div className="card cw__emptyState">
-                <div className="cw__emptyIcon" aria-hidden="true">📡</div>
+                <div className="cw__emptyIcon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4.93 4.93l4.24 4.24"/>
+                    <path d="M14.83 9.17l4.24-4.24"/>
+                    <path d="M14.83 14.83l4.24 4.24"/>
+                    <path d="M9.17 14.83l-4.24 4.24"/>
+                    <circle cx="12" cy="12" r="4"/>
+                    <circle cx="12" cy="12" r="8" strokeDasharray="2 3"/>
+                    <line x1="12" y1="2" x2="12" y2="4"/>
+                    <line x1="12" y1="20" x2="12" y2="22"/>
+                    <line x1="2" y1="12" x2="4" y2="12"/>
+                    <line x1="20" y1="12" x2="22" y2="12"/>
+                  </svg>
+                </div>
                 <h3>No conjunction data available</h3>
                 <p>
                   {payload.lastUpdatedAt

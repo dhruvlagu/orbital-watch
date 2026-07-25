@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useRevealOnScroll } from "../hooks/useRevealOnScroll";
 import LiveDataSection from "../components/LiveDataSection";
 import StarfieldCanvas from "../components/StarfieldCanvas";
 import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
@@ -74,6 +75,9 @@ export default function HomePage() {
     if (!conjunctionData) return null;
     return conjunctionData.events.filter((e) => e.tcaMs > Date.now()).length;
   }, [conjunctionData, timeTick]);
+
+  // Scroll Reveal Hook
+  useRevealOnScroll(".reveal-item", null, 0.15);
 
   const handleScrollIndicatorClick = () => {
     window.scrollTo({
@@ -162,7 +166,7 @@ export default function HomePage() {
           </div>
 
           <div className="homeExplore__grid" ref={exploreGridRef}>
-            <div className="card homeExploreCard">
+            <div className="card homeExploreCard reveal-item" style={{ ["--reveal-i" as any]: 0 }}>
               <div className="homeExploreCard__icon">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 22a10 10 0 0 0 10-10C22 6.48 17.52 2 12 2S2 6.48 2 12" />
@@ -180,7 +184,7 @@ export default function HomePage() {
               </Link>
             </div>
 
-            <div className="card homeExploreCard">
+            <div className="card homeExploreCard reveal-item" style={{ ["--reveal-i" as any]: 1 }}>
               <div className="homeExploreCard__icon">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="8" cy="8" r="3" />
@@ -202,7 +206,7 @@ export default function HomePage() {
               </Link>
             </div>
 
-            <div className="card homeExploreCard">
+            <div className="card homeExploreCard reveal-item" style={{ ["--reveal-i" as any]: 2 }}>
               <div className="homeExploreCard__icon">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="8" cy="8" r="3" />
@@ -224,7 +228,7 @@ export default function HomePage() {
               </Link>
             </div>
 
-            <div className="card homeExploreCard">
+            <div className="card homeExploreCard reveal-item" style={{ ["--reveal-i" as any]: 3 }}>
               <div className="homeExploreCard__icon">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
@@ -239,7 +243,7 @@ export default function HomePage() {
               </Link>
             </div>
 
-            <div className="card homeExploreCard">
+            <div className="card homeExploreCard reveal-item" style={{ ["--reveal-i" as any]: 4 }}>
               <div className="homeExploreCard__icon">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
@@ -256,7 +260,7 @@ export default function HomePage() {
               </Link>
             </div>
 
-            <div className="card homeExploreCard">
+            <div className="card homeExploreCard reveal-item" style={{ ["--reveal-i" as any]: 5 }}>
               <div className="homeExploreCard__icon">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -274,7 +278,7 @@ export default function HomePage() {
               </Link>
             </div>
 
-            <div className="card homeExploreCard">
+            <div className="card homeExploreCard reveal-item" style={{ ["--reveal-i" as any]: 6 }}>
               <div className="homeExploreCard__icon">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10" />

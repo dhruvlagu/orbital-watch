@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useRevealOnScroll } from "../hooks/useRevealOnScroll";
 import { Link } from "react-router-dom";
 import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
 import { useCardSpotlight } from "../hooks/useCardSpotlight";
@@ -82,24 +83,44 @@ const adrMissions = [
 // ─── Economics Panels ─────────────────────────────────────────────────────────
 const economicsPanels = [
   {
-    icon: "🥧",
+    icon: (
+      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21.21 15.89A10 10 0 1 1 8 2.83"/>
+        <path d="M22 12A10 10 0 0 0 12 2v10z"/>
+      </svg>
+    ),
     title: "The Commons Problem",
     body: "No nation or company owns orbital lanes. LEO is a global commons like the ocean or the atmosphere. Economic theory — first described by Garrett Hardin in 1968 — predicts that when a resource is shared, individuals acting in self-interest will deplete it, even when it's not in anyone's collective interest.",
     accent: "blue",
   },
   {
-    icon: "🧮",
+    icon: (
+      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="4" y="2" width="16" height="20" rx="2"/>
+        <line x1="8" y1="6" x2="16" y2="6"/>
+        <line x1="8" y1="10" x2="16" y2="10"/>
+        <line x1="8" y1="14" x2="12" y2="14"/>
+        <line x1="8" y1="18" x2="10" y2="18"/>
+      </svg>
+    ),
     title: "The Cleanup Math",
-    body: "Removing one piece of large debris costs an estimated $100M–$300M per object. At 25,000+ objects, the math is brutal: even at the low end, full LEO cleanup exceeds $2.5 trillion. The nation that pays gets no exclusive benefit — cleaner orbits help every spacefaring nation equally. So no single actor will volunteer to foot the bill.",
+    body: "Removing one piece of large debris costs an estimated $100M\u2013$300M per object. At 25,000+ objects, the math is brutal: even at the low end, full LEO cleanup exceeds $2.5 trillion. The nation that pays gets no exclusive benefit \u2014 cleaner orbits help every spacefaring nation equally. So no single actor will volunteer to foot the bill.",
     accent: "amber",
   },
   {
-    icon: "🤝",
+    icon: (
+      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+    ),
     title: "The Solution Framework",
     listItems: [
-      "Liability expansion — make debris creators pay for future collision risk",
-      "Market incentives — SSR ratings and insurance premiums that reward cleanup",
-      "International cost-sharing — treaty-based funding pool (like the Montreal Protocol for ozone) for collective debris removal",
+      "Liability expansion \u2014 make debris creators pay for future collision risk",
+      "Market incentives \u2014 SSR ratings and insurance premiums that reward cleanup",
+      "International cost-sharing \u2014 treaty-based funding pool (like the Montreal Protocol for ozone) for collective debris removal",
     ],
     accent: "green",
   },
@@ -192,22 +213,8 @@ export default function SolutionsPage() {
   useCardSpotlight(economicsRef);
   useCardSpotlight(auditRef);
 
-  // Scroll-reveal IntersectionObserver — identical pattern to other pages
-  useEffect(() => {
-    const elements = document.querySelectorAll<HTMLElement>(".reveal-item");
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-visible");
-          }
-        });
-      },
-      { threshold: 0.15 }
-    );
-    elements.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
+  // Scroll-reveal IntersectionObserver
+  useRevealOnScroll(".reveal-item", null, 0.15);
 
   return (
     <section className="solutionsPage">
@@ -240,7 +247,13 @@ export default function SolutionsPage() {
           </div>
 
           <div className="sovereigntyCallout reveal-item">
-            <div className="sovereigntyCallout__icon" aria-hidden="true">⚠️</div>
+            <div className="sovereigntyCallout__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+            </div>
             <p className="sovereigntyCallout__text">
               "The same robot arm that removes dead satellite debris could
               theoretically disable an active military satellite. This single
@@ -350,7 +363,10 @@ export default function SolutionsPage() {
                 <p className="adrCard__description">{mission.description}</p>
 
                 <div className="adrCard__challenge">
-                  <span className="adrCard__challengeLabel">⚡ Key Challenge</span>
+                  <span className="adrCard__challengeLabel">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline',verticalAlign:'middle',marginRight:'4px'}} aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    Key Challenge
+                  </span>
                   <span className="adrCard__challengeValue">{mission.challenge}</span>
                 </div>
 
@@ -426,7 +442,16 @@ export default function SolutionsPage() {
                 {auditCriteria.map((item, i) => (
                   <li key={i} className={`auditList__item auditList__item--reveal ${item.pass ? "auditList__item--pass" : "auditList__item--fail"}`} style={{ ["--reveal-i" as any]: Math.min(i, 8) }}>
                     <span className="auditList__icon" aria-hidden="true">
-                      {item.pass ? "✅" : "❌"}
+                      {item.pass ? (
+                        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#4ade80" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                      ) : (
+                        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#f87171" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <line x1="18" y1="6" x2="6" y2="18"/>
+                          <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                      )}
                     </span>
                     <span className="auditList__text">{item.text}</span>
                   </li>
@@ -474,7 +499,15 @@ export default function SolutionsPage() {
               </div>
 
               <div className="card auditNote">
-                <div className="auditNote__icon" aria-hidden="true">🏆</div>
+                <div className="auditNote__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="8 21 12 21 16 21"/>
+                    <line x1="12" y1="17" x2="12" y2="21"/>
+                    <path d="M7 4H4a2 2 0 0 0-2 2v1a4 4 0 0 0 4 4h.5"/>
+                    <path d="M17 4h3a2 2 0 0 1 2 2v1a4 4 0 0 1-4 4h-.5"/>
+                    <path d="M7 4a5 5 0 0 0 10 0H7z"/>
+                  </svg>
+                </div>
                 <p className="auditNote__text">
                   A <strong>Gold rating (9–10)</strong> earns preferred launch
                   slots at ESA facilities and favorable insurance premiums from

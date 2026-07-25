@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useRevealOnScroll } from "../hooks/useRevealOnScroll";
 import { Link } from "react-router-dom";
 import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
 import { useCardSpotlight } from "../hooks/useCardSpotlight";
@@ -1168,22 +1169,8 @@ export default function CrisisPage() {
     return () => observer.disconnect();
   }, []);
 
-  useEffect(() => {
-    const elements = document.querySelectorAll<HTMLElement>(".timelineEvent");
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-visible");
-          }
-        });
-      },
-      { threshold: 0.2 },
-    );
-
-    elements.forEach((element) => observer.observe(element));
-    return () => observer.disconnect();
-  }, []);
+  // Scroll-reveal IntersectionObserver
+  useRevealOnScroll(".timelineEvent", null, 0.2);
 
   const chartData = useMemo(
     () => ({

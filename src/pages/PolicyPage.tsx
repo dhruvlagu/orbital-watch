@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { useRevealOnScroll } from "../hooks/useRevealOnScroll";
 import { Link } from "react-router-dom";
 import { useCountUp } from "../hooks/useCountUp";
 import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
@@ -356,23 +357,7 @@ export default function PolicyPage() {
     });
   }, [sortKey]);
 
-  useEffect(() => {
-    const elements = document.querySelectorAll<HTMLElement>(".reveal-item");
-    const observer = new IntersectionObserver(
-      (entries, obs) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-visible");
-            obs.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.15, rootMargin: "0px 0px -20% 0px" },
-    );
-
-    elements.forEach((element) => observer.observe(element));
-    return () => observer.disconnect();
-  }, []);
+  useRevealOnScroll(".reveal-item", null, 0.15);
 
   return (
     <section className="policyPage">
@@ -580,7 +565,7 @@ export default function PolicyPage() {
                         className="policyAskLink"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        Ask your representative to support this →
+                        Contact your representative →
                       </Link>
                     </div>
                   ) : null}
@@ -624,4 +609,3 @@ export default function PolicyPage() {
     </section>
   );
 }
-

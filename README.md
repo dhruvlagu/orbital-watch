@@ -24,9 +24,9 @@ This site was built to make that argument legible — through real orbital data,
 | **The Crisis** | Scrollytelling timeline from Sputnik to today, with a debris growth chart (1957–2025) |
 | **Collision Watch** | Upcoming predicted conjunction events between tracked objects, updated 3x daily from Space-Track's public CDM feed |
 | **The Physics** | Interactive kinetic energy calculator and Kessler cascade simulation |
-| **Policy** | Treaty tracker, country scorecard, and a policy reform simulator with live projections |
+| **Policy** | Treaty tracker, country scorecard, policy reform simulator with live projections, and links into a preselected civic action |
 | **Solutions** | ADR mission map, Tragedy of the Commons explainer, mock SSR audit |
-| **Get Involved** | Organizations, student resources, and action links |
+| **Get Involved** | Organizations, student resources, action links, and the Contact Your Representative workflow |
 | **About** | Research methodology, source library, personal reflections, and real implementation code excerpts (`/about#the-code`) |
 
 ---
@@ -51,6 +51,9 @@ Four policy toggles (binding IADC guidelines, ASAT ban, international ADR author
 **Country Scorecard**
 Sortable table rating USA, Russia, China, ESA, and India on debris mitigation compliance, ASAT test history, and ADR investment. Based on public records from ESA, NASA ODPO, and Secure World Foundation.
 
+**Contact Your Representative**
+A three-step civic action flow: select one of five orbital-debris policy asks, enter a ZIP code to find the applicable U.S. House representative, then edit and copy a personalized message. The tool presents an official contact form when available, otherwise the official site or phone/mail details, and requires a personal note before its copy or external-contact actions are enabled. Policy Simulator links can open the same workflow with the relevant ask already selected.
+
 ---
 
 ## Data Architecture
@@ -61,9 +64,11 @@ Instead:
 - A **Vercel Cron Job** queries SATCAT once daily (18:12 UTC, offset from the hour per Space-Track's traffic guidance) and stores the result in Redis.
 - A **Cloudflare Worker**, running independently on its own schedule (13:14 / 21:14 / 05:14 UTC), triggers the CDM refresh — this works around Vercel's free-tier limit of one cron job per project while still respecting Space-Track's 3x/day cap.
 - Both scheduled jobs use delta queries (fetching only records changed since the last run) rather than re-downloading full datasets.
-- User-facing endpoints (`/api/spacetrack`, `/api/conjunctions`) only ever read from this cached store — they never call Space-Track directly, regardless of how much traffic the site gets.
+- User-facing endpoints (`/api/spacetrack/satcat`, `/api/spacetrack/conjunctions`) only ever read from this cached store — they never call Space-Track directly, regardless of how much traffic the site gets.
 
-This guarantees a fixed, compliant request volume (4 requests/day total) no matter how many people visit the site. The real implementation — including the session-caching auth logic and the cascade animation's spawn logic — is shown directly on the About page under [The Code Behind It](https://orbitalwatch.vercel.app/about#the-code).
+The Contact Your Representative workflow uses a separate server-side lookup endpoint. It sends the entered ZIP code to Geocodio only from the server, identifies the House representative for the most likely congressional district, and returns the representative name, district number, and official contact options. It does not use or expose a legislator email address.
+
+This guarantees a fixed, compliant Space-Track request volume (4 requests/day total) no matter how many people visit the site. The real implementation — including the session-caching auth logic, cascade animation spawn logic, and civic-action lookup/message flow — is shown directly on the About page under [The Code Behind It](https://orbitalwatch.vercel.app/about#the-code).
 
 ---
 
@@ -79,6 +84,7 @@ This guarantees a fixed, compliant request volume (4 requests/day total) no matt
 | Caching / Storage | Redis (Vercel Marketplace integration, `node-redis` client) |
 | Scheduled Jobs | Vercel Cron (SATCAT, daily) + Cloudflare Worker Cron Trigger (CDM, 3x daily) |
 | Live Data Sources | Space-Track.org SATCAT + public CDM APIs |
+| Representative Lookup | Geocodio congressional-district API (server-side) |
 | Deployment | Vercel (auto-deploy on GitHub push) |
 | Analytics | Google Analytics 4 |
 | Fonts | Space Grotesk, Inter (Google Fonts) |
@@ -116,8 +122,9 @@ SPACE_TRACK_USER=your_space_track_username
 SPACE_TRACK_PASS=your_space_track_password
 STORAGE_REDIS_URL=your_redis_connection_string
 CRON_SECRET=a_random_secret_used_to_authenticate_scheduled_jobs
+GEOCODIO_API_KEY=your_geocodio_api_key
 
-A free Space-Track.org account is required. Register at [space-track.org](https://www.space-track.org). `STORAGE_REDIS_URL` is provisioned automatically when connecting a Redis store via Vercel's Marketplace integration. `CRON_SECRET` must also be set identically in the separate Cloudflare Worker responsible for triggering the CDM refresh.
+A free Space-Track.org account is required. Register at [space-track.org](https://www.space-track.org). `STORAGE_REDIS_URL` is provisioned automatically when connecting a Redis store via Vercel's Marketplace integration. `CRON_SECRET` must also be set identically in the separate Cloudflare Worker responsible for triggering the CDM refresh. `GEOCODIO_API_KEY` is used only by the server-side representative lookup endpoint and is never exposed to visitors.
 
 ---
 

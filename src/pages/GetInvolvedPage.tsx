@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useRevealOnScroll } from "../hooks/useRevealOnScroll";
 import { Link, useLocation } from "react-router-dom";
 import StarfieldCanvas from "../components/StarfieldCanvas";
 import CivicActionSection from "../components/CivicActionSection";
@@ -41,21 +42,7 @@ export default function GetInvolvedPage() {
   }, [location.hash, askParam]);
 
   // Scroll Reveal Hook
-  useEffect(() => {
-    const elements = document.querySelectorAll<HTMLElement>(".reveal-item");
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-visible");
-          }
-        });
-      },
-      { threshold: 0.15 }
-    );
-    elements.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
+  useRevealOnScroll(".reveal-item", null, 0.15);
 
   const handleCopyLink = () => {
     const shareUrl = window.location.origin;
@@ -141,7 +128,7 @@ export default function GetInvolvedPage() {
               <h3 className="actionCard__title">Contact Your Representatives</h3>
               <p className="actionCard__body">
                 The 5-Year Rule passed because of FCC regulatory pressure. International treaty reform requires
-                Congressional awareness. A five-minute email to your senator about ASAT test bans costs nothing.
+                Congressional awareness. A five-minute message to your representative about ASAT test bans can make a difference.
               </p>
               <a
                 href="#contact-rep"
