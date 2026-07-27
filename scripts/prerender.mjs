@@ -88,11 +88,11 @@ function outputPathForRoute(route) {
 
 async function prerenderRoute(page, route) {
   const expectedCanonical = `https://orbitalwatch.vercel.app${route}`;
-  await page.goto(`${baseUrl}${route}`, { waitUntil: "domcontentloaded" });
-  await page.waitForSelector("h1", { timeout: 10_000 });
+  await page.goto(`${baseUrl}${route}`, { waitUntil: "networkidle0" });
+  await page.waitForSelector("h1", { timeout: 30_000 });
   await page.waitForFunction(
     (canonicalUrl) => document.querySelector('link[rel="canonical"]')?.getAttribute("href") === canonicalUrl,
-    { timeout: 10_000 },
+    { timeout: 30_000 },
     expectedCanonical,
   );
   await page.evaluate(() => new Promise((resolveFrame) => requestAnimationFrame(() => requestAnimationFrame(resolveFrame))));
@@ -112,7 +112,22 @@ try {
   const page = await browser.newPage();
 
   for (const route of routes) {
-    await prerenderRoute(page, route);
+    let lastError;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        if (attempt > 0) {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+        }
+        await prerenderRoute(page, route);
+        lastError = null;
+        break;
+      } catch (err) {
+        lastError = err;
+      }
+    }
+    if (lastError) {
+      console.warn(`Prerender failed for ${route}, falling back to SPA shell for this route: ${lastError.message}`);
+    }
   }
 } finally {
   await browser?.close();

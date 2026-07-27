@@ -23,6 +23,9 @@ export default function KesslerSimulation() {
   const animationRef = useRef<number>();
   const triggerButtonRef = useRef<HTMLButtonElement>(null);
   const [ripple, setRipple] = useState<{ radius: number; opacity: number; active: boolean }>({ radius: 0, opacity: 0, active: false });
+  const currentDebrisRef = useRef<Debris[]>([]);
+  const rippleRef = useRef<{ radius: number; opacity: number; active: boolean }>({ radius: 0, opacity: 0, active: false });
+  const isAnimatingRef = useRef(false);
 
   useMagneticButton(triggerButtonRef);
 
@@ -65,14 +68,24 @@ export default function KesslerSimulation() {
 
   useEffect(() => {
     setDebris(initialDebris);
+    currentDebrisRef.current = initialDebris;
+    drawCanvas(initialDebris, rippleRef.current);
+    // #region agent log
+    fetch('http://127.0.0.1:7410/ingest/c16f9c49-958a-4a3c-8919-bdb2522ba221',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'0f8587'},body:JSON.stringify({sessionId:'0f8587',location:'KesslerSimulation.tsx:init-effect',message:'init debris effect',data:{refLen:initialDebris.length,hydrating:document.getElementById('root')?.hasChildNodes()??false,isAnimating:isAnimatingRef.current},timestamp:Date.now(),hypothesisId:'H2',runId:'post-fix'})}).catch(()=>{});
+    // #endregion
   }, []);
 
   const triggerCascade = () => {
     setIsRunning(true);
     setRipple({ radius: 0, opacity: 0.6, active: true });
-    let currentDebris = [...debris];
+    rippleRef.current = { radius: 0, opacity: 0.6, active: true };
+    currentDebrisRef.current = [...currentDebrisRef.current];
+    isAnimatingRef.current = true;
+    // #region agent log
+    fetch('http://127.0.0.1:7410/ingest/c16f9c49-958a-4a3c-8919-bdb2522ba221',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'0f8587'},body:JSON.stringify({sessionId:'0f8587',location:'KesslerSimulation.tsx:triggerCascade',message:'cascade started',data:{stateDebrisLen:debris.length,refDebrisLen:currentDebrisRef.current.length,hydrating:document.getElementById('root')?.hasChildNodes()??false},timestamp:Date.now(),hypothesisId:'H1'})}).catch(()=>{});
+    // #endregion
     let time = 0;
-    const duration = 2000; // 2 seconds
+    const duration = 2500; // 2.5 seconds
     const maxDebrisCount = 150; // Cap per cascade
     let debrisAddedInCascade = 0; // Track debris added during this cascade
 
@@ -81,18 +94,20 @@ export default function KesslerSimulation() {
       const progress = Math.min(time / duration, 1);
 
       // Update ripple
-      if (ripple.active) {
+      if (rippleRef.current.active) {
         const rippleProgress = Math.min((time) / 600, 1);
-        setRipple({
+        rippleRef.current = {
           radius: rippleProgress * 0.5,
           opacity: 0.6 * (1 - rippleProgress),
           active: rippleProgress < 1
-        });
+        };
       }
 
       if (progress < 1) {
         // Add new debris randomly every few frames (respect per-cascade cap)
-        if (Math.random() < 0.5 && debrisAddedInCascade < maxDebrisCount) {
+        const countBeforeFrame = currentDebrisRef.current.length;
+        let spawnedThisFrame = 0;
+        if (Math.random() < 0.4 && debrisAddedInCascade < maxDebrisCount) {
           const newRadius = 0.25 + Math.random() * 0.15;
           const newAngle = Math.random() * Math.PI * 2;
           const newInclination = (Math.random() - 0.5) * 0.8;
@@ -127,8 +142,9 @@ export default function KesslerSimulation() {
             vz,
             size: 2 + Math.random() * 2,
           };
-          currentDebris = [...currentDebris, newDebris];
+          currentDebrisRef.current = [...currentDebrisRef.current, newDebris];
           debrisAddedInCascade++;
+          spawnedThisFrame++;
         }
 
         // Update positions with stable orbital mechanics and detect collisions
@@ -136,19 +152,19 @@ export default function KesslerSimulation() {
         const newFragments: Debris[] = [];
         
         // Update positions using stable orbital mechanics (angle-based)
-        currentDebris = currentDebris.map((d) => {
+        currentDebrisRef.current = currentDebrisRef.current.map((d: Debris) => {
           const nextAngle = (d.angle + 0.02) % (Math.PI * 2);
           // Calculate 3D position using spherical coordinates with inclination
           const cosAngle = Math.cos(nextAngle);
           const sinAngle = Math.sin(nextAngle);
           const cosInc = Math.cos(d.inclination);
           const sinInc = Math.sin(d.inclination);
-          
+
           // 3D coordinates centered at origin
           const x3d = d.radius * cosAngle;
           const y3d = d.radius * sinAngle * cosInc;
           const z3d = d.radius * sinAngle * sinInc;
-          
+
           return {
             ...d,
             angle: nextAngle,
@@ -157,23 +173,31 @@ export default function KesslerSimulation() {
             z: z3d,
           };
         });
-        
+
         // Collision detection (optimized with early exit)
-        const maxDebrisToCheck = Math.min(currentDebris.length, 50); // Limit to prevent lag
+        const maxDebrisToCheck = Math.min(currentDebrisRef.current.length, 50); // Limit to prevent lag
         for (let i = 0; i < maxDebrisToCheck; i++) {
           for (let j = i + 1; j < maxDebrisToCheck; j++) {
-            const d1 = currentDebris[i];
-            const d2 = currentDebris[j];
-            
+            const d1 = currentDebrisRef.current[i];
+            const d2 = currentDebrisRef.current[j];
+
             // Calculate 3D distance
             const dx = d1.x - d2.x;
             const dy = d1.y - d2.y;
             const dz = d1.z - d2.z;
             const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
-            
+
             if (distance < collisionThreshold) {
-              // Collision detected - create fragments
               const fragmentCount = 2;
+              const remainingCap = maxDebrisCount - debrisAddedInCascade - newFragments.length;
+              if (
+                remainingCap < fragmentCount ||
+                currentDebrisRef.current[i].size === 0 ||
+                currentDebrisRef.current[j].size === 0
+              ) {
+                continue;
+              }
+
               for (let f = 0; f < fragmentCount; f++) {
                 newFragments.push({
                   id: `frag-${Date.now()}-${Math.random()}`,
@@ -187,23 +211,33 @@ export default function KesslerSimulation() {
                   size: Math.max(1, d1.size * 0.7),
                 });
               }
-              
-              // Mark collided debris for removal (by setting size to 0)
-              currentDebris[i] = { ...currentDebris[i], size: 0 };
-              currentDebris[j] = { ...currentDebris[j], size: 0 };
+
+              currentDebrisRef.current[i] = { ...currentDebrisRef.current[i], size: 0 };
+              currentDebrisRef.current[j] = { ...currentDebrisRef.current[j], size: 0 };
             }
           }
         }
-        
-        // Remove collided debris and add fragments (respect per-cascade cap)
-        const fragmentsToAdd = newFragments.slice(0, maxDebrisCount - debrisAddedInCascade);
-        currentDebris = [...currentDebris.filter(d => d.size > 0), ...fragmentsToAdd];
-        debrisAddedInCascade += fragmentsToAdd.length;
 
-        setDebris(currentDebris);
+        // Remove collided debris and add fragments (respect per-cascade cap)
+        const beforeFilterLen = currentDebrisRef.current.length;
+        const markedRemoved = currentDebrisRef.current.filter((d: Debris) => d.size === 0).length;
+        const fragmentsToAdd = newFragments;
+        currentDebrisRef.current = [...currentDebrisRef.current.filter((d: Debris) => d.size > 0), ...fragmentsToAdd];
+        debrisAddedInCascade += fragmentsToAdd.length;
+        const countAfterFrame = currentDebrisRef.current.length;
+        if (spawnedThisFrame > 0 || countAfterFrame < countBeforeFrame || markedRemoved > fragmentsToAdd.length) {
+          // #region agent log
+          fetch('http://127.0.0.1:7410/ingest/c16f9c49-958a-4a3c-8919-bdb2522ba221',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'0f8587'},body:JSON.stringify({sessionId:'0f8587',location:'KesslerSimulation.tsx:animate-frame',message:'debris count delta',data:{time,spawnedThisFrame,countBeforeFrame,beforeFilterLen,markedRemoved,collisions:newFragments.length/2,fragmentsAdded:fragmentsToAdd.length,fragmentsDropped:0,countAfterFrame,capRemaining:maxDebrisCount-debrisAddedInCascade,netDelta:countAfterFrame-countBeforeFrame},timestamp:Date.now(),hypothesisId:'H4',runId:'post-fix'})}).catch(()=>{});
+          // #endregion
+        }
+
+        drawCanvas(currentDebrisRef.current, rippleRef.current);
         animationRef.current = requestAnimationFrame(animate);
       } else {
         setIsRunning(false);
+        isAnimatingRef.current = false;
+        setDebris(currentDebrisRef.current); // Sync state only when animation ends
+        drawCanvas(currentDebrisRef.current, rippleRef.current);
       }
     };
 
@@ -213,10 +247,15 @@ export default function KesslerSimulation() {
   const reset = () => {
     if (animationRef.current) cancelAnimationFrame(animationRef.current);
     setIsRunning(false);
+    isAnimatingRef.current = false;
     setDebris(initialDebris);
+    currentDebrisRef.current = initialDebris;
+    rippleRef.current = { radius: 0, opacity: 0, active: false };
+    setRipple(rippleRef.current);
+    drawCanvas(initialDebris, rippleRef.current);
   };
 
-  useEffect(() => {
+  const drawCanvas = (debrisToDraw: Debris[], rippleToDraw: { radius: number; opacity: number; active: boolean }) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -299,15 +338,15 @@ export default function KesslerSimulation() {
 
     // Draw debris with 3D perspective
     const focalLength = 2; // Controls the strength of perspective effect
-    const sortedDebris = [...debris].sort((a, b) => a.z - b.z); // Sort by Z for proper depth ordering
-    
+    const sortedDebris = [...debrisToDraw].sort((a, b) => a.z - b.z); // Sort by Z for proper depth ordering
+
     sortedDebris.forEach((d) => {
       // Perspective projection
       const scale = focalLength / (focalLength + d.z);
       const projectedX = centerX + (d.x - 0.5) * width * scale;
       const projectedY = centerY + (d.y - 0.5) * height * scale;
       const scaledSize = d.size * scale;
-      
+
       // Depth-based opacity
       const depthOpacity = Math.max(0.3, Math.min(1, scale));
 
@@ -326,10 +365,10 @@ export default function KesslerSimulation() {
     });
 
     // Draw ripple effect
-    if (ripple.active) {
-      const rippleRadius = ripple.radius * Math.min(width, height);
-      const rippleOpacity = ripple.opacity;
-      const strokeWidth = 4 * (1 - ripple.radius * 2);
+    if (rippleToDraw.active) {
+      const rippleRadius = rippleToDraw.radius * Math.min(width, height);
+      const rippleOpacity = rippleToDraw.opacity;
+      const strokeWidth = 4 * (1 - rippleToDraw.radius * 2);
 
       ctx.strokeStyle = `rgba(0, 212, 255, ${rippleOpacity})`;
       ctx.lineWidth = Math.max(strokeWidth, 1);
@@ -342,8 +381,8 @@ export default function KesslerSimulation() {
     ctx.fillStyle = "#8b9ab0";
     ctx.font = "12px Inter, sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText(`Debris objects: ${debris.length}`, width * 0.5, 30);
-  }, [debris, ripple]);
+    ctx.fillText(`Debris objects: ${debrisToDraw.length}`, width * 0.5, 30);
+  };
 
   return (
     <div className="kesslerSimulation">

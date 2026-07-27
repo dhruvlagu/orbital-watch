@@ -257,19 +257,19 @@ export default async function handler(req, res) {
                 <pre className="technicalCode">{`const triggerCascade = () => {
   setIsRunning(true);
   setRipple({ radius: 0, opacity: 0.6, active: true });
-  let currentDebris = [...debris];
+  currentDebrisRef.current = [...debris];
   let time = 0;
-  const duration = 3000; // 3 seconds
+  const duration = 2500; // 2.5 seconds
   const maxDebrisCount = 150; // Cap per cascade
-  let debrisAddedInCascade = 0;
+  let debrisAddedInCascade = 0; // Track debris added during this cascade
 
   const animate = () => {
     time += 16;
     const progress = Math.min(time / duration, 1);
 
-    // Update ripple effect
+    // Update ripple
     if (ripple.active) {
-      const rippleProgress = Math.min(time / 600, 1);
+      const rippleProgress = Math.min((time) / 600, 1);
       setRipple({
         radius: rippleProgress * 0.5,
         opacity: 0.6 * (1 - rippleProgress),
@@ -278,28 +278,29 @@ export default async function handler(req, res) {
     }
 
     if (progress < 1) {
-      // Add new debris randomly (respect per-cascade cap)
-      if (Math.random() < 0.3 && debrisAddedInCascade < maxDebrisCount) {
+      // Add new debris randomly every few frames (respect per-cascade cap)
+      if (Math.random() < 0.4 && debrisAddedInCascade < maxDebrisCount) {
         const newRadius = 0.25 + Math.random() * 0.15;
         const newAngle = Math.random() * Math.PI * 2;
         const newInclination = (Math.random() - 0.5) * 0.8;
-        
-        // 3D spherical coordinates with inclination
+
+        // Calculate 3D position using spherical coordinates with inclination
         const cosAngle = Math.cos(newAngle);
         const sinAngle = Math.sin(newAngle);
         const cosInc = Math.cos(newInclination);
         const sinInc = Math.sin(newInclination);
-        
+
+        // 3D coordinates centered at origin
         const x3d = newRadius * cosAngle;
         const y3d = newRadius * sinAngle * cosInc;
         const z3d = newRadius * sinAngle * sinInc;
-        
-        // Orbital velocity (tangential to orbit)
+
+        // Calculate orbital velocity (tangential to orbit)
         const orbitalSpeed = 0.02;
         const vx = -orbitalSpeed * sinAngle;
         const vy = orbitalSpeed * cosAngle * cosInc;
         const vz = orbitalSpeed * cosAngle * sinInc;
-        
+
         const newDebris: Debris = {
           id: \`d-\${Date.now()}-\${Math.random()}\`,
           angle: newAngle,
@@ -308,29 +309,33 @@ export default async function handler(req, res) {
           x: 0.5 + x3d,
           y: 0.5 + y3d,
           z: z3d,
-          vx, vy, vz,
+          vx,
+          vy,
+          vz,
           size: 2 + Math.random() * 2,
         };
-        currentDebris = [...currentDebris, newDebris];
+        currentDebrisRef.current = [...currentDebrisRef.current, newDebris];
         debrisAddedInCascade++;
       }
 
-      // Collision detection and fragmentation
-      const collisionThreshold = 0.04;
+      // Update positions with stable orbital mechanics and detect collisions
+      const collisionThreshold = 0.04; // Distance threshold for collision
       const newFragments: Debris[] = [];
-      
-      // Update positions using 3D orbital mechanics
-      currentDebris = currentDebris.map((d) => {
+
+      // Update positions using stable orbital mechanics (angle-based)
+      currentDebrisRef.current = currentDebrisRef.current.map((d: Debris) => {
         const nextAngle = (d.angle + 0.02) % (Math.PI * 2);
+        // Calculate 3D position using spherical coordinates with inclination
         const cosAngle = Math.cos(nextAngle);
         const sinAngle = Math.sin(nextAngle);
         const cosInc = Math.cos(d.inclination);
         const sinInc = Math.sin(d.inclination);
-        
+
+        // 3D coordinates centered at origin
         const x3d = d.radius * cosAngle;
         const y3d = d.radius * sinAngle * cosInc;
         const z3d = d.radius * sinAngle * sinInc;
-        
+
         return {
           ...d,
           angle: nextAngle,
@@ -339,46 +344,50 @@ export default async function handler(req, res) {
           z: z3d,
         };
       });
-      
-      // Check for collisions (limited to 50 debris for performance)
-      const maxDebrisToCheck = Math.min(currentDebris.length, 50);
+
+      // Collision detection (optimized with early exit)
+      const maxDebrisToCheck = Math.min(currentDebrisRef.current.length, 50); // Limit to prevent lag
       for (let i = 0; i < maxDebrisToCheck; i++) {
         for (let j = i + 1; j < maxDebrisToCheck; j++) {
-          const d1 = currentDebris[i];
-          const d2 = currentDebris[j];
-          
+          const d1 = currentDebrisRef.current[i];
+          const d2 = currentDebrisRef.current[j];
+
+          // Calculate 3D distance
           const dx = d1.x - d2.x;
           const dy = d1.y - d2.y;
           const dz = d1.z - d2.z;
           const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
-          
+
           if (distance < collisionThreshold) {
-            // Create fragments
-            for (let f = 0; f < 2; f++) {
+            // Collision detected - create fragments
+            const fragmentCount = 2;
+            for (let f = 0; f < fragmentCount; f++) {
               newFragments.push({
                 id: \`frag-\${Date.now()}-\${Math.random()}\`,
-                x: d1.x, y: d1.y, z: d1.z,
-                vx: 0, vy: 0, vz: 0,
+                x: d1.x,
+                y: d1.y,
+                z: d1.z,
+                vx: 0, vy: 0, vz: 0, // Not used in orbital mechanics
                 angle: d1.angle + (Math.random() - 0.5) * 0.5,
                 radius: d1.radius * (0.9 + Math.random() * 0.2),
                 inclination: d1.inclination + (Math.random() - 0.5) * 0.1,
                 size: Math.max(1, d1.size * 0.7),
               });
             }
-            
-            // Mark collided debris for removal
-            currentDebris[i] = { ...currentDebris[i], size: 0 };
-            currentDebris[j] = { ...currentDebris[j], size: 0 };
+
+            // Mark collided debris for removal (by setting size to 0)
+            currentDebrisRef.current[i] = { ...currentDebrisRef.current[i], size: 0 };
+            currentDebrisRef.current[j] = { ...currentDebrisRef.current[j], size: 0 };
           }
         }
       }
-      
-      // Add fragments (respect cap)
+
+      // Remove collided debris and add fragments (respect per-cascade cap)
       const fragmentsToAdd = newFragments.slice(0, maxDebrisCount - debrisAddedInCascade);
-      currentDebris = [...currentDebris.filter(d => d.size > 0), ...fragmentsToAdd];
+      currentDebrisRef.current = [...currentDebrisRef.current.filter((d: Debris) => d.size > 0), ...fragmentsToAdd];
       debrisAddedInCascade += fragmentsToAdd.length;
 
-      setDebris(currentDebris);
+      setDebris(currentDebrisRef.current);
       animationRef.current = requestAnimationFrame(animate);
     } else {
       setIsRunning(false);
@@ -426,14 +435,20 @@ const hasPlaceholder = messageText.includes(
   "[Add a sentence"
 );
 
-const handleCopyMessage = () => {
-  if (hasPlaceholder || !selectedAskId) return;
-  navigator.clipboard.writeText(messageText);
-  trackGA4Event("representative_contact_sent", {
-    ask_id: selectedAskId,
-    action_type: "copy",
-  });
-};
+  const handleCopyMessage = () => {
+    if (hasPlaceholder || !selectedAskId) return;
+
+    navigator.clipboard.writeText(messageText).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    });
+
+    // GA4 Event 2: representative_contact_sent
+    trackGA4Event("representative_contact_sent", {
+      ask_id: selectedAskId,
+      action_type: "copy",
+    });
+  };
 
 // api/representative.mjs
 const rep = legislators.find((l) => l.type === "representative");
