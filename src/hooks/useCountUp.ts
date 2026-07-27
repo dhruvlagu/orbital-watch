@@ -4,10 +4,11 @@ type UseCountUpOptions = {
   durationMs?: number;
   formatter?: (value: number) => string;
   startFromZero?: boolean;
+  startFromPercentage?: number;
 };
 
 export function useCountUp(target: number, options: UseCountUpOptions = {}) {
-  const { durationMs = 2000, formatter, startFromZero = true } = options;
+  const { durationMs = 2000, formatter, startFromZero = true, startFromPercentage = 0.8 } = options;
   const [display, setDisplay] = useState("0");
   const formatterRef = useRef(formatter);
   const prevTargetRef = useRef(startFromZero ? 0 : target);
@@ -19,14 +20,17 @@ export function useCountUp(target: number, options: UseCountUpOptions = {}) {
   useEffect(() => {
     let frameId: number;
     const start = performance.now();
-    const startVal = startFromZero ? 0 : prevTargetRef.current;
+    const startVal = startFromZero ? Math.round(target * startFromPercentage) : prevTargetRef.current;
     const diff = target - startVal;
 
     const animate = (now: number) => {
       const elapsed = now - start;
       const t = Math.min(1, elapsed / durationMs);
-      // easeOutCubic
-      const eased = 1 - Math.pow(1 - t, 3);
+
+      // easeOutExpo with subtle bounce
+      const easeOutExpo = t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+      const bounce = t < 1 ? Math.sin(t * Math.PI * 2) * 0.02 : 0;
+      const eased = easeOutExpo + bounce;
       const value = Math.round(startVal + diff * eased);
 
       if (formatterRef.current) {
@@ -45,7 +49,7 @@ export function useCountUp(target: number, options: UseCountUpOptions = {}) {
     frameId = requestAnimationFrame(animate);
 
     return () => cancelAnimationFrame(frameId);
-  }, [target, durationMs, startFromZero]);
+  }, [target, durationMs, startFromZero, startFromPercentage]);
 
   return display;
 }

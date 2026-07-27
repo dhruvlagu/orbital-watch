@@ -405,6 +405,7 @@
 
 /* ─── Home page teaser card ───────────────────────────────────────────────── */
 .cw__teaserCard {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -417,11 +418,45 @@
   color: var(--text-primary);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
   backdrop-filter: blur(8px);
-  transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1), 
-              border-color 0.25s cubic-bezier(0.25, 0.8, 0.25, 1), 
-              box-shadow 0.25s cubic-bezier(0.25, 0.8, 0.25, 1), 
+  transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1),
+              border-color 0.25s cubic-bezier(0.25, 0.8, 0.25, 1),
+              box-shadow 0.25s cubic-bezier(0.25, 0.8, 0.25, 1),
               background 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
   margin-top: 20px;
+}
+
+.cw__teaserCard::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  padding: 3px;
+  background: conic-gradient(
+    from var(--trail-angle),
+    transparent 0deg,
+    transparent 250deg,
+    rgba(0, 212, 100, 0.04) 270deg,
+    rgba(0, 212, 100, 0.18) 300deg,
+    rgba(0, 212, 100, 0.04) 330deg,
+    transparent 350deg
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  animation: trailRotate 8s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cw__teaserCard::before {
+    animation: none;
+  }
 }
 
 .cw__teaserCard:hover {
@@ -432,6 +467,8 @@
 }
 
 .cw__teaserCard__left {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   gap: 14px;
@@ -474,6 +511,39 @@
 
 .cw__teaserCard:hover .cw__teaserCard__arrow {
   transform: translateX(4px);
+}
+
+.cw__teaserCard__badge--small {
+  font-size: 10px;
+  padding: 2px 8px;
+}
+
+.cw__teaserCard__text--primary {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.cw__teaserCard__text--secondary {
+  color: var(--text-secondary);
+  font-weight: 400;
+  margin-left: 4px;
+}
+
+.cw__teaserCard__right--flex {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cw__teaserCard__count--large {
+  font-size: 20px;
+  color: var(--accent-blue);
+}
+
+.cw__teaserCard__arrow--reset {
+  margin: 0;
 }
 
 /* liveData__pulseDot reuse (defined in layout.css, referenced here for badge) */

@@ -32,10 +32,24 @@ function createStar(width: number, height: number, fromEdge?: "top" | "bottom" |
 
 export default function StarfieldCanvas() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const mousePos = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = canvasRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      mousePos.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    };
+
+    const handleMouseLeave = () => {
+      mousePos.current = null;
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    canvas.addEventListener("mouseleave", handleMouseLeave);
 
     // Respect devicePixelRatio for sharp rendering on retina displays
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -79,6 +93,17 @@ export default function StarfieldCanvas() {
         s.x += s.speed;
         s.y += s.speed * 0.6;
 
+        if (mousePos.current) {
+          const dx = mousePos.current.x - s.x;
+          const dy = mousePos.current.y - s.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 150 && dist > 0) {
+            const pull = 0.1;
+            s.x += (dx / dist) * pull;
+            s.y += (dy / dist) * pull;
+          }
+        }
+
         if (s.x > w || s.y > h) {
           const fromEdge = Math.random() > 0.5 ? "top" : "left";
           stars[i] = createStar(w, h, fromEdge);
@@ -97,6 +122,8 @@ export default function StarfieldCanvas() {
     return () => {
       window.cancelAnimationFrame(animationFrameId);
       window.removeEventListener("resize", resize);
+      window.removeEventListener("mousemove", handleMouseMove);
+      canvas.removeEventListener("mouseleave", handleMouseLeave);
     };
   }, []);
 

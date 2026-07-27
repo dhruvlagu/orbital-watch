@@ -10,11 +10,11 @@ import { fetchConjunctions, type ConjunctionResponse } from "../services/conjunc
 const STATS_GROUP = (
   <div className="quickStats__group">
     <div className="quickStats__item">
-      Debris in LEO: <span>25,000+</span>
+      Objects tracked in orbit: <span>40,000+</span>
     </div>
     <div className="quickStats__divider" />
     <div className="quickStats__item">
-      Total debris mass: <span>~9,000 tons</span>
+      Total mass in orbit: <span>15,000+ tonnes</span>
     </div>
     <div className="quickStats__divider" />
     <div className="quickStats__item">
@@ -22,7 +22,7 @@ const STATS_GROUP = (
     </div>
     <div className="quickStats__divider" />
     <div className="quickStats__item">
-      Objects added to LEO in 2025: <span>4,500+</span>
+      Objects added to LEO in 2025: <span>4,772</span>
     </div>
     <div className="quickStats__divider" />
   </div>
@@ -96,11 +96,10 @@ export default function HomePage() {
               <div className="hero__label">ORBITAL DEBRIS CRISIS</div>
               <h1 className="hero__headline">Earth&apos;s Orbit Is Becoming a Graveyard.</h1>
               <p className="hero__subheadline">
-                Imagine a world without GPS navigation, weather forecasts, or internet
-                connectivity — all of it depends on satellites. Decades of Cold War recklessness
-                created 25,000+ trackable debris objects in low Earth orbit traveling at
-                17,500 mph. One collision cascade could render low Earth orbit unusable for
-                generations.
+                GPS, weather forecasts, and internet connectivity all depend on
+                satellites. Decades of Cold War era neglect created 40,000+ trackable
+                objects in low Earth orbit (LEO) traveling at 17,500 mph. A single collision
+                cascade could render LEO unusable for generations.
               </p>
 
               <div className="hero__liveData">
@@ -110,16 +109,16 @@ export default function HomePage() {
                 {/* Conjunction teaser */}
                 <Link to="/collision-watch" className="cw__teaserCard" aria-label="View conjunction alerts on Collision Watch">
                   <div className="cw__teaserCard__left">
-                    <span className="badge badge--red" style={{ fontSize: "10px", padding: "2px 8px" }}>FEED</span>
-                    <span className="cw__teaserCard__text" style={{ color: "var(--text-primary)", fontWeight: 600 }}>
-                      Active Conjunction Alerts <span style={{ color: "var(--text-secondary)", fontWeight: 400, marginLeft: "4px" }}>(Updated 3x Daily)</span>
+                    <span className="badge badge--red cw__teaserCard__badge--small">FEED</span>
+                    <span className="cw__teaserCard__text cw__teaserCard__text--primary">
+                      Active Conjunction Alerts <span className="cw__teaserCard__text--secondary">(Updated 3x Daily)</span>
                     </span>
                   </div>
-                  <div className="cw__teaserCard__right" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    <span className="cw__teaserCard__count" style={{ fontSize: "20px", color: "var(--accent-blue)" }}>
+                  <div className="cw__teaserCard__right cw__teaserCard__right--flex">
+                    <span className="cw__teaserCard__count cw__teaserCard__count--large">
                       {activeConjunctionCount !== null ? activeConjunctionCount : "—"}
                     </span>
-                    <span className="cw__teaserCard__arrow" aria-hidden="true" style={{ margin: 0 }}>→</span>
+                    <span className="cw__teaserCard__arrow cw__teaserCard__arrow--reset" aria-hidden="true">→</span>
                   </div>
                 </Link>
               </div>
@@ -161,7 +160,7 @@ export default function HomePage() {
             <span className="homeExplore__label">EXPLORE THE PLATFORM</span>
             <h2 className="homeExplore__title">Platform Modules &amp; Policy Tools</h2>
             <p className="homeExplore__subtitle">
-              Analyze the science, orbital mechanics, regulatory frameworks, and engineering solutions driving space sustainability.
+              Explore the science, orbital mechanics, regulatory frameworks, and engineering solutions behind space sustainability.
             </p>
           </div>
 
@@ -177,7 +176,7 @@ export default function HomePage() {
               </div>
               <h3 className="homeExploreCard__title">The Crisis</h3>
               <p className="homeExploreCard__description">
-                Examine the historical buildup of orbital debris, map object distribution across critical altitudes, and study the international treaties governing space.
+                Trace the historical buildup of orbital debris, map object distribution across critical altitudes, and examine the international treaties governing space.
               </p>
               <Link to="/crisis" className="btn btn--secondary homeExploreCard__btn">
                 Analyze the Crisis
@@ -199,7 +198,7 @@ export default function HomePage() {
               </div>
               <h3 className="homeExploreCard__title">Collision Watch</h3>
               <p className="homeExploreCard__description">
-                Predicted close approaches between tracked objects — updated 3x daily and sourced from the U.S. Space Force's public conjunction data feed with active countdown timers.
+                Predicted close approaches between tracked objects, updated 3x daily from the U.S. Space Force's public conjunction data feed. Includes active countdown timers.
               </p>
               <Link to="/collision-watch" className="btn btn--secondary homeExploreCard__btn">
                 View Conjunctions
@@ -209,14 +208,7 @@ export default function HomePage() {
             <div className="card homeExploreCard reveal-item" style={{ ["--reveal-i" as any]: 2 }}>
               <div className="homeExploreCard__icon">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="8" cy="8" r="3" />
-                  <circle cx="16" cy="16" r="3" />
-                  <path d="M16 8l-6 6" />
-                  <path d="M8 16l6-6" />
-                  <path d="M12 6V2" />
-                  <path d="M12 18v4" />
-                  <path d="M6 12H2" />
-                  <path d="M18 12h4" />
+                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
                 </svg>
               </div>
               <h3 className="homeExploreCard__title">The Physics</h3>
@@ -236,7 +228,7 @@ export default function HomePage() {
               </div>
               <h3 className="homeExploreCard__title">Policy</h3>
               <p className="homeExploreCard__description">
-                Investigate legal liability under international space law, track treaty compliance, and inspect our nation-by-nation sustainability scorecard.
+                Explore legal liability under international space law, track treaty compliance, and review our nation-by-nation sustainability scorecard.
               </p>
               <Link to="/policy" className="btn btn--secondary homeExploreCard__btn">
                 Inspect Policy
@@ -278,7 +270,7 @@ export default function HomePage() {
               </Link>
             </div>
 
-            <div className="card homeExploreCard reveal-item" style={{ ["--reveal-i" as any]: 6 }}>
+            <div className="card homeExploreCard homeExploreCard--wide reveal-item" style={{ ["--reveal-i" as any]: 6 }}>
               <div className="homeExploreCard__icon">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10" />
@@ -286,10 +278,12 @@ export default function HomePage() {
                   <line x1="12" y1="8" x2="12.01" y2="8" />
                 </svg>
               </div>
-              <h3 className="homeExploreCard__title">About</h3>
-              <p className="homeExploreCard__description">
-                Review our development methodology, meet the creators of Orbital Watch, and access our comprehensive library of peer-reviewed data sources.
-              </p>
+              <div>
+                <h3 className="homeExploreCard__title">About</h3>
+                <p className="homeExploreCard__description">
+                  Review the development methodology, learn about Orbital Watch, and access the comprehensive library of peer-reviewed data sources.
+                </p>
+              </div>
               <Link to="/about" className="btn btn--secondary homeExploreCard__btn">
                 Read More
               </Link>

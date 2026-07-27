@@ -123,7 +123,7 @@ export default function LiveDataSection({ variant = "standalone" }: LiveDataSect
     <>
       <div className="liveData__header">
         <div>
-          <h2 className="liveData__title">Orbital Environment</h2>
+          <h2 className="liveData__title">Live Orbital Environment</h2>
           <p className="liveData__subtitle">
             Real data from Space-Track.org, updated daily.
           </p>
