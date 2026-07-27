@@ -256,8 +256,9 @@ export default async function handler(req, res) {
               <>
                 <pre className="technicalCode">{`const triggerCascade = () => {
   setIsRunning(true);
-  setRipple({ radius: 0, opacity: 0.6, active: true });
-  currentDebrisRef.current = [...debris];
+  rippleRef.current = { radius: 0, opacity: 0.6, active: true };
+  currentDebrisRef.current = [...currentDebrisRef.current];
+  isAnimatingRef.current = true;
   let time = 0;
   const duration = 2500; // 2.5 seconds
   const maxDebrisCount = 150; // Cap per cascade
@@ -268,13 +269,13 @@ export default async function handler(req, res) {
     const progress = Math.min(time / duration, 1);
 
     // Update ripple
-    if (ripple.active) {
+    if (rippleRef.current.active) {
       const rippleProgress = Math.min((time) / 600, 1);
-      setRipple({
+      rippleRef.current = {
         radius: rippleProgress * 0.5,
         opacity: 0.6 * (1 - rippleProgress),
         active: rippleProgress < 1
-      });
+      };
     }
 
     if (progress < 1) {
@@ -359,8 +360,16 @@ export default async function handler(req, res) {
           const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
           if (distance < collisionThreshold) {
-            // Collision detected - create fragments
             const fragmentCount = 2;
+            const remainingCap = maxDebrisCount - debrisAddedInCascade - newFragments.length;
+            if (
+              remainingCap < fragmentCount ||
+              currentDebrisRef.current[i].size === 0 ||
+              currentDebrisRef.current[j].size === 0
+            ) {
+              continue;
+            }
+
             for (let f = 0; f < fragmentCount; f++) {
               newFragments.push({
                 id: \`frag-\${Date.now()}-\${Math.random()}\`,
@@ -375,7 +384,6 @@ export default async function handler(req, res) {
               });
             }
 
-            // Mark collided debris for removal (by setting size to 0)
             currentDebrisRef.current[i] = { ...currentDebrisRef.current[i], size: 0 };
             currentDebrisRef.current[j] = { ...currentDebrisRef.current[j], size: 0 };
           }
@@ -383,14 +391,16 @@ export default async function handler(req, res) {
       }
 
       // Remove collided debris and add fragments (respect per-cascade cap)
-      const fragmentsToAdd = newFragments.slice(0, maxDebrisCount - debrisAddedInCascade);
-      currentDebrisRef.current = [...currentDebrisRef.current.filter((d: Debris) => d.size > 0), ...fragmentsToAdd];
-      debrisAddedInCascade += fragmentsToAdd.length;
+      currentDebrisRef.current = [...currentDebrisRef.current.filter((d: Debris) => d.size > 0), ...newFragments];
+      debrisAddedInCascade += newFragments.length;
 
-      setDebris(currentDebrisRef.current);
+      drawCanvas(currentDebrisRef.current, rippleRef.current);
       animationRef.current = requestAnimationFrame(animate);
     } else {
       setIsRunning(false);
+      isAnimatingRef.current = false;
+      setDebris(currentDebrisRef.current); // Sync state only when animation ends
+      drawCanvas(currentDebrisRef.current, rippleRef.current);
     }
   };
 

@@ -6,3 +6,4 @@ spacetrack.env
 .DS_Store
 
 *.tsbuildinfo
+.cursor/

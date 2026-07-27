@@ -22,7 +22,6 @@ export default function KesslerSimulation() {
   const [isRunning, setIsRunning] = useState(false);
   const animationRef = useRef<number>();
   const triggerButtonRef = useRef<HTMLButtonElement>(null);
-  const [ripple, setRipple] = useState<{ radius: number; opacity: number; active: boolean }>({ radius: 0, opacity: 0, active: false });
   const currentDebrisRef = useRef<Debris[]>([]);
   const rippleRef = useRef<{ radius: number; opacity: number; active: boolean }>({ radius: 0, opacity: 0, active: false });
   const isAnimatingRef = useRef(false);
@@ -77,7 +76,6 @@ export default function KesslerSimulation() {
 
   const triggerCascade = () => {
     setIsRunning(true);
-    setRipple({ radius: 0, opacity: 0.6, active: true });
     rippleRef.current = { radius: 0, opacity: 0.6, active: true };
     currentDebrisRef.current = [...currentDebrisRef.current];
     isAnimatingRef.current = true;
@@ -251,7 +249,6 @@ export default function KesslerSimulation() {
     setDebris(initialDebris);
     currentDebrisRef.current = initialDebris;
     rippleRef.current = { radius: 0, opacity: 0, active: false };
-    setRipple(rippleRef.current);
     drawCanvas(initialDebris, rippleRef.current);
   };
 
