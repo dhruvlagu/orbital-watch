@@ -1162,7 +1162,7 @@ export default function CrisisPage() {
           }
         });
       },
-      { threshold: 0.35 },
+      { threshold: 0.15 },
     );
 
     observer.observe(chartRef.current);
@@ -1170,7 +1170,7 @@ export default function CrisisPage() {
   }, []);
 
   // Scroll-reveal IntersectionObserver
-  useRevealOnScroll(".timelineEvent", null, 0.2);
+  useRevealOnScroll(".timelineEvent", null, 0.15);
 
   const chartData = useMemo(
     () => ({

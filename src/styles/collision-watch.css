@@ -448,9 +448,19 @@
     linear-gradient(#fff 0 0) content-box,
     linear-gradient(#fff 0 0);
   mask-composite: exclude;
-  animation: trailRotate 8s ease-in-out infinite;
+  opacity: 0;
+  animation: trailRotate 8s ease-in-out infinite, trailFadeIn 0.5s ease-out 2s forwards;
   pointer-events: none;
   z-index: 0;
+}
+
+@keyframes trailFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

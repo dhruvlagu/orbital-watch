@@ -44,8 +44,21 @@ export default function RouteProgressBar() {
     }, 250);
 
     return clear;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
+
+  // Fallback: if bar is stuck visible for too long, force completion
+  useEffect(() => {
+    if (visible && progress < 100) {
+      const fallbackTimer = setTimeout(() => {
+        setProgress(100);
+        setTimeout(() => {
+          setVisible(false);
+          setProgress(0);
+        }, 300);
+      }, 2000);
+      return () => clearTimeout(fallbackTimer);
+    }
+  }, [visible, progress]);
 
   if (!visible && progress === 0) return null;
 

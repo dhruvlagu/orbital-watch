@@ -141,7 +141,7 @@ function SSRGauge({ score, total }: { score: number; total: number }) {
           obs.disconnect();
         }
       },
-      { threshold: 0.5 }
+      { threshold: 0.15 }
     );
     obs.observe(el);
     return () => obs.disconnect();

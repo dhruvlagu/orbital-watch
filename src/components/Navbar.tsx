@@ -4,6 +4,7 @@ import { NAV_LINKS } from "../services/navLinks";
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
     document.documentElement.style.overflow = mobileOpen ? "hidden" : "";
@@ -14,11 +15,19 @@ export default function Navbar() {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setMobileOpen(false);
+      if (event.key === "Escape") closeMobileNav();
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
+
+  const closeMobileNav = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setMobileOpen(false);
+      setIsClosing(false);
+    }, 200);
+  };
 
   return (
     <header className="navbar" role="banner">
@@ -56,12 +65,12 @@ export default function Navbar() {
       </div>
 
       {!mobileOpen ? null : (
-        <div className="mobileNav" id="mobileNav">
+        <div className={`mobileNav ${isClosing ? "mobileNav--closing" : ""}`} id="mobileNav">
           <button
             className="icon-button mobileNav__close"
             type="button"
             aria-label="Close menu"
-            onClick={() => setMobileOpen(false)}
+            onClick={closeMobileNav}
           >
             <span className="closeIcon" aria-hidden="true" />
           </button>
@@ -74,7 +83,7 @@ export default function Navbar() {
                 className={({ isActive }) =>
                   isActive ? "mobileNav__link is-active" : "mobileNav__link"
                 }
-                onClick={() => setMobileOpen(false)}
+                onClick={closeMobileNav}
               >
                 {link.label}
               </NavLink>

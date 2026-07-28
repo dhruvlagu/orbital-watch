@@ -459,9 +459,19 @@
     linear-gradient(#fff 0 0) content-box,
     linear-gradient(#fff 0 0);
   mask-composite: exclude;
-  animation: trailRotate 8s ease-in-out infinite;
+  opacity: 0;
+  animation: trailRotate 8s ease-in-out infinite, trailFadeIn 0.5s ease-out 2s forwards;
   pointer-events: none;
   z-index: 0;
+}
+
+@keyframes trailFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes trailRotate {
@@ -471,6 +481,57 @@
 
 @media (prefers-reduced-motion: reduce) {
   .liveDataCard::before {
+    animation: none;
+  }
+
+  .hero__headline,
+  .hero__subheadline,
+  .heroStat__number--static {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .heroScrollIndicator__chevron {
+    animation: none;
+  }
+
+  .liveData__pulseDot {
+    animation: none;
+  }
+
+  .liveData__refreshButton--spinning .liveData__refreshIcon {
+    animation: none;
+  }
+
+  .liveDataCard__skeletonValue,
+  .liveDataCard__skeletonLabel,
+  .crisisChart__skeleton {
+    animation: none;
+  }
+
+  .liveData__spinnerInner {
+    animation: none;
+  }
+
+  .liveData__loadingText {
+    animation: none;
+  }
+
+  .holographicDoc__scanline {
+    animation: none;
+  }
+
+  .holographicDoc__statusBlink,
+  .holographicDoc__cursor {
+    animation: none;
+  }
+
+  .holographicDoc__highlight {
+    animation: none;
+  }
+
+  .quickStats__track {
     animation: none;
   }
 }
@@ -1004,6 +1065,11 @@
   }
 }
 
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
 /* Navbar */
 .navbar {
   position: fixed;
@@ -1054,6 +1120,7 @@
 
 .navlink.is-active {
   color: var(--accent-blue);
+  text-shadow: 0 0 12px rgba(0, 212, 255, 0.5);
 }
 
 .navlink.is-active::after {
@@ -1065,6 +1132,7 @@
   height: 2px;
   border-radius: 999px;
   background: var(--accent-blue);
+  box-shadow: 0 0 8px rgba(0, 212, 255, 0.6);
 }
 
 .icon-button {
@@ -1155,10 +1223,16 @@
 .mobileNav {
   position: fixed;
   inset: 0;
-  background: rgba(10, 14, 26, 0.96);
+  background: rgba(10, 14, 26, 1);
   backdrop-filter: blur(20px);
   z-index: 150;
   padding: 22px;
+  transition: opacity 0.2s ease;
+}
+
+.mobileNav--closing {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .mobileNav__close {
@@ -2050,7 +2124,7 @@
   font-size: 14px;
   color: var(--text-secondary);
   cursor: pointer;
-  padding: 4px;
+  padding: 8px;
   border-radius: 50%;
   transition: all 0.2s ease;
 }
@@ -2117,6 +2191,27 @@
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto; /* enable interaction when visible */
+}
+
+@media (max-width: 768px) {
+  .tooltipText {
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%) translateY(8px) scale(0.95);
+    width: max-content;
+    max-width: min(260px, calc(100vw - 32px));
+  }
+
+  .tooltipText::after {
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .tooltipContainer:hover .tooltipText,
+  .tooltipContainer:focus-within .tooltipText {
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
 }
 
 /* Obstacles Section */
@@ -2286,6 +2381,20 @@
   /* Container inset: reduce horizontal padding on very small screens */
   .container {
     width: min(100%, calc(100% - 32px));
+  }
+
+  /* Improve text visibility against starry background */
+  body {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Increase secondary text opacity for better readability */
+  :root {
+    --text-secondary: #a8b5c8;
   }
 
   /* Timeline events: always single column */
