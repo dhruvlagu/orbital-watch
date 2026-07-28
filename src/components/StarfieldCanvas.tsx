@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import ClientOnly from "./ClientOnly";
 
 type Star = {
   x: number;
@@ -30,7 +31,7 @@ function createStar(width: number, height: number, fromEdge?: "top" | "bottom" |
   };
 }
 
-export default function StarfieldCanvas() {
+function StarfieldCanvasInner() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const mousePos = useRef<{ x: number; y: number } | null>(null);
 
@@ -128,4 +129,12 @@ export default function StarfieldCanvas() {
   }, []);
 
   return <canvas ref={canvasRef} className="starfieldCanvas" aria-hidden="true" />;
+}
+
+export default function StarfieldCanvas() {
+  return (
+    <ClientOnly>
+      <StarfieldCanvasInner />
+    </ClientOnly>
+  );
 }

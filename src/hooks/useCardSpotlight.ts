@@ -2,6 +2,11 @@ import { useEffect } from "react";
 
 export function useCardSpotlight(containerRef: React.RefObject<HTMLElement>) {
   useEffect(() => {
+    // Skip during prerendering to avoid hydration issues
+    if (typeof window === 'undefined') {
+      return;
+    }
+
     const container = containerRef.current;
     if (!container) return;
 

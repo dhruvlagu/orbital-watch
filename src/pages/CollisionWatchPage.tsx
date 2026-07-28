@@ -279,6 +279,11 @@ export default function CollisionWatchPage() {
   useRevealOnScroll(".reveal-item", loading, 0.1);
 
   useEffect(() => {
+    // Skip data fetching during prerendering to avoid hydration mismatches
+    if (typeof window === 'undefined') {
+      return;
+    }
+
     let isCancelled = false;
 
     const load = async () => {

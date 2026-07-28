@@ -7,9 +7,14 @@ export default function Navbar() {
   const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
-    document.body.style.overflow = mobileOpen ? "hidden" : "unset";
+    // Only set body overflow on client-side to avoid hydration issues
+    if (typeof window !== 'undefined') {
+      document.body.style.overflow = mobileOpen ? "hidden" : "unset";
+    }
     return () => {
-      document.body.style.overflow = "unset";
+      if (typeof window !== 'undefined') {
+        document.body.style.overflow = "unset";
+      }
     };
   }, [mobileOpen]);
 
@@ -56,7 +61,15 @@ export default function Navbar() {
           aria-label="Open menu"
           aria-controls="mobileNav"
           aria-expanded={mobileOpen}
-          onClick={() => setMobileOpen(true)}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setMobileOpen(true);
+          }}
+          onTouchEnd={(e) => {
+            e.preventDefault();
+            setMobileOpen(true);
+          }}
         >
           <span className="hamburger" aria-hidden="true">
             <span />

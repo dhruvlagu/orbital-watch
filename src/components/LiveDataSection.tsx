@@ -56,6 +56,11 @@ export default function LiveDataSection({ variant = "standalone" }: LiveDataSect
   }, []);
 
   useEffect(() => {
+    // Skip data fetching during prerendering to avoid hydration mismatches
+    if (typeof window === 'undefined') {
+      return;
+    }
+
     let isCancelled = false;
 
     const load = async () => {
