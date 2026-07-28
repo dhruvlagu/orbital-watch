@@ -128,7 +128,7 @@ ${zip.trim()}`;
   );
 
   const handleCopyMessage = () => {
-    if (hasPlaceholder || !selectedAskId) return;
+    if (!selectedAskId) return;
 
     navigator.clipboard.writeText(messageText).then(() => {
       setCopied(true);
@@ -143,7 +143,7 @@ ${zip.trim()}`;
   };
 
   const handleContextualActionClick = () => {
-    if (hasPlaceholder || !selectedAskId) return;
+    if (!selectedAskId) return;
 
     // GA4 Event 2: representative_contact_sent
     trackGA4Event("representative_contact_sent", {
@@ -325,12 +325,7 @@ ${zip.trim()}`;
               type="button"
               className="btn btn--primary copyMsgBtn"
               onClick={handleCopyMessage}
-              disabled={hasPlaceholder}
-              title={
-                hasPlaceholder
-                  ? "Please edit or replace the personal note placeholder first"
-                  : "Copy full text to clipboard"
-              }
+              title="Copy full text to clipboard"
             >
               {copied ? (
                 <>
@@ -349,11 +344,8 @@ ${zip.trim()}`;
                   href={repResult.contact.contactForm}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`btn btn--secondary contextualBtn ${
-                    hasPlaceholder ? "is-disabled" : ""
-                  }`}
+                  className="btn btn--secondary contextualBtn"
                   onClick={handleContextualActionClick}
-                  aria-disabled={hasPlaceholder}
                 >
                   Open Official Contact Form →
                 </a>
@@ -367,11 +359,8 @@ ${zip.trim()}`;
                   href={repResult.contact.officialSite}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`btn btn--secondary contextualBtn ${
-                    hasPlaceholder ? "is-disabled" : ""
-                  }`}
+                  className="btn btn--secondary contextualBtn"
                   onClick={handleContextualActionClick}
-                  aria-disabled={hasPlaceholder}
                 >
                   Visit Official Website →
                 </a>

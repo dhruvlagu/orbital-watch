@@ -7,9 +7,9 @@ export default function Navbar() {
   const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
-    document.documentElement.style.overflow = mobileOpen ? "hidden" : "";
+    document.body.style.overflow = mobileOpen ? "hidden" : "unset";
     return () => {
-      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "unset";
     };
   }, [mobileOpen]);
 
