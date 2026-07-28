@@ -88,16 +88,13 @@ function outputPathForRoute(route) {
 
 async function prerenderRoute(page, route) {
   const expectedCanonical = `https://orbitalwatch.vercel.app${route}`;
-  // Use 'domcontentloaded' instead of 'networkidle0' to avoid waiting for live data fetching
-  await page.goto(`${baseUrl}${route}`, { waitUntil: "domcontentloaded" });
+  await page.goto(`${baseUrl}${route}`, { waitUntil: "networkidle0" });
   await page.waitForSelector("h1", { timeout: 30_000 });
   await page.waitForFunction(
     (canonicalUrl) => document.querySelector('link[rel="canonical"]')?.getAttribute("href") === canonicalUrl,
     { timeout: 30_000 },
     expectedCanonical,
   );
-  // Wait a short time for React to mount, but not for live data fetches to complete
-  await new Promise((resolve) => setTimeout(resolve, 100));
   await page.evaluate(() => new Promise((resolveFrame) => requestAnimationFrame(() => requestAnimationFrame(resolveFrame))));
 
   const outputPath = outputPathForRoute(route);

@@ -6,15 +6,18 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
+  const closeMobileNav = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setMobileOpen(false);
+      setIsClosing(false);
+    }, 200);
+  };
+
   useEffect(() => {
-    // Only set body overflow on client-side to avoid hydration issues
-    if (typeof window !== 'undefined') {
-      document.body.style.overflow = mobileOpen ? "hidden" : "unset";
-    }
+    document.body.style.overflow = mobileOpen ? "hidden" : "unset";
     return () => {
-      if (typeof window !== 'undefined') {
-        document.body.style.overflow = "unset";
-      }
+      document.body.style.overflow = "unset";
     };
   }, [mobileOpen]);
 
@@ -25,14 +28,6 @@ export default function Navbar() {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
-
-  const closeMobileNav = () => {
-    setIsClosing(true);
-    setTimeout(() => {
-      setMobileOpen(false);
-      setIsClosing(false);
-    }, 200);
-  };
 
   return (
     <header className="navbar" role="banner">
@@ -55,54 +50,50 @@ export default function Navbar() {
           ))}
         </nav>
 
-        <button
-          className="icon-button navbar__menuButton"
-          type="button"
-          aria-label="Open menu"
-          aria-controls="mobileNav"
-          aria-expanded={mobileOpen}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setMobileOpen(true);
-          }}
-          onTouchEnd={(e) => {
-            e.preventDefault();
-            setMobileOpen(true);
-          }}
-        >
-          <span className="hamburger" aria-hidden="true">
-            <span />
-          </span>
-        </button>
+        {!mobileOpen && (
+          <button
+            className="icon-button navbar__menuButton"
+            type="button"
+            aria-label="Open menu"
+            aria-controls="mobileNav"
+            aria-expanded={mobileOpen}
+            onClick={() => setMobileOpen(true)}
+          >
+            <span className="hamburger" aria-hidden="true">
+              <span />
+            </span>
+          </button>
+        )}
       </div>
 
       {!mobileOpen ? null : (
-        <div className={`mobileNav ${isClosing ? "mobileNav--closing" : ""}`} id="mobileNav">
+        <>
           <button
-            className="icon-button mobileNav__close"
+            className={`icon-button mobileNav__close ${isClosing ? '' : 'mobileNav__close--visible'}`}
             type="button"
             aria-label="Close menu"
             onClick={closeMobileNav}
           >
             <span className="closeIcon" aria-hidden="true" />
           </button>
-
-          <nav className="mobileNav__links" aria-label="Mobile">
-            {NAV_LINKS.map((link) => (
-              <NavLink
-                key={link.path}
-                to={link.path}
-                className={({ isActive }) =>
-                  isActive ? "mobileNav__link is-active" : "mobileNav__link"
-                }
-                onClick={closeMobileNav}
-              >
-                {link.label}
-              </NavLink>
-            ))}
-          </nav>
-        </div>
+          <div className={`mobileNav__backdrop ${isClosing ? '' : 'mobileNav__backdrop--visible'}`} onClick={closeMobileNav} />
+          <div className={`mobileNav ${isClosing ? "mobileNav--closing" : "mobileNav--open"}`} id="mobileNav">
+            <nav className="mobileNav__links" aria-label="Mobile">
+              {NAV_LINKS.map((link) => (
+                <NavLink
+                  key={link.path}
+                  to={link.path}
+                  className={({ isActive }) =>
+                    isActive ? "mobileNav__link is-active" : "mobileNav__link"
+                  }
+                  onClick={closeMobileNav}
+                >
+                  {link.label}
+                </NavLink>
+              ))}
+            </nav>
+          </div>
+        </>
       )}
     </header>
   );

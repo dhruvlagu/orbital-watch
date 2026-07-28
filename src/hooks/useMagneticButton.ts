@@ -14,11 +14,6 @@ export function useMagneticButton(
   const isActiveRef = useRef(false);
 
   useEffect(() => {
-    // Skip during prerendering to avoid hydration issues
-    if (typeof window === 'undefined') {
-      return;
-    }
-
     const element = ref.current;
     if (!element) return;
 

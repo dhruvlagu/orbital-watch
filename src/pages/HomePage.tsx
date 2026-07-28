@@ -51,11 +51,6 @@ export default function HomePage() {
 
   // Lightweight conjunction data fetch — filter for active events client-side
   useEffect(() => {
-    // Skip data fetching during prerendering to avoid hydration mismatches
-    if (typeof window === 'undefined') {
-      return;
-    }
-
     let isCancelled = false;
     fetchConjunctions((fresh) => {
       if (!isCancelled) setConjunctionData(fresh);
