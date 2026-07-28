@@ -11,6 +11,7 @@ export default function RouteProgressBar() {
   const [visible, setVisible] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const rafRef = useRef<number | null>(null);
+  const isCompletingRef = useRef(false);
 
   const clear = () => {
     if (timerRef.current) clearTimeout(timerRef.current);
@@ -18,6 +19,9 @@ export default function RouteProgressBar() {
   };
 
   useEffect(() => {
+    // Reset completion flag on new route
+    isCompletingRef.current = false;
+    
     // Start bar
     setVisible(true);
     setProgress(0);
@@ -35,6 +39,8 @@ export default function RouteProgressBar() {
 
     // Complete the bar shortly after
     timerRef.current = setTimeout(() => {
+      if (isCompletingRef.current) return;
+      isCompletingRef.current = true;
       setProgress(100);
       // Fade out after completion
       timerRef.current = setTimeout(() => {
@@ -48,8 +54,10 @@ export default function RouteProgressBar() {
 
   // Fallback: if bar is stuck visible for too long, force completion
   useEffect(() => {
-    if (visible && progress < 100) {
+    if (visible && progress < 100 && !isCompletingRef.current) {
       const fallbackTimer = setTimeout(() => {
+        if (isCompletingRef.current) return;
+        isCompletingRef.current = true;
         setProgress(100);
         setTimeout(() => {
           setVisible(false);

@@ -1081,6 +1081,14 @@ html {
   border-bottom: 1px solid var(--border-subtle);
 }
 
+/* Ensure navbar stays visible when body has overflow hidden (mobile menu open) */
+body[style*="overflow: hidden"] .navbar,
+body[style*="overflow:hidden"] .navbar {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
 .navbar__inner {
   height: 64px;
   display: flex;
