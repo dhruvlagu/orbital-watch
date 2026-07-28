@@ -21,7 +21,7 @@ export const policyAsks: Record<PolicyAskId, PolicyAsk> = {
     repCanDo:
       "support legislation, oversight, and funding that advance stronger international debris-prevention commitments",
     supportingStat:
-      "Modeled to reduce projected 2050 LEO debris by roughly 8,000 objects if adopted (ESA compliance modeling).",
+      "Experts estimate this could cut the amount of debris expected by 2050 by about 8,000 objects.",
     whyItMatters: [
       "Helps prevent avoidable debris from entering orbit.",
       "Supports safer GPS, communications, and weather satellites.",
@@ -35,7 +35,7 @@ export const policyAsks: Record<PolicyAskId, PolicyAsk> = {
     repCanDo:
       "support legislation and oversight that reinforce the United States' commitment and encourage responsible behavior in space",
     supportingStat:
-      "Modeled to reduce projected 2050 LEO debris by roughly 5,000 objects (based on historical ASAT event analysis).",
+      "Experts estimate this could cut the amount of debris expected by 2050 by about 5,000 objects.",
     whyItMatters: [
       "Destructive tests can create thousands of long-lived debris fragments.",
       "Protects satellites relied on for navigation and communications.",
@@ -49,7 +49,7 @@ export const policyAsks: Record<PolicyAskId, PolicyAsk> = {
     repCanDo:
       "support research, funding, and international cooperation for responsible active debris removal",
     supportingStat:
-      "Modeled to reduce projected 2050 LEO debris by roughly 15,000 objects (Liou et al. 2021).",
+      "Experts estimate this could cut the amount of debris expected by 2050 by about 15,000 objects.",
     whyItMatters: [
       "Targets debris that poses the greatest collision risk.",
       "Protects the satellite services people use every day.",
@@ -63,7 +63,7 @@ export const policyAsks: Record<PolicyAskId, PolicyAsk> = {
     repCanDo:
       "support legislation, oversight, and funding that help the United States lead on responsible satellite de-orbit standards",
     supportingStat:
-      "Closing this gap globally is modeled to reduce projected 2050 LEO debris by roughly 10,000 objects.",
+      "Experts estimate this could cut the amount of debris expected by 2050 by about 10,000 objects.",
     whyItMatters: [
       "Reduces the chance that inactive satellites become debris.",
       "Keeps crowded orbital paths safer for essential satellites.",

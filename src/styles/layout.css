@@ -1224,7 +1224,7 @@ html {
   position: fixed;
   inset: 0;
   background: #0b0f19;
-  z-index: 50;
+  z-index: 150;
   padding: 22px;
   transition: opacity 0.2s ease;
   overflow-y: auto;

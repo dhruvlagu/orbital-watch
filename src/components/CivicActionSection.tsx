@@ -12,6 +12,8 @@ export interface CivicActionSectionProps {
 
 const PERSONALIZATION_PLACEHOLDER_SUBSTRING = "[Add a sentence";
 
+const STAKES_PARAGRAPH = "There are already thousands of pieces of debris orbiting Earth, and just one collision can create thousands more. If this keeps happening, it could break the GPS, weather forecasting, and communications systems that people in our district use every day. The current rules aren't keeping up with how fast this problem is getting worse.";
+
 function trackGA4Event(eventName: string, params?: Record<string, unknown>) {
   if (typeof window === "undefined") return;
   const gtagFn = (window as Window & { gtag?: (...args: unknown[]) => void }).gtag;
@@ -54,20 +56,23 @@ export default function CivicActionSection({
     if (!ask) return;
 
     const repName = repResult.representativeName;
-    const statText = ask.supportingStat ? `\n\n${ask.supportingStat}` : "";
+    const statText = ask.supportingStat ? ` ${ask.supportingStat}` : "";
     const nameFormatted = userName.trim() ? userName.trim() : "[Your name]";
+    const lowercasedAskSummary = ask.askSummary.charAt(0).toLowerCase() + ask.askSummary.slice(1);
 
     const generated = `Dear Representative ${repName},
 
-I'm a constituent in your district, and I'm writing because I care about protecting the space infrastructure our communities rely on. ${ask.askSummary}
+I'm a constituent in your district, and I'm writing to ask you to ${lowercasedAskSummary}
+
+${STAKES_PARAGRAPH}
 
 I hope you'll ${ask.repCanDo}.${statText}
 
-I'd appreciate knowing your office's position on this issue and any related work you are pursuing.
+I'd like to know where you stand on this issue and if you're working on anything related to it.
 
 [Add a sentence about why this matters to you personally — messages with a personal note are far more likely to be read as genuine by congressional staff than a form letter.]
 
-Thank you for your time,
+Thank you,
 ${nameFormatted}
 ${zip.trim()}`;
 
