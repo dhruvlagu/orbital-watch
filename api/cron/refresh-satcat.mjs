@@ -14,7 +14,7 @@ import {
 
 const SATCAT_BASE_URL =
   "https://www.space-track.org/basicspacedata/query/class/satcat";
-const PREDICATES = "OBJECT_TYPE,LAUNCH,CURRENT,DECAY,FILE";
+const PREDICATES = "NORAD_CAT_ID,OBJECT_TYPE,LAUNCH,CURRENT,DECAY,FILE";
 
 // ─── Auth check ───────────────────────────────────────────────────────────────
 
@@ -69,7 +69,7 @@ function buildMetrics(records) {
 
   const debrisToActiveRatio =
     activeSatellites > 0
-      ? `${Math.max(1, Math.round(debrisCount / activeSatellites))}:1` 
+      ? `${Math.max(1, Math.round(debrisCount / activeSatellites))}:1`
       : "N/A";
 
   let maxFileNumber = null;
@@ -90,6 +90,18 @@ function buildMetrics(records) {
       highestRiskShell: "LEO 800–1000km",
     },
     maxFileNumber,
+  };
+}
+
+function normalizeCatalogEntry(record) {
+  if (!record || !record.NORAD_CAT_ID) return null;
+  return {
+    NORAD_CAT_ID: String(record.NORAD_CAT_ID),
+    OBJECT_TYPE: record.OBJECT_TYPE || "",
+    LAUNCH: record.LAUNCH || "",
+    CURRENT: record.CURRENT || "",
+    DECAY: record.DECAY || "",
+    FILE: record.FILE || "",
   };
 }
 
@@ -137,23 +149,34 @@ export default async function handler(req, res) {
     console.log("[refresh-satcat] Starting SATCAT refresh...");
     const startedAt = Date.now();
 
-    // 1. Read last-used file number from Redis
-    const storedFileNumber = await withRedis((c) => c.get("satcat:fileNumber"));
+    // 1. Read last-used file number and existing catalog from Redis
+    const [storedCatalogJson, storedFileNumber] = await withRedis(async (c) => {
+      return await c.mGet(["satcat:catalog", "satcat:fileNumber"]);
+    });
+
+    const hadCatalog = Boolean(storedCatalogJson);
     const fileNumber = storedFileNumber ? Number(storedFileNumber) : null;
+    const forceFullFetch = !hadCatalog && fileNumber !== null;
+    if (forceFullFetch) {
+      console.log(
+        "[refresh-satcat] Missing satcat:catalog with existing fileNumber — forcing full snapshot fetch to bootstrap the catalog.",
+      );
+    }
 
     // 2. Get a fresh (or cached) session cookie
     let cookieHeader = await getValidSessionCookie();
 
     // 3. Query Space-Track (with one retry on session expiry)
+    const queryFileNumber = forceFullFetch ? null : fileNumber;
     let records;
     try {
-      records = await fetchSatcatRecords(cookieHeader, fileNumber);
+      records = await fetchSatcatRecords(cookieHeader, queryFileNumber);
     } catch (err) {
       if (err instanceof Error && err.message === "Space-Track session expired.") {
         console.warn("[refresh-satcat] Session expired, re-authenticating...");
         invalidateSessionCookie();
         cookieHeader = await getValidSessionCookie();
-        records = await fetchSatcatRecords(cookieHeader, fileNumber);
+        records = await fetchSatcatRecords(cookieHeader, queryFileNumber);
       } else {
         throw err;
       }
@@ -173,14 +196,32 @@ export default async function handler(req, res) {
 
     console.log(`[refresh-satcat] Fetched ${records.length} records.`);
 
-    // 4. Compute metrics and determine new max file number
-    const computed = buildMetrics(records);
+    // 4. Merge incoming records into the full catalog and compute metrics from the merged data.
+    const existingCatalog = storedCatalogJson
+      ? JSON.parse(storedCatalogJson)
+      : {};
+    const catalog = typeof existingCatalog === "object" && existingCatalog !== null && !Array.isArray(existingCatalog)
+      ? existingCatalog
+      : {};
+
+    for (const record of records) {
+      const normalized = normalizeCatalogEntry(record);
+      if (!normalized) continue;
+      catalog[normalized.NORAD_CAT_ID] = normalized;
+    }
+
+    const catalogEntries = Object.values(catalog);
+    const computed = buildMetrics(catalogEntries);
     metrics = computed.metrics;
     const { maxFileNumber } = computed;
 
-    // 5. Persist to Redis
+    const serializedCatalog = JSON.stringify(catalog);
+    console.log(`[refresh-satcat] Catalog size: ${serializedCatalog.length} bytes`);
+
+    // 5. Persist catalog and metrics to Redis
     await withRedis(async (c) => {
       const pipeline = c.multi();
+      pipeline.set("satcat:catalog", serializedCatalog);
       pipeline.set("satcat:latest", JSON.stringify(metrics));
       pipeline.set("satcat:lastUpdatedAt", new Date().toISOString());
       if (maxFileNumber !== null) {
