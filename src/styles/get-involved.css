@@ -758,7 +758,19 @@
 .messageTextareaWrapper {
   margin-bottom: 20px;
 }
-
+ 
+.messagePreviewCard {
+  display: none;
+}
+ 
+.messageEditorBlock.is-expanded .messagePreviewCard {
+  display: none;
+}
+ 
+.messageEditorBlock.is-expanded .messageTextareaWrapper {
+  display: block;
+}
+ 
 .whyMattersCallout {
   margin: 0 0 18px;
   padding: 14px 16px;
@@ -911,5 +923,60 @@
 
   .civicActionsRow {
     flex-direction: column;
+  }
+ 
+  .civicActionsRow .btn {
+    width: 100%;
+  }
+ 
+  .contextualNote {
+    max-width: none;
+  }
+ 
+  .messageEditorBlock {
+    display: block;
+  }
+ 
+  .messagePreviewCard {
+    display: block;
+    margin-bottom: 20px;
+    padding: 18px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+ 
+  .messagePreviewLabel {
+    display: block;
+    margin-bottom: 12px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-primary);
+  }
+ 
+  .messagePreviewText {
+    margin: 0 0 16px;
+    font-family: "Courier New", monospace;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 12em;
+    overflow: hidden;
+    color: rgba(255, 255, 255, 0.92);
+  }
+ 
+  .editMessageToggleBtn {
+    width: 100%;
+  }
+ 
+  .messageEditorBlock:not(.is-expanded) .messageTextareaWrapper {
+    display: none;
+  }
+ 
+  .messageEditorBlock.is-expanded .messagePreviewCard {
+    display: none;
   }
 }

@@ -34,6 +34,7 @@ export default function CivicActionSection({
   const [repResult, setRepResult] = useState<RepresentativeResult | null>(null);
   const [messageText, setMessageText] = useState("");
   const [copied, setCopied] = useState(false);
+  const [isMessageEditorExpanded, setIsMessageEditorExpanded] = useState(false);
 
   const zipInputId = useId();
   const userNameInputId = useId();
@@ -45,7 +46,21 @@ export default function CivicActionSection({
       setSelectedAskId(preSelectedAskId);
     }
   }, [preSelectedAskId]);
-
+ 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+ 
+    const media = window.matchMedia("(min-width: 760px)");
+    const updateExpandedState = () => setIsMessageEditorExpanded(media.matches);
+ 
+    updateExpandedState();
+    media.addEventListener?.("change", updateExpandedState);
+ 
+    return () => {
+      media.removeEventListener?.("change", updateExpandedState);
+    };
+  }, []);
+ 
   // Regenerate message template when repResult, selectedAskId, userName, or zip changes
   useEffect(() => {
     if (!repResult || !repResult.representativeName || !selectedAskId) return;
@@ -65,9 +80,10 @@ ${ask.issueParagraph}
 ${ask.supportingStat || ""}
 
 I hope you'll ${ask.repCanDo}.
+${ask.closingSentence}
 
 As someone who cares about the long-term sustainability of space, I hope Congress continues treating orbital debris as an issue worthy of bipartisan attention.
-[Add a sentence about why this matters to you personally — messages with a personal note are far more likely to be read as genuine by congressional staff than a form letter.]
+[Add one sentence about why this matters to you personally — messages with a personal note are far more likely to be read as genuine by congressional staff than a form letter.]
 
 Thank you,
 ${nameFormatted}
@@ -128,7 +144,14 @@ ${zip.trim()}`;
   const hasPlaceholder = messageText.includes(
     PERSONALIZATION_PLACEHOLDER_SUBSTRING
   );
-
+ 
+  const previewTextLines = messageText.split("\n").slice(0, 6);
+  const hasMorePreviewText =
+    messageText.split("\n").length > 6 || messageText.length > 320;
+  const messagePreviewText = `${previewTextLines.join("\n")}${
+    hasMorePreviewText ? "\n..." : ""
+  }`;
+ 
   const handleCopyMessage = () => {
     if (!selectedAskId) return;
 
@@ -306,21 +329,35 @@ ${zip.trim()}`;
               ))}
             </ul>
           </aside>
-
-          {/* Editable Textarea */}
-          <div className="messageTextareaWrapper">
-            <label htmlFor={messageTextareaId} className="messageTextareaLabel">
-              Generated Message (Edit as needed):
-            </label>
-            <textarea
-              id={messageTextareaId}
-              className="messageTextarea"
-              rows={14}
-              value={messageText}
-              onChange={(e) => setMessageText(e.target.value)}
-            />
+ 
+          <div className={`messageEditorBlock${isMessageEditorExpanded ? " is-expanded" : ""}`}>
+            <div className="messagePreviewCard" aria-hidden={isMessageEditorExpanded}>
+              <div className="messagePreviewLabel">Message Preview</div>
+              <pre className="messagePreviewText">{messagePreviewText}</pre>
+              <button
+                type="button"
+                className="btn btn--secondary editMessageToggleBtn"
+                onClick={() => setIsMessageEditorExpanded(true)}
+                aria-expanded={isMessageEditorExpanded}
+              >
+                Edit Message
+              </button>
+            </div>
+ 
+            <div className="messageTextareaWrapper">
+              <label htmlFor={messageTextareaId} className="messageTextareaLabel">
+                Generated Message (Edit as needed):
+              </label>
+              <textarea
+                id={messageTextareaId}
+                className="messageTextarea"
+                rows={14}
+                value={messageText}
+                onChange={(e) => setMessageText(e.target.value)}
+              />
+            </div>
           </div>
-
+ 
           {/* Action Buttons */}
           <div className="civicActionsRow">
             <button

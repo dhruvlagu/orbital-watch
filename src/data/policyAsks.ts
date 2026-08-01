@@ -12,6 +12,7 @@ export interface PolicyAsk {
   issueParagraph: string;
   repCanDo: string;
   supportingStat?: string;
+  closingSentence: string;
   whyItMatters: string[];
 }
 
@@ -23,11 +24,13 @@ export const policyAsks: Record<PolicyAskId, PolicyAsk> = {
     opening:
       "I’m writing as one of your constituents because I’m concerned about the growing orbital debris problem.",
     issueParagraph:
-      "The United States should continue leading efforts to make international debris guidelines binding and more enforceable, so that satellite operators around the world follow shared rules for safe launch, maneuvering, and post-mission disposal.",
+      "The United States should continue leading efforts to make debris mitigation guidelines more than voluntary recommendations, so operators around the world follow consistent practices for safe launch, maneuvering, and post-mission disposal.",
     repCanDo:
       "support bipartisan legislation, oversight, and appropriations that advance stronger international debris-prevention commitments",
     supportingStat:
-      "Current orbital environment models suggest this could reduce the projected number of tracked objects in low Earth orbit by roughly 8,000 by 2050.",
+      "Analysis of orbital environment models suggests stronger international adherence to debris mitigation standards could reduce the projected number of tracked objects in low Earth orbit by roughly 8,000 by 2050.",
+    closingSentence:
+      "Please let me know whether you will support this effort.",
     whyItMatters: [
       "Helps prevent avoidable debris from entering orbit.",
       "Supports safer GPS, communications, and weather satellites.",
@@ -41,11 +44,13 @@ export const policyAsks: Record<PolicyAskId, PolicyAsk> = {
     opening:
       "As a constituent, I hope you’ll continue supporting responsible U.S. leadership in space.",
     issueParagraph:
-      "Destructive anti-satellite tests create thousands of long-lived fragments that can threaten operational satellites and increase the risk for all users of space.",
+      "Stopping destructive anti-satellite tests is one of the clearest steps Congress can back to prevent avoidable debris from threatening operational satellites and the services they provide.",
     repCanDo:
-      "support bipartisan legislation and oversight that reinforce U.S. commitments and encourage responsible behavior in space",
+      "support bipartisan oversight and legislation that reinforce U.S. leadership against destructive anti-satellite testing",
     supportingStat:
-      "Current modeling suggests ending destructive ASAT testing could avoid roughly 5,000 additional tracked debris fragments over the next few decades.",
+      "Models show that banning destructive ASAT tests could avoid roughly 5,000 new tracked debris fragments over the next few decades.",
+    closingSentence:
+      "Please let me know if you will support stronger oversight in this area.",
     whyItMatters: [
       "Destructive tests can create thousands of long-lived debris fragments.",
       "Protects satellites relied on for navigation and communications.",
@@ -59,11 +64,13 @@ export const policyAsks: Record<PolicyAskId, PolicyAsk> = {
     opening:
       "I’m reaching out because orbital debris is becoming an increasingly important issue for the long-term sustainability of space.",
     issueParagraph:
-      "The most dangerous large debris objects should be removed from orbit before they cause a catastrophic collision that could generate tens of thousands of new fragments.",
+      "An international authority for active debris removal can coordinate safe, transparent removal of the largest collision hazards before they fragment into tens of thousands of additional pieces.",
     repCanDo:
       "support appropriations, research, and international cooperation for responsible active debris removal",
     supportingStat:
-      "Current orbital environment forecasts suggest this could lower the projected number of tracked objects by roughly 15,000 by 2050.",
+      "Forecasts indicate a sustained active debris removal effort could lower the projected number of tracked objects by roughly 15,000 by 2050.",
+    closingSentence:
+      "Please let me know whether you will support U.S. leadership on this issue.",
     whyItMatters: [
       "Targets debris that poses the greatest collision risk.",
       "Protects the satellite services people use every day.",
@@ -77,11 +84,13 @@ export const policyAsks: Record<PolicyAskId, PolicyAsk> = {
     opening:
       "I’m a constituent in your district, and I’m writing to ask for continued attention to responsible space policy.",
     issueParagraph:
-      "Stronger U.S. support for international satellite de-orbit standards can help ensure operators dispose of hardware safely instead of leaving inactive satellites to drift as collision hazards.",
+      "Stronger U.S. support for international satellite de-orbit standards can make it more likely inactive satellites are retired safely instead of being left to drift as future collision hazards.",
     repCanDo:
-      "support legislation, oversight, and funding that help the United States lead on responsible satellite de-orbit standards",
+      "support legislation, oversight, and funding that encourage responsible satellite end-of-life disposal practices",
     supportingStat:
-      "Modeling indicates more consistent end-of-life disposal practices could reduce the projected number of tracked objects in low Earth orbit by roughly 10,000 by 2050.",
+      "Industry and modeling studies suggest more consistent end-of-life disposal practices could reduce the projected number of tracked objects in low Earth orbit by roughly 10,000 by 2050.",
+    closingSentence:
+      "Please let me know whether you will support stronger end-of-life disposal practices.",
     whyItMatters: [
       "Reduces the chance that inactive satellites become debris.",
       "Keeps crowded orbital paths safer for essential satellites.",
@@ -97,9 +106,11 @@ export const policyAsks: Record<PolicyAskId, PolicyAsk> = {
     issueParagraph:
       "Congress has an important role in keeping orbital debris mitigation visible through NASA funding, space policy oversight, and support for international cooperation.",
     repCanDo:
-      "support legislation, oversight, and funding that keep orbital debris mitigation on the national agenda",
+      "support legislation, oversight, and appropriations that keep orbital debris mitigation on the national agenda",
     supportingStat:
-      "Current analysis suggests this kind of attention can help prevent thousands of additional tracked objects from crowding low Earth orbit over the coming decades.",
+      "Recent analysis suggests that keeping debris mitigation visible in U.S. space policy can prevent thousands of additional tracked objects from crowding low Earth orbit over the coming decades.",
+    closingSentence:
+      "Please let me know whether you support keeping debris mitigation a continuing priority.",
     whyItMatters: [
       "Helps reduce the risk of future orbital debris.",
       "Protects satellites used for GPS, communications, and weather forecasting.",

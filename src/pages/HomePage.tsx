@@ -144,7 +144,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
+  
       <section className="quickStats">
         <div className="quickStats__track">
           {STATS_GROUP}
@@ -160,7 +160,11 @@ export default function HomePage() {
             <span className="homeExplore__label">EXPLORE THE PLATFORM</span>
             <h2 className="homeExplore__title">Platform Modules &amp; Policy Tools</h2>
             <p className="homeExplore__subtitle">
-              Explore the science, orbital mechanics, regulatory frameworks, and engineering solutions behind space sustainability.
+              Navigate the full Orbital Watch workflow: explore live Space-Track data,
+              investigate predicted collisions, understand the physics of orbital debris,
+              uncover the legal barriers created by the 1967 Outer Space Treaty, and turn
+              that knowledge into civic action through a personalized message to your U.S.
+              representative.
             </p>
           </div>
 
@@ -263,7 +267,9 @@ export default function HomePage() {
               </div>
               <h3 className="homeExploreCard__title">Get Involved</h3>
               <p className="homeExploreCard__description">
-                Discover how citizens, students, and policymakers can collaborate on space stewardship, advocacy, and STEM-focused educational initiatives.
+                Contact your U.S. representative and discover how citizens,
+                students, and policymakers can collaborate on space stewardship,
+                advocacy, and STEM education.
               </p>
               <Link to="/get-involved" className="btn btn--secondary homeExploreCard__btn">
                 Take Action
