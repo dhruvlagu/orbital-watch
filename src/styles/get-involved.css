@@ -666,6 +666,9 @@
   color: #ff9999;
   font-size: 0.88rem;
   line-height: 1.5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* ── Rep Dashboard ── */
@@ -686,6 +689,9 @@
   color: rgba(0, 212, 255, 0.8);
   font-size: 0.82rem;
   line-height: 1.55;
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
 }
 
 .districtDisclaimer a {
@@ -727,16 +733,7 @@
   flex-shrink: 0;
 }
 
-.civicErrorBanner {
-  display: flex;
-  align-items: center;
-}
 
-.districtDisclaimer {
-  display: flex;
-  align-items: flex-start;
-  gap: 7px;
-}
 
 .policyAskCard__statIcon {
   display: inline-flex;

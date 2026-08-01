@@ -36,7 +36,7 @@ export default function HomePage() {
 
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
   const [conjunctionData, setConjunctionData] = useState<ConjunctionResponse | null>(null);
-  const [timeTick, setTimeTick] = useState(Date.now());
+  const [timeTick, setTimeTick] = useState(() => Date.now());
   const exploreGridRef = useRef<HTMLDivElement>(null);
 
   useCardSpotlight(exploreGridRef);

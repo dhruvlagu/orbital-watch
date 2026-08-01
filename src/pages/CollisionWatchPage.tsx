@@ -245,7 +245,7 @@ export default function CollisionWatchPage() {
   const [payload, setPayload] = useState<ConjunctionResponse>(FALLBACK_RESPONSE);
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
   const [sortMode, setSortMode] = useState<"SOONEST" | "HIGHEST_RISK">("SOONEST");
-  const [timeTick, setTimeTick] = useState(Date.now());
+  const [timeTick, setTimeTick] = useState(() => Date.now());
   const isMountedRef = useRef(true);
   const gridRef = useRef<HTMLDivElement>(null);
   const physicsButtonRef = useRef<HTMLAnchorElement>(null);
@@ -595,28 +595,45 @@ export default function CollisionWatchPage() {
               chance two objects will collide — it's the modeled probability
               that both objects will pass within a specified combined distance of
               each other at time of closest approach, given known uncertainty in
-              their tracked positions. It is deliberately conservative: when in
+              their tracked positions. It's deliberately conservative: when in
               doubt, the models overestimate risk rather than underestimate it.
-              A Pc of 1×10⁻⁴ (0.01%) is considered operationally significant
-              and typically triggers avoidance maneuver planning.
             </p>
+            <div className="cw__explainerStat">
+              <span className="cw__explainerStat__value">1×10⁻⁴ (0.01%)</span>
+              <span className="cw__explainerStat__label">
+                Pc threshold considered operationally significant — typically
+                triggers avoidance maneuver planning
+              </span>
+            </div>
             <p className="cw__explainerBody" style={{ marginTop: "16px" }}>
               <strong>A common misconception: a smaller miss distance doesn't
               always mean a higher Pc.</strong> Pc depends on three things
               together — miss distance, the combined physical size of both
-              objects, and how *precisely* their positions are actually known.
-              An object with a longer tracking history and precise orbit
-              determination can have a moderate miss distance but very low Pc,
-              because its position is tightly known. An object with sparse or
-              older tracking data can have a larger miss distance but higher Pc,
-              because its true position could plausibly be anywhere within a
-              wider uncertainty region — some of which may overlap the collision
-              zone even at a seemingly comfortable distance. Counterintuitively,
-              Pc can decrease again at very extreme uncertainty, since the same
-              probability gets spread across such a large area that its
-              concentration over the actual collision zone thins out. This is
-              why sorting by "Highest Risk" (Pc) on this page sometimes surfaces
-              an event with a larger miss distance above one with a smaller
+              objects, and how precisely their positions are actually known.
+            </p>
+            <ul className="cw__explainerList">
+              <li>
+                <strong>Precisely tracked objects</strong> can have a moderate
+                miss distance but very low Pc, since their true position is
+                tightly known.
+              </li>
+              <li>
+                <strong>Poorly tracked objects</strong> can have a larger miss
+                distance but higher Pc, since their true position could plausibly
+                fall anywhere within a wider uncertainty region — some of which
+                may overlap the collision zone even at a seemingly comfortable
+                distance.
+              </li>
+              <li>
+                Counterintuitively, Pc can <strong>decrease again</strong> at
+                very extreme uncertainty, since the same probability spreads
+                across such a large area that its concentration over the actual
+                collision zone thins out.
+              </li>
+            </ul>
+            <p className="cw__explainerBody cw__explainerBody--note">
+              This is why sorting by "Highest Risk" (Pc) on this page sometimes
+              surfaces an event with a larger miss distance above one with a smaller
               miss distance — that's expected behavior, not an error.
             </p>
             <div style={{ display: "flex", gap: "32px", marginTop: "24px", flexWrap: "wrap", justifyContent: "center" }}>

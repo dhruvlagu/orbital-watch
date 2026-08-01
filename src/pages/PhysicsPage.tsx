@@ -26,6 +26,7 @@ export default function PhysicsPage() {
   const calculatorRef = useRef<HTMLDivElement>(null);
   const technicalCardRef = useRef<HTMLDivElement>(null);
   const policyButtonRef = useRef<HTMLAnchorElement>(null);
+  const calculatorTrackedRef = useRef(false);
 
   useMagneticButton(policyButtonRef);
   useCardSpotlight(speedCalloutRef);
@@ -54,15 +55,16 @@ export default function PhysicsPage() {
     });
   };
 
-  const trackCalculatorUsage = (nextMass: number, nextVelocity: number) => {
+  const trackCalculatorUsage = (calculatorType: string) => {
     if (typeof window === "undefined") return;
+    if (calculatorTrackedRef.current) return;
 
     const gtagFn = (window as Window & { gtag?: (...args: unknown[]) => void }).gtag;
     if (typeof gtagFn === "function") {
       gtagFn("event", "calculator_used", {
-        mass_grams: nextMass,
-        velocity_kms: nextVelocity,
+        calculator_type: calculatorType,
       });
+      calculatorTrackedRef.current = true;
     }
   };
 
@@ -287,7 +289,7 @@ export default function PhysicsPage() {
                     const pos = parseFloat(e.target.value);
                     const nextMass = sliderToMass(pos);
                     setMass(nextMass);
-                    trackCalculatorUsage(nextMass, velocity);
+                    trackCalculatorUsage("kinetic_energy");
                   }}
                   className="slider"
                 />
@@ -327,7 +329,7 @@ export default function PhysicsPage() {
                   onChange={(e) => {
                     const nextVelocity = parseFloat(e.target.value);
                     setVelocity(nextVelocity);
-                    trackCalculatorUsage(mass, nextVelocity);
+                    trackCalculatorUsage("kinetic_energy");
                   }}
                   className="slider"
                 />

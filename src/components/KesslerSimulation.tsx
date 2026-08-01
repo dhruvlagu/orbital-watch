@@ -18,7 +18,7 @@ interface Debris {
 // MAGNETIC BUTTON AUDIT: "Trigger Cascade" button uses magnetic effect
 export default function KesslerSimulation() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [debris, setDebris] = useState<Debris[]>([]);
+  const [, setDebris] = useState<Debris[]>([]);
   const [isRunning, setIsRunning] = useState(false);
   const animationRef = useRef<number>();
   const triggerButtonRef = useRef<HTMLButtonElement>(null);
@@ -28,50 +28,48 @@ export default function KesslerSimulation() {
 
   useMagneticButton(triggerButtonRef);
 
-  const initialDebris: Debris[] = Array.from({ length: 15 }, (_, i) => {
-    const angle = (i / 15) * Math.PI * 2;
-    const radius = 0.25 + Math.random() * 0.15;
-    const inclination = (Math.random() - 0.5) * 0.8; // Random inclination between -0.4 and 0.4 radians
-    
-    // Calculate 3D position using spherical coordinates with inclination
-    const cosAngle = Math.cos(angle);
-    const sinAngle = Math.sin(angle);
-    const cosInc = Math.cos(inclination);
-    const sinInc = Math.sin(inclination);
-    
-    // 3D coordinates centered at origin
-    const x3d = radius * cosAngle;
-    const y3d = radius * sinAngle * cosInc;
-    const z3d = radius * sinAngle * sinInc;
-    
-    // Calculate orbital velocity (tangential to orbit)
-    const orbitalSpeed = 0.02;
-    const vx = -orbitalSpeed * sinAngle;
-    const vy = orbitalSpeed * cosAngle * cosInc;
-    const vz = orbitalSpeed * cosAngle * sinInc;
-    
-    return {
-      id: `d-${i}`,
-      angle,
-      radius,
-      inclination,
-      x: 0.5 + x3d,
-      y: 0.5 + y3d,
-      z: z3d,
-      vx,
-      vy,
-      vz,
-      size: 3,
-    };
-  });
+  const initialDebrisRef = useRef<Debris[] | null>(null);
+  if (!initialDebrisRef.current) {
+    initialDebrisRef.current = Array.from({ length: 15 }, (_, i) => {
+      const angle = (i / 15) * Math.PI * 2;
+      const radius = 0.25 + Math.random() * 0.15;
+      const inclination = (Math.random() - 0.5) * 0.8;
+
+      const cosAngle = Math.cos(angle);
+      const sinAngle = Math.sin(angle);
+      const cosInc = Math.cos(inclination);
+      const sinInc = Math.sin(inclination);
+
+      const x3d = radius * cosAngle;
+      const y3d = radius * sinAngle * cosInc;
+      const z3d = radius * sinAngle * sinInc;
+
+      const orbitalSpeed = 0.02;
+      const vx = -orbitalSpeed * sinAngle;
+      const vy = orbitalSpeed * cosAngle * cosInc;
+      const vz = orbitalSpeed * cosAngle * sinInc;
+
+      return {
+        id: `d-${i}`,
+        angle,
+        radius,
+        inclination,
+        x: 0.5 + x3d,
+        y: 0.5 + y3d,
+        z: z3d,
+        vx,
+        vy,
+        vz,
+        size: 3,
+      };
+    });
+  }
+  const initialDebris = initialDebrisRef.current;
 
   useEffect(() => {
     setDebris(initialDebris);
     currentDebrisRef.current = initialDebris;
     drawCanvas(initialDebris, rippleRef.current);
-    // #region agent log
-    fetch('http://127.0.0.1:7410/ingest/c16f9c49-958a-4a3c-8919-bdb2522ba221',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'0f8587'},body:JSON.stringify({sessionId:'0f8587',location:'KesslerSimulation.tsx:init-effect',message:'init debris effect',data:{refLen:initialDebris.length,hydrating:document.getElementById('root')?.hasChildNodes()??false,isAnimating:isAnimatingRef.current},timestamp:Date.now(),hypothesisId:'H2',runId:'post-fix'})}).catch(()=>{});
-    // #endregion
   }, []);
 
   const triggerCascade = () => {
@@ -79,9 +77,6 @@ export default function KesslerSimulation() {
     rippleRef.current = { radius: 0, opacity: 0.6, active: true };
     currentDebrisRef.current = [...currentDebrisRef.current];
     isAnimatingRef.current = true;
-    // #region agent log
-    fetch('http://127.0.0.1:7410/ingest/c16f9c49-958a-4a3c-8919-bdb2522ba221',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'0f8587'},body:JSON.stringify({sessionId:'0f8587',location:'KesslerSimulation.tsx:triggerCascade',message:'cascade started',data:{stateDebrisLen:debris.length,refDebrisLen:currentDebrisRef.current.length,hydrating:document.getElementById('root')?.hasChildNodes()??false},timestamp:Date.now(),hypothesisId:'H1'})}).catch(()=>{});
-    // #endregion
     let time = 0;
     const duration = 2500; // 2.5 seconds
     const maxDebrisCount = 150; // Cap per cascade
@@ -103,7 +98,6 @@ export default function KesslerSimulation() {
 
       if (progress < 1) {
         // Add new debris randomly every few frames (respect per-cascade cap)
-        const countBeforeFrame = currentDebrisRef.current.length;
         let spawnedThisFrame = 0;
         if (Math.random() < 0.4 && debrisAddedInCascade < maxDebrisCount) {
           const newRadius = 0.25 + Math.random() * 0.15;
@@ -217,17 +211,9 @@ export default function KesslerSimulation() {
         }
 
         // Remove collided debris and add fragments (respect per-cascade cap)
-        const beforeFilterLen = currentDebrisRef.current.length;
-        const markedRemoved = currentDebrisRef.current.filter((d: Debris) => d.size === 0).length;
         const fragmentsToAdd = newFragments;
         currentDebrisRef.current = [...currentDebrisRef.current.filter((d: Debris) => d.size > 0), ...fragmentsToAdd];
         debrisAddedInCascade += fragmentsToAdd.length;
-        const countAfterFrame = currentDebrisRef.current.length;
-        if (spawnedThisFrame > 0 || countAfterFrame < countBeforeFrame || markedRemoved > fragmentsToAdd.length) {
-          // #region agent log
-          fetch('http://127.0.0.1:7410/ingest/c16f9c49-958a-4a3c-8919-bdb2522ba221',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'0f8587'},body:JSON.stringify({sessionId:'0f8587',location:'KesslerSimulation.tsx:animate-frame',message:'debris count delta',data:{time,spawnedThisFrame,countBeforeFrame,beforeFilterLen,markedRemoved,collisions:newFragments.length/2,fragmentsAdded:fragmentsToAdd.length,fragmentsDropped:0,countAfterFrame,capRemaining:maxDebrisCount-debrisAddedInCascade,netDelta:countAfterFrame-countBeforeFrame},timestamp:Date.now(),hypothesisId:'H4',runId:'post-fix'})}).catch(()=>{});
-          // #endregion
-        }
 
         drawCanvas(currentDebrisRef.current, rippleRef.current);
         animationRef.current = requestAnimationFrame(animate);

@@ -1,10 +1,15 @@
-import { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { useEffect, useLayoutEffect, useState, useRef } from "react";
+import { NavLink, useLocation } from "react-router-dom";
 import { NAV_LINKS } from "../services/navLinks";
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [indicatorLeft, setIndicatorLeft] = useState(0);
+  const [indicatorWidth, setIndicatorWidth] = useState(0);
+  const navRef = useRef<HTMLElement | null>(null);
+  const location = useLocation();
 
   const closeMobileNav = () => {
     setIsClosing(true);
@@ -12,6 +17,19 @@ export default function Navbar() {
       setMobileOpen(false);
       setIsClosing(false);
     }, 200);
+  };
+
+  const measureActiveLink = () => {
+    const navEl = navRef.current;
+    if (!navEl) return;
+
+    const activeLink = navEl.querySelector<HTMLAnchorElement>(".navlink.is-active");
+    if (!activeLink) return;
+
+    const navRect = navEl.getBoundingClientRect();
+    const linkRect = activeLink.getBoundingClientRect();
+    setIndicatorLeft(linkRect.left - navRect.left);
+    setIndicatorWidth(linkRect.width);
   };
 
   useEffect(() => {
@@ -29,14 +47,47 @@ export default function Navbar() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
+  useLayoutEffect(() => {
+    measureActiveLink();
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 80);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    let frame: number | null = null;
+    const handleResize = () => {
+      if (frame !== null) {
+        cancelAnimationFrame(frame);
+      }
+      frame = window.requestAnimationFrame(() => {
+        measureActiveLink();
+        frame = null;
+      });
+    };
+
+    window.addEventListener("resize", handleResize, { passive: true });
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      if (frame !== null) cancelAnimationFrame(frame);
+    };
+  }, []);
+
   return (
-    <header className="navbar" role="banner">
+    <header className={`navbar ${isScrolled ? "navbar--scrolled" : ""}`} role="banner">
       <div className="container navbar__inner">
         <NavLink className="navbar__logo" to="/" aria-label="Go to home">
           ORBITAL WATCH
         </NavLink>
 
-        <nav className="navbar__nav" aria-label="Primary">
+        <nav ref={navRef} className="navbar__nav" aria-label="Primary">
           {NAV_LINKS.map((link) => (
             <NavLink
               key={link.path}
@@ -48,6 +99,11 @@ export default function Navbar() {
               {link.label}
             </NavLink>
           ))}
+          <span
+            className="navbar__activeIndicator"
+            style={{ left: indicatorLeft, width: indicatorWidth }}
+            aria-hidden="true"
+          />
         </nav>
 
         {!mobileOpen && (

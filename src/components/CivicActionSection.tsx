@@ -12,8 +12,6 @@ export interface CivicActionSectionProps {
 
 const PERSONALIZATION_PLACEHOLDER_SUBSTRING = "[Add a sentence";
 
-const STAKES_PARAGRAPH = "There are already thousands of pieces of debris orbiting Earth, and just one collision can create thousands more. If this keeps happening, it could break the GPS, weather forecasting, and communications systems that people in our district use every day. The current rules aren't keeping up with how fast this problem is getting worse.";
-
 function trackGA4Event(eventName: string, params?: Record<string, unknown>) {
   if (typeof window === "undefined") return;
   const gtagFn = (window as Window & { gtag?: (...args: unknown[]) => void }).gtag;
@@ -56,20 +54,19 @@ export default function CivicActionSection({
     if (!ask) return;
 
     const repName = repResult.representativeName;
-    const statText = ask.supportingStat ? ` ${ask.supportingStat}` : "";
     const nameFormatted = userName.trim() ? userName.trim() : "[Your name]";
-    const lowercasedAskSummary = ask.askSummary.charAt(0).toLowerCase() + ask.askSummary.slice(1);
 
     const generated = `Dear Representative ${repName},
 
-I'm a constituent in your district, and I'm writing to ask you to ${lowercasedAskSummary}
+${ask.opening}
 
-${STAKES_PARAGRAPH}
+${ask.issueParagraph}
 
-I hope you'll ${ask.repCanDo}.${statText}
+${ask.supportingStat || ""}
 
-I'd like to know where you stand on this issue and if you're working on anything related to it.
+I hope you'll ${ask.repCanDo}.
 
+As someone who cares about the long-term sustainability of space, I hope Congress continues treating orbital debris as an issue worthy of bipartisan attention.
 [Add a sentence about why this matters to you personally — messages with a personal note are far more likely to be read as genuine by congressional staff than a form letter.]
 
 Thank you,
