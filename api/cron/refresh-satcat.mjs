@@ -108,30 +108,62 @@ function normalizeCatalogEntry(record) {
 // ─── Space-Track query ────────────────────────────────────────────────────────
 
 async function fetchSatcatRecords(cookieHeader, fileNumber) {
-  let queryUrl;
-  if (fileNumber) {
-    // Incremental: only objects updated since the last known file number
-    queryUrl = `${SATCAT_BASE_URL}/FILE/>${fileNumber}/predicates/${PREDICATES}/format/json`;
-    console.log(`[refresh-satcat] Incremental fetch — file > ${fileNumber}`);
-  } else {
-    // First run: full snapshot
-    queryUrl = `${SATCAT_BASE_URL}/predicates/${PREDICATES}/format/json`;
-    console.log("[refresh-satcat] Full fetch — first run (no stored file number).");
-  }
+  // Pagination is required because SATCAT contains tens of thousands of records (~34,000–40,000 objects).
+  // Single-request fetching is unsafe as it may timeout or return truncated results without error.
+  // Page size of 5000 balances request size with reliability; can be adjusted if Space-Track recommends otherwise.
+  const pageSize = 5000;
+  const orderBy = "NORAD_CAT_ID"; // Deterministic ordering to prevent page overlap/skip
 
-  const dataResponse = await fetch(queryUrl, {
-    headers: { Cookie: cookieHeader },
-  });
+  let allRecords = [];
+  let offset = 0;
+  let page;
 
-  if (dataResponse.status === 401 || dataResponse.status === 403) {
-    throw new Error("Space-Track session expired.");
-  }
+  do {
+    let queryUrl;
+    if (fileNumber) {
+      // Incremental: only objects updated since the last known file number
+      queryUrl = `${SATCAT_BASE_URL}/FILE/>${fileNumber}/predicates/${PREDICATES}/orderby/${orderBy}/limit/${pageSize}/offset/${offset}/format/json`;
+      if (offset === 0) {
+        console.log(`[refresh-satcat] Incremental fetch — file > ${fileNumber}`);
+      }
+    } else {
+      // First run: full snapshot
+      queryUrl = `${SATCAT_BASE_URL}/predicates/${PREDICATES}/orderby/${orderBy}/limit/${pageSize}/offset/${offset}/format/json`;
+      if (offset === 0) {
+        console.log("[refresh-satcat] Full fetch — first run (no stored file number).");
+      }
+    }
 
-  if (!dataResponse.ok) {
-    throw new Error(`Space-Track SATCAT query failed: HTTP ${dataResponse.status}`);
-  }
+    const dataResponse = await fetch(queryUrl, {
+      headers: { Cookie: cookieHeader },
+    });
 
-  return dataResponse.json();
+    if (dataResponse.status === 401 || dataResponse.status === 403) {
+      throw new Error("Space-Track session expired.");
+    }
+
+    if (!dataResponse.ok) {
+      throw new Error(`Space-Track SATCAT query failed: HTTP ${dataResponse.status}`);
+    }
+
+    page = await dataResponse.json();
+
+    if (!Array.isArray(page)) {
+      throw new Error(`Space-Track SATCAT query returned non-array response`);
+    }
+
+    console.log(`[refresh-satcat] Fetched page: ${page.length} records at offset ${offset}`);
+    allRecords = allRecords.concat(page);
+
+    // Stop if we received fewer records than the page size (final page)
+    if (page.length < pageSize) {
+      break;
+    }
+
+    offset += pageSize;
+  } while (true);
+
+  return allRecords;
 }
 
 // ─── Handler ──────────────────────────────────────────────────────────────────
