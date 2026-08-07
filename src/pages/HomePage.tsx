@@ -10,7 +10,7 @@ import { fetchConjunctions, type ConjunctionResponse } from "../services/conjunc
 const STATS_GROUP = (
   <div className="quickStats__group">
     <div className="quickStats__item">
-      Objects tracked in orbit: <span>40,000+</span>
+      Objects tracked in orbit: <span>Tens of thousands</span>
     </div>
     <div className="quickStats__divider" />
     <div className="quickStats__item">
@@ -97,9 +97,9 @@ export default function HomePage() {
               <h1 className="hero__headline">Earth&apos;s Orbit Is Becoming a Graveyard.</h1>
               <p className="hero__subheadline">
                 GPS, weather forecasts, and internet connectivity all depend on
-                satellites. Decades of Cold War era neglect created 40,000+ trackable
-                objects in low Earth orbit (LEO) traveling at 17,500 mph. A single collision
-                cascade could render LEO unusable for generations.
+                satellites. Decades of Cold War era neglect created tens of thousands of
+                trackable objects in Earth orbit traveling at 17,500 mph. A single collision
+                cascade could render low Earth orbit unusable for generations.
               </p>
 
               <div className="hero__liveData">

@@ -214,27 +214,43 @@ export default async function handler(req, res) {
       }
     }
 
-    if (!Array.isArray(records) || records.length === 0) {
-      console.log(
-        "[refresh-satcat] Space-Track returned 0 records — no update needed (no new SATCAT entries since last run).",
-      );
-      success = true;
-      return res.status(200).json({
-        ok: true,
-        message: "No new SATCAT records since last run.",
-        durationMs: Date.now() - startedAt,
-      });
-    }
-
     console.log(`[refresh-satcat] Fetched ${records.length} records.`);
 
-    // 4. Merge incoming records into the full catalog and compute metrics from the merged data.
+    // 4. Parse existing catalog (needed for both zero-records and normal paths)
     const existingCatalog = storedCatalogJson
       ? JSON.parse(storedCatalogJson)
       : {};
     const catalog = typeof existingCatalog === "object" && existingCatalog !== null && !Array.isArray(existingCatalog)
       ? existingCatalog
       : {};
+
+    if (!Array.isArray(records) || records.length === 0) {
+      console.log(
+        "[refresh-satcat] Space-Track returned 0 records — no update needed (no new SATCAT entries since last run).",
+      );
+
+      // Rebuild metrics from existing catalog and refresh timestamp
+      const catalogEntries = Object.values(catalog);
+      const computed = buildMetrics(catalogEntries);
+      metrics = computed.metrics;
+
+      await withRedis(async (c) => {
+        const pipeline = c.multi();
+        pipeline.set("satcat:latest", JSON.stringify(metrics));
+        pipeline.set("satcat:lastUpdatedAt", new Date().toISOString());
+        await pipeline.exec();
+      });
+
+      success = true;
+      return res.status(200).json({
+        ok: true,
+        message: "No new SATCAT records — timestamp refreshed.",
+        totalTracked: metrics.totalTracked,
+        durationMs: Date.now() - startedAt,
+      });
+    }
+
+    // 5. Merge incoming records into the full catalog and compute metrics from the merged data.
 
     for (const record of records) {
       const normalized = normalizeCatalogEntry(record);
@@ -250,7 +266,7 @@ export default async function handler(req, res) {
     const serializedCatalog = JSON.stringify(catalog);
     console.log(`[refresh-satcat] Catalog size: ${serializedCatalog.length} bytes`);
 
-    // 5. Persist catalog and metrics to Redis
+    // 6. Persist catalog and metrics to Redis
     await withRedis(async (c) => {
       const pipeline = c.multi();
       pipeline.set("satcat:catalog", serializedCatalog);
