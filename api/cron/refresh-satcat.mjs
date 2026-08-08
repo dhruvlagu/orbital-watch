@@ -122,13 +122,13 @@ async function fetchSatcatRecords(cookieHeader, fileNumber) {
     let queryUrl;
     if (fileNumber) {
       // Incremental: only objects updated since the last known file number
-      queryUrl = `${SATCAT_BASE_URL}/FILE/>${fileNumber}/predicates/${PREDICATES}/orderby/${orderBy}/limit/${pageSize}/offset/${offset}/format/json`;
+      queryUrl = `${SATCAT_BASE_URL}/FILE/>${fileNumber}/predicates/${PREDICATES}/orderby/${orderBy}/limit/${pageSize},${offset}/format/json`;
       if (offset === 0) {
         console.log(`[refresh-satcat] Incremental fetch — file > ${fileNumber}`);
       }
     } else {
       // First run: full snapshot
-      queryUrl = `${SATCAT_BASE_URL}/predicates/${PREDICATES}/orderby/${orderBy}/limit/${pageSize}/offset/${offset}/format/json`;
+      queryUrl = `${SATCAT_BASE_URL}/predicates/${PREDICATES}/orderby/${orderBy}/limit/${pageSize},${offset}/format/json`;
       if (offset === 0) {
         console.log("[refresh-satcat] Full fetch — first run (no stored file number).");
       }
