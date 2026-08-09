@@ -799,18 +799,15 @@
   grid-template-columns: 1.1fr 0.9fr;
   gap: 30px;
   align-items: center;
-  opacity: 0;
-  transform: translateY(30px);
-  transition: opacity var(--transition-reveal), transform var(--transition-reveal);
-}
-
-.timelineEvent.is-visible {
-  opacity: 1;
-  transform: translateY(0);
 }
 
 .timelineEvent--flip {
   grid-template-columns: 0.9fr 1.1fr;
+}
+
+/* Ensure reveal-item works with timeline-specific transitions */
+.timelineEvent.reveal-item {
+  transition: opacity var(--transition-reveal), transform var(--transition-reveal);
 }
 
 .timelineEvent--flip .timelineEvent__text {

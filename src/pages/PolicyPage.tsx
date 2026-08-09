@@ -27,7 +27,7 @@ const policyOptions: Policy[] = [
     name: "Global Ban on ASAT Missile Tests",
     description: "International treaty prohibiting all destructive anti-satellite weapons tests that generate trackable debris.",
     impact: 5000,
-    tooltip: "Prevents recurrence of events like China 2007 (+150,000 fragments) and Russia 2021 (+1,500 fragments)",
+    tooltip: "Prevents recurrence of events like China 2007 (3,000+ trackable fragments, ~150,000 total estimated pieces) and Russia 2021 (+1,500 fragments)",
   },
   {
     id: "adr",

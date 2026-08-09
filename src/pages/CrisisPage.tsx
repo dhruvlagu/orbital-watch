@@ -54,6 +54,18 @@ const markedEvents = [
   { year: 2009, label: "Iridium collision" },
 ];
 
+// Centralized color reference for canvas animations (design system consistency)
+const CANVAS_COLORS = {
+  accentBlue: "#00d4ff",
+  accentAmber: "#f5a623",
+  accentRed: "#ff3b3b",
+  textSecondary: "#8b9ab0",
+  textPrimary: "#ffffff",
+  borderSubtle: "rgba(255, 255, 255, 0.08)",
+  bgDark: "#0c152a",
+  bgDarker: "#0a0e1a",
+} as const;
+
 const eventMarkerPlugin: Plugin<"line"> = {
   id: "eventMarkers",
   afterDraw(chart: ChartJS<"line">) {
@@ -67,7 +79,7 @@ const eventMarkerPlugin: Plugin<"line"> = {
       if (x < chartArea.left || x > chartArea.right) return;
 
       ctx.setLineDash([4, 6]);
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.35)";
+      ctx.strokeStyle = `rgba(255, 255, 255, 0.35)`;
       ctx.beginPath();
       ctx.moveTo(x, chartArea.top);
       ctx.lineTo(x, chartArea.bottom);
@@ -75,14 +87,9 @@ const eventMarkerPlugin: Plugin<"line"> = {
 
       ctx.setLineDash([]);
       ctx.font = "12px Inter, sans-serif";
-      ctx.fillStyle = "#8b9ab0";
-      if (event.year === 2025) {
-        ctx.textAlign = "right";
-        ctx.fillText(event.label, x - 6, chartArea.top + 16);
-      } else {
-        ctx.textAlign = "left";
-        ctx.fillText(event.label, x + 6, chartArea.top + 16);
-      }
+      ctx.fillStyle = CANVAS_COLORS.textSecondary;
+      ctx.textAlign = "left";
+      ctx.fillText(event.label, x + 6, chartArea.top + 16);
     });
     ctx.restore();
   },
@@ -94,7 +101,7 @@ const glowLinePlugin: Plugin<"line"> = {
     if (args.index !== 0) return;
     const { ctx } = chart;
     ctx.save();
-    ctx.shadowColor = "rgba(0, 212, 255, 0.6)";
+    ctx.shadowColor = `rgba(0, 212, 255, 0.6)`;
     ctx.shadowBlur = 16;
   },
   afterDatasetDraw(chart: ChartJS<"line">, args: { index: number }) {
@@ -110,15 +117,15 @@ const crisisEvents = [
     context:
       "Sputnik's launch ignited the Space Race between the US and USSR. Speed was the only metric that mattered — no nation paused to consider what would happen to hardware once its mission ended. Rocket boosters, dead satellites, lens caps — all abandoned in orbit without a second thought.",
     significance:
-      "Established the 'Frontier Mentality' — space as an infinite, empty void.",
+      "Fostered an early operational approach that treated low Earth orbit as an infinite, self-cleaning environment.",
     visualType: "orbit",
   },
   {
     year: "1967",
-    title: "The Paper Shield",
+    title: "The Sovereignty Trap",
     context:
       "The Outer Space Treaty was signed by the US, USSR, and UK, becoming the foundational document of space law. While it declared space the 'province of all mankind,' it also established that nations retain permanent jurisdiction over every object they launch — forever. This seemingly reasonable clause would become the legal barrier preventing international debris cleanup decades later.",
-    significance: "Space got a constitution. It didn't mention trash.",
+    significance: "Established foundational international space governance while omitting rules for orbital debris management.",
     visualType: "document",
   },
   {
@@ -126,7 +133,7 @@ const crisisEvents = [
     title: "The Warning No One Heard",
     context:
       "NASA scientist Donald J. Kessler and colleague Burton Cour-Palais published a peer-reviewed paper in the Journal of Geophysical Research mathematically modeling a self-sustaining collision cascade in LEO. They calculated the orbital density threshold at which debris collisions would become inevitable and exponential. The paper was largely ignored by policymakers.",
-    significance: "The math existed. The will to act didn't.",
+    significance: "Established the mathematical model for self-sustaining collision cascades decades before commercial constellation expansion.",
     visualType: "warning",
   },
   {
@@ -139,7 +146,7 @@ const crisisEvents = [
   },
   {
     year: "2009",
-    title: "The Zombie Strike",
+    title: "The Zombie Satellite Collision",
     context:
       "On February 10, 2009, the active Iridium-33 communications satellite collided with the decommissioned Russian Cosmos-2251 at a closing speed of 11.7 km/s — roughly 26,000 mph. The first accidental hypervelocity impact between two intact satellites in history, it generated over 2,300 trackable fragments and an estimated 100,000+ smaller pieces. Both objects were tracked by the Space Surveillance Network — but the conjunction warning system failed to flag the collision risk in time for Iridium operators to maneuver.",
     significance: "The Kessler Syndrome stopped being theoretical.",
@@ -150,7 +157,7 @@ const crisisEvents = [
     title: "Too Little, Too Late?",
     context:
       "The FCC passed the 5-Year Rule, requiring US-licensed satellites to de-orbit within five years of mission end — replacing the previous 25-year standard. Progress, but only binding on US operators. Meanwhile, SpaceX's Starlink constellation was adding hundreds of satellites per year, and China was building its own megaconstellation.",
-    significance: "The first enforceable rule. Still only covers one nation.",
+    significance: "The first enforceable de-orbit rule, though limited to US-licensed operators.",
     visualType: "constellation",
     tone: "amber",
   },
@@ -195,18 +202,18 @@ function SputnikVisual() {
       // Draw Earth body
       ctx.beginPath();
       ctx.arc(cx, cy, 40, 0, Math.PI * 2);
-      ctx.fillStyle = "#0c152b";
+      ctx.fillStyle = CANVAS_COLORS.bgDark;
       ctx.fill();
       ctx.lineWidth = 1.5;
-      ctx.strokeStyle = "rgba(0, 212, 255, 0.5)";
-      ctx.shadowColor = "rgba(0, 212, 255, 0.3)";
+      ctx.strokeStyle = `rgba(0, 212, 255, 0.5)`;
+      ctx.shadowColor = `rgba(0, 212, 255, 0.3)`;
       ctx.shadowBlur = 8;
       ctx.stroke();
       ctx.shadowBlur = 0;
 
       // Earth latitude & longitude lines
       ctx.lineWidth = 1;
-      ctx.strokeStyle = "rgba(0, 212, 255, 0.2)";
+      ctx.strokeStyle = `rgba(0, 212, 255, 0.2)`;
       ctx.beginPath();
       ctx.ellipse(cx, cy, 40, 15, 0, 0, Math.PI * 2);
       ctx.stroke();
@@ -218,7 +225,7 @@ function SputnikVisual() {
       ctx.beginPath();
       ctx.arc(cx, cy, 80, 0, Math.PI * 2);
       ctx.setLineDash([4, 6]);
-      ctx.strokeStyle = "rgba(0, 212, 255, 0.15)";
+      ctx.strokeStyle = `rgba(0, 212, 255, 0.15)`;
       ctx.stroke();
       ctx.setLineDash([]);
 
@@ -261,7 +268,7 @@ function SputnikVisual() {
       ctx.shadowBlur = 14;
       ctx.beginPath();
       ctx.arc(sx, sy, 5, 0, Math.PI * 2);
-      ctx.fillStyle = "#ffffff";
+      ctx.fillStyle = CANVAS_COLORS.textPrimary;
       ctx.fill();
       ctx.shadowBlur = 0;
 
@@ -357,7 +364,7 @@ function WarningVisual() {
       lanes.forEach((lane) => {
         const count = Math.floor(lane / 12);
         for (let i = 0; i < count; i++) {
-          satellites.push({ orbit: lane, angle: (i * (Math.PI * 2)) / count, speed: 0.015 - (lane - 54) * 0.00005, color: "#00d4ff", id: idCounter++ });
+          satellites.push({ orbit: lane, angle: (i * (Math.PI * 2)) / count, speed: 0.015 - (lane - 54) * 0.00005, color: CANVAS_COLORS.accentBlue, id: idCounter++ });
         }
       });
     };
@@ -381,7 +388,7 @@ function WarningVisual() {
 
       ctx.beginPath();
       ctx.arc(cx, cy, 32, 0, Math.PI * 2);
-      ctx.fillStyle = "#0a1021";
+      ctx.fillStyle = CANVAS_COLORS.bgDarker;
       ctx.fill();
       ctx.shadowColor = "rgba(0, 180, 255, 0.25)";
       ctx.shadowBlur = 10;
@@ -404,14 +411,14 @@ function WarningVisual() {
         const sx = cx + Math.cos(s.angle) * s.orbit;
         const sy = cy + Math.sin(s.angle) * s.orbit;
 
-        if (s.color === "#00d4ff") {
-          ctx.shadowColor = "rgba(0, 212, 255, 0.7)";
+        if (s.color === CANVAS_COLORS.accentBlue) {
+          ctx.shadowColor = `rgba(0, 212, 255, 0.7)`;
           ctx.shadowBlur = 9;
-        } else if (s.color === "#ff3b3b") {
-          ctx.shadowColor = "rgba(255, 59, 59, 0.8)";
+        } else if (s.color === CANVAS_COLORS.accentRed) {
+          ctx.shadowColor = `rgba(255, 59, 59, 0.8)`;
           ctx.shadowBlur = 12;
         } else {
-          ctx.shadowColor = "rgba(245, 166, 35, 0.6)";
+          ctx.shadowColor = `rgba(245, 166, 35, 0.6)`;
           ctx.shadowBlur = 8;
         }
 
@@ -423,9 +430,9 @@ function WarningVisual() {
       });
 
       if (time >= 100 && time < 102) {
-        const target = satellites.find((s) => s.orbit === 74 && s.color === "#00d4ff");
+        const target = satellites.find((s) => s.orbit === 74 && s.color === CANVAS_COLORS.accentBlue);
         if (target) {
-          target.color = "#f5a623";
+          target.color = CANVAS_COLORS.accentAmber;
           const tx = cx + Math.cos(target.angle) * target.orbit;
           const ty = cy + Math.sin(target.angle) * target.orbit;
           for (let i = 0; i < 18; i++) {
@@ -447,11 +454,11 @@ function WarningVisual() {
         ctx.fill();
 
         satellites.forEach((s) => {
-          if (s.color === "#00d4ff") {
+          if (s.color === CANVAS_COLORS.accentBlue) {
             const sx = cx + Math.cos(s.angle) * s.orbit;
             const sy = cy + Math.sin(s.angle) * s.orbit;
             if (Math.hypot(d.x - sx, d.y - sy) < 6) {
-              s.color = "#ff3b3b";
+              s.color = CANVAS_COLORS.accentRed;
               for (let i = 0; i < 7; i++) {
                 const theta = Math.random() * Math.PI * 2;
                 const speed = 0.4 + Math.random() * 1.5;
@@ -564,7 +571,7 @@ function ScatterVisual() {
       // Earth
       ctx.beginPath();
       ctx.arc(cx, cy, 32, 0, Math.PI * 2);
-      ctx.fillStyle = "#091024";
+      ctx.fillStyle = CANVAS_COLORS.bgDarker;
       ctx.fill();
       ctx.shadowColor = "rgba(0, 212, 255, 0.3)";
       ctx.shadowBlur = 8;
@@ -600,15 +607,15 @@ function ScatterVisual() {
         }
 
         // Satellite
-        ctx.shadowColor = "rgba(0, 212, 255, 0.9)";
+        ctx.shadowColor = `rgba(0, 212, 255, 0.9)`;
         ctx.shadowBlur = 12;
         ctx.beginPath();
         ctx.arc(satX, satY, 4, 0, Math.PI * 2);
-        ctx.fillStyle = "#00d4ff";
+        ctx.fillStyle = CANVAS_COLORS.accentBlue;
         ctx.fill();
         ctx.shadowBlur = 0;
 
-        if (time > 90) {
+        if (time > 40) {
           state = "launching";
           missileY = missileStartY;
         }
@@ -625,11 +632,11 @@ function ScatterVisual() {
           ctx.fill();
         }
 
-        ctx.shadowColor = "rgba(0, 212, 255, 0.9)";
+        ctx.shadowColor = `rgba(0, 212, 255, 0.9)`;
         ctx.shadowBlur = 12;
         ctx.beginPath();
         ctx.arc(satX, satY, 4, 0, Math.PI * 2);
-        ctx.fillStyle = "#00d4ff";
+        ctx.fillStyle = CANVAS_COLORS.accentBlue;
         ctx.fill();
         ctx.shadowBlur = 0;
 
@@ -639,7 +646,7 @@ function ScatterVisual() {
         ctx.beginPath();
         ctx.moveTo(cx, missileStartY);
         ctx.lineTo(cx, missileY + 6);
-        ctx.strokeStyle = "rgba(255, 200, 80, 0.2)";
+        ctx.strokeStyle = `rgba(255, 200, 80, 0.2)`;
         ctx.lineWidth = 2;
         ctx.stroke();
 
@@ -648,12 +655,12 @@ function ScatterVisual() {
         ctx.shadowBlur = 10;
         ctx.beginPath();
         ctx.arc(cx, missileY, 2.5, 0, Math.PI * 2);
-        ctx.fillStyle = "#ffffff";
+        ctx.fillStyle = CANVAS_COLORS.textPrimary;
         ctx.fill();
         ctx.shadowBlur = 0;
 
         const satDist = Math.hypot(cx - satX, missileY - satY);
-        if (satDist < 8 || missileY <= cy - 80) {
+        if (satDist < 20 || missileY <= cy - 75) {
           state = "impacted";
           explosionRadius = 5;
           for (let i = 0; i < 150; i++) {
@@ -665,7 +672,7 @@ function ScatterVisual() {
               vx: Math.cos(angle) * speed + -Math.sin(satAngle) * 1.2,
               vy: Math.sin(angle) * speed + Math.cos(satAngle) * 1.2,
               size: 0.8 + Math.random() * 2,
-              color: i % 3 === 0 ? "#f5a623" : i % 3 === 1 ? "#ff3b3b" : "#8b9ab0",
+              color: i % 3 === 0 ? CANVAS_COLORS.accentAmber : i % 3 === 1 ? CANVAS_COLORS.accentRed : CANVAS_COLORS.textSecondary,
               decay: 0.0012 + Math.random() * 0.003,
               alpha: 1,
             });
@@ -711,7 +718,6 @@ function ScatterVisual() {
 
       time += 1;
       if (time > 500) reset();
-
       animationId = requestAnimationFrame(draw);
     };
 
@@ -840,20 +846,20 @@ function ImpactVisual() {
         }
 
         // Sat 1 — Iridium-33 (active, blue glow)
-        ctx.shadowColor = "rgba(0, 212, 255, 0.9)";
+        ctx.shadowColor = `rgba(0, 212, 255, 0.9)`;
         ctx.shadowBlur = 14;
         ctx.beginPath();
         ctx.arc(sat1.x, sat1.y, 4.5, 0, Math.PI * 2);
-        ctx.fillStyle = "#00d4ff";
+        ctx.fillStyle = CANVAS_COLORS.accentBlue;
         ctx.fill();
         ctx.shadowBlur = 0;
 
         // Sat 2 — Cosmos-2251 (derelict, dim grey)
-        ctx.shadowColor = "rgba(139, 154, 176, 0.5)";
+        ctx.shadowColor = `rgba(139, 154, 176, 0.5)`;
         ctx.shadowBlur = 8;
         ctx.beginPath();
         ctx.arc(sat2.x, sat2.y, 4.5, 0, Math.PI * 2);
-        ctx.fillStyle = "#8b9ab0";
+        ctx.fillStyle = CANVAS_COLORS.textSecondary;
         ctx.fill();
         ctx.shadowBlur = 0;
 
@@ -869,7 +875,7 @@ function ImpactVisual() {
               vx: Math.cos(angle) * speed,
               vy: Math.sin(angle) * speed,
               size: 0.8 + Math.random() * 2,
-              color: i % 3 === 0 ? "#00d4ff" : i % 3 === 1 ? "#ff3b3b" : "#8b9ab0",
+              color: i % 3 === 0 ? CANVAS_COLORS.accentBlue : i % 3 === 1 ? CANVAS_COLORS.accentRed : CANVAS_COLORS.textSecondary,
               alpha: 1.0,
               decay: 0.0015 + Math.random() * 0.003,
             });
@@ -932,7 +938,6 @@ function ImpactVisual() {
 
       time += 1;
       if (time > 400) reset(w, h);
-
       animationId = requestAnimationFrame(draw);
     };
 
@@ -971,7 +976,6 @@ function ConstellationVisual() {
 
     let animationId: number;
     let angleOffset = 0;
-    let labelPulse = 0;
 
     // 6 orbital planes × 10 sats = 60 satellites total visible
     const PLANES = 6;
@@ -1002,7 +1006,7 @@ function ConstellationVisual() {
       // Earth body
       ctx.beginPath();
       ctx.arc(cx, cy, earthR, 0, Math.PI * 2);
-      ctx.fillStyle = "#0c152a";
+      ctx.fillStyle = CANVAS_COLORS.bgDark;
       ctx.fill();
       ctx.shadowColor = "rgba(0, 212, 255, 0.4)";
       ctx.shadowBlur = 10;
@@ -1043,28 +1047,17 @@ function ConstellationVisual() {
           const sx = Math.cos(theta) * o.rx;
           const sy = Math.sin(theta) * o.ry;
 
-          ctx.shadowColor = "rgba(0, 212, 255, 0.7)";
+          ctx.shadowColor = `rgba(0, 212, 255, 0.7)`;
           ctx.shadowBlur = 6;
           ctx.beginPath();
           ctx.arc(sx, sy, 2 * scale, 0, Math.PI * 2);
-          ctx.fillStyle = "#00d4ff";
+          ctx.fillStyle = CANVAS_COLORS.accentBlue;
           ctx.fill();
           ctx.shadowBlur = 0;
         }
 
         ctx.restore();
       });
-
-      // Pulsing satellite count label
-      labelPulse += 0.03;
-      const labelAlpha = 0.55 + Math.sin(labelPulse) * 0.25;
-      ctx.font = `bold ${Math.round(11 * scale)}px 'Inter', monospace`;
-      ctx.textAlign = "center";
-      ctx.fillStyle = `rgba(0, 212, 255, ${labelAlpha})`;
-      ctx.fillText(`${PLANES * SATS_PER_PLANE} SATELLITES`, cx, cy + earthR * 2.4);
-      ctx.font = `${Math.round(9 * scale)}px 'Inter', monospace`;
-      ctx.fillStyle = `rgba(139, 154, 176, ${labelAlpha * 0.7})`;
-      ctx.fillText("MEGACONSTELLATION SHELL", cx, cy + earthR * 2.9);
 
       angleOffset += 0.005;
       animationId = requestAnimationFrame(draw);
@@ -1169,7 +1162,7 @@ export default function CrisisPage() {
     return () => observer.disconnect();
   }, []);
 
-  // Scroll-reveal IntersectionObserver
+  // Scroll-reveal IntersectionObserver - use shared reveal system
   useRevealOnScroll(".timelineEvent", null, 0.15);
 
   const chartData = useMemo(
@@ -1179,7 +1172,7 @@ export default function CrisisPage() {
         {
           label: "Trackable objects",
           data: debrisGrowthData.map((point) => point.count),
-          borderColor: "#00d4ff",
+          borderColor: CANVAS_COLORS.accentBlue,
           backgroundColor: ((ctx: { chart: ChartJS<"line"> }) => {
             const chart = ctx.chart;
             const area = chart.chartArea;
@@ -1206,8 +1199,7 @@ export default function CrisisPage() {
       <div className="container crisisHero">
         <h1>How We Got Here</h1>
         <p>
-          The history of orbital negligence, from the first satellite to the edge of
-          catastrophe.
+          Trace the history of orbital debris from Sputnik's launch to present-day constellation growth, and explore how policy gaps shape modern collision risks.
         </p>
       </div>
 
@@ -1231,16 +1223,16 @@ export default function CrisisPage() {
                   borderColor: "rgba(255,255,255,0.15)",
                   borderWidth: 1,
                   titleColor: "#fff",
-                  bodyColor: "#8b9ab0",
+                  bodyColor: CANVAS_COLORS.textSecondary,
                 },
               },
               scales: {
                 x: {
-                  ticks: { color: "#8b9ab0" },
+                  ticks: { color: CANVAS_COLORS.textSecondary },
                   grid: { color: "rgba(255,255,255,0.08)" },
                 },
                 y: {
-                  ticks: { color: "#8b9ab0" },
+                  ticks: { color: CANVAS_COLORS.textSecondary },
                   grid: { color: "rgba(255,255,255,0.08)" },
                 },
               },
@@ -1255,9 +1247,11 @@ export default function CrisisPage() {
       <div className="container timeline" ref={timelineRef}>
         {crisisEvents.map((event, idx) => (
           <article
-            className={`timelineEvent ${idx % 2 === 0 ? "" : "timelineEvent--flip"} ${event.tone === "amber" ? "timelineEvent--amber" : ""
+            className={`timelineEvent reveal-item ${idx % 2 === 0 ? "" : "timelineEvent--flip"} ${event.tone === "amber" ? "timelineEvent--amber" : ""
               }`}
             key={event.year}
+            aria-label={`${event.year}: ${event.title}`}
+            style={{ ["--reveal-i" as any]: idx }}
           >
             <div className="timelineEvent__text">
               <div className="card timelineEvent__content">
@@ -1282,7 +1276,7 @@ export default function CrisisPage() {
               <span className="badge badge--red timelineEvent__yearPill">Today</span>
               <h3>The Tipping Point</h3>
             <p>
-              <strong style={{ color: "#00d4ff" }}>{liveCount.toLocaleString()}</strong> tracked objects across all orbital regimes — and growing. In LEO alone, 4,772 new objects were added in 2025, 91% of them active megaconstellation payloads. Millions of additional fragments remain too small to track but large enough to destroy a satellite. Active debris removal technology exists but faces legal paralysis under the 1967 Treaty. The window to act may be closing.
+              <strong style={{ color: "var(--accent-blue)" }}>{liveCount.toLocaleString()}</strong> tracked objects across all orbital regimes — and growing. In LEO alone, thousands of new objects are added each year, the large majority of them active megaconstellation payloads. Millions of additional fragments remain too small to track but large enough to destroy a satellite. Active debris removal technology exists but faces legal paralysis under the 1967 Treaty. The window to act may be closing.
             </p>
             <p>
               See the conjunctions being tracked right now on the{" "}
