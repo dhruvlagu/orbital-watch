@@ -14,7 +14,7 @@ const STATS_GROUP = (
     </div>
     <div className="quickStats__divider" />
     <div className="quickStats__item">
-      Total mass in orbit: <span>15,000+ tonnes</span>
+      Total mass in orbit: <span>15,000+ tons</span>
     </div>
     <div className="quickStats__divider" />
     <div className="quickStats__item">

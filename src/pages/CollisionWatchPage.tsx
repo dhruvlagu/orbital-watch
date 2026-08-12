@@ -95,14 +95,28 @@ function RiskBadge({ tier, emergency }: { tier: RiskTier; emergency: boolean }) 
 
   return (
     <div className="cw__badgeRow">
-      <div className="tooltipContainer" style={{ marginLeft: 0 }}>
+      <div
+        className="tooltipContainer"
+        style={{ marginLeft: 0 }}
+        onClick={(e) => {
+          e.stopPropagation();
+          (e.currentTarget as HTMLElement).classList.toggle("is-open");
+        }}
+      >
         <span className={cls} tabIndex={0} aria-label={`Risk tier: ${label}`}>
           {label}
         </span>
         <div className="tooltipText">{tierTooltip[tier]}</div>
       </div>
       {emergency && (
-        <div className="tooltipContainer" style={{ marginLeft: 0 }} onClick={(e) => e.stopPropagation()}>
+        <div
+          className="tooltipContainer"
+          style={{ marginLeft: 0 }}
+          onClick={(e) => {
+            e.stopPropagation();
+            (e.currentTarget as HTMLElement).classList.toggle("is-open");
+          }}
+        >
           <span className="badge badge--red" tabIndex={0} aria-label="Emergency reportable">
             <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline',verticalAlign:'middle',marginRight:'4px'}} aria-hidden="true">
               <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
@@ -189,7 +203,13 @@ function ConjunctionCard({ event, index }: { event: ConjunctionEvent; index?: nu
         <div className="cw__metaItem">
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span className="cw__metaLabel">Pc</span>
-            <div className="tooltipContainer" onClick={(e) => e.stopPropagation()}>
+            <div
+              className="tooltipContainer"
+              onClick={(e) => {
+                e.stopPropagation();
+                (e.currentTarget as HTMLElement).classList.toggle("is-open");
+              }}
+            >
               <span className="infoIcon" tabIndex={0} aria-label="Pc definition">ⓘ</span>
               <div className="tooltipText">
                 <a href="#what-is-pc">Click to view the definition of Pc</a>
@@ -245,6 +265,7 @@ export default function CollisionWatchPage() {
   const [payload, setPayload] = useState<ConjunctionResponse>(FALLBACK_RESPONSE);
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
   const [sortMode, setSortMode] = useState<"SOONEST" | "HIGHEST_RISK">("SOONEST");
+  const [showAll, setShowAll] = useState(false);
   const [timeTick, setTimeTick] = useState(() => Date.now());
   const isMountedRef = useRef(true);
   const gridRef = useRef<HTMLDivElement>(null);
@@ -358,6 +379,8 @@ export default function CollisionWatchPage() {
     return () => window.clearInterval(id);
   }, []);
 
+  const INITIAL_CARD_LIMIT = 12;
+
   // Memoize to avoid re-sorting on every render; support client-side sort modes
   const sortedEvents = useMemo(() => {
     const events = [...activeEvents];
@@ -373,6 +396,13 @@ export default function CollisionWatchPage() {
       return pb - pa;
     });
   }, [activeEvents, sortMode]);
+
+  const visibleEvents = useMemo(() => {
+    if (showAll || sortedEvents.length <= INITIAL_CARD_LIMIT) {
+      return sortedEvents;
+    }
+    return sortedEvents.slice(0, INITIAL_CARD_LIMIT);
+  }, [sortedEvents, showAll]);
 
   return (
     <>
@@ -392,9 +422,7 @@ export default function CollisionWatchPage() {
               </h1>
 
               <p className="hero__subheadline">
-                Predicted close approaches between tracked objects in orbit
-                — updated 3x daily and sourced from the U.S. Space Force's public conjunction
-                data feed.
+                Real-time countdowns and predicted close approaches between tracked satellites and orbital debris, sourced directly from the U.S. Space Force public conjunction catalog.
               </p>
 
               {/* Disclaimer callout */}
@@ -416,17 +444,16 @@ export default function CollisionWatchPage() {
                   <line x1="12" y1="17" x2="12.01" y2="17" />
                 </svg>
                 <span>
-                  This shows the <strong>publicly released subset</strong> of
-                  conjunction screenings. Some operators opt out of public
-                  release, and Pc
+                  This feed displays the <strong>publicly available subset</strong> of
+                  conjunction screenings. Because certain satellite operators opt out of public
+                  release and sensitive defense assets may use rounded probability
                   <span className="tooltipContainer" style={{ marginLeft: 0 }}>
                     <span className="infoIcon" tabIndex={0} aria-label="Pc definition">ⓘ</span>
                     <div className="tooltipText">
                       <a href="#what-is-pc">Click to view the definition of Pc</a>
                     </div>
                   </span>
-                  values may be withheld or rounded for
-                  sensitive assets. This is a partial picture, not a complete
+                  values, these alerts represent a monitored sample rather than a comprehensive global
                   risk map.
                 </span>
               </div>
@@ -463,14 +490,14 @@ export default function CollisionWatchPage() {
               <span className="cw__sectionLabel">UPCOMING EVENTS</span>
               <h2 className="cw__sectionTitle">Upcoming Close Approaches</h2>
               <div className="cw__sectionSubtitle">
-                Default sort: Soonest-first. Toggle to "Highest Risk" to sort by Pc
+                Events are ordered by closest approach time by default. Use the controls to sort by probability of collision (Pc)
                 <span className="tooltipContainer" style={{ marginLeft: 0 }}>
                   <span className="infoIcon" tabIndex={0} aria-label="Pc definition">ⓘ</span>
                   <div className="tooltipText">
                       <a href="#what-is-pc">Click to view the definition of Pc</a>
                   </div>
                 </span>
-                . Pc values are from the U.S. Space Surveillance Network.
+                , as calculated by the U.S. Space Surveillance Network.
               </div>
             </div>
 
@@ -509,11 +536,8 @@ export default function CollisionWatchPage() {
 
           {/* Card grid */}
           {!loading && hasEvents && (
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-              <div
-                className="cw__summary"
-                style={{ color: "var(--text-secondary)", fontSize: "0.9rem", textAlign: "left" }}
-              >
+            <div className="cw__controlsBar">
+              <div className="cw__summaryText">
                 {activeEvents.length} conjunctions tracked · {activeEvents.filter((e) => e.riskTier === "ELEVATED").length} at elevated risk
               </div>
 
@@ -564,11 +588,25 @@ export default function CollisionWatchPage() {
                 </p>
               </div>
             ) : (
-              sortedEvents.map((event, index) => (
+              visibleEvents.map((event, index) => (
                 <ConjunctionCard key={event.id} event={event} index={index} />
               ))
             )}
           </div>
+
+          {!loading && sortedEvents.length > INITIAL_CARD_LIMIT && (
+            <div className="cw__showMoreWrapper">
+              <button
+                type="button"
+                className="btn btn--secondary"
+                onClick={() => setShowAll((prev) => !prev)}
+              >
+                {showAll
+                  ? "Show Fewer Conjunctions"
+                  : `Show All (${sortedEvents.length}) Conjunctions`}
+              </button>
+            </div>
+          )}
 
           {/* ── What Is Pc? ───────────────────────────────────────────────── */}
           <div id="what-is-pc" className="card cw__explainerCard reveal-item">
@@ -606,10 +644,10 @@ export default function CollisionWatchPage() {
               </span>
             </div>
             <p className="cw__explainerBody" style={{ marginTop: "16px" }}>
-              <strong>A common misconception: a smaller miss distance doesn't
-              always mean a higher Pc.</strong> Pc depends on three things
-              together — miss distance, the combined physical size of both
-              objects, and how precisely their positions are actually known.
+              <strong>Contrary to common assumption, a smaller miss distance does not
+              automatically produce a higher collision probability.</strong> Pc is determined
+              by three interacting variables: physical miss distance, the combined dimensions of both
+              objects, and the positional uncertainty (covariance) of their orbital tracks.
             </p>
             <ul className="cw__explainerList">
               <li>
@@ -664,9 +702,9 @@ export default function CollisionWatchPage() {
       <div className="container crisisCTA" style={{ marginBottom: "60px" }}>
         <h3>Curious about the physics?</h3>
         <p>
-          At orbital velocities, even a 10-gram bolt carries the kinetic energy
-          of a grenade. Try the impact calculator to understand why miss
-          distances of hundreds of metres still matter enormously.
+          At hypervelocity speeds, even a 10-gram fragment delivers kinetic energy
+          equivalent to an explosive charge. Explore the impact calculator to see how orbital
+          velocity transforms small miss distances into critical collision risks.
         </p>
         <div className="crisisCTA__actions">
           <Link ref={physicsButtonRef} className="btn btn--primary" to="/physics">

@@ -218,6 +218,9 @@ export default async function handler(req, res) {
       return res.status(503).json({
         error: "Conjunction data not yet available.",
         dataNotYetAvailable: true,
+        message:
+          "Data is populated 3x daily by a scheduled job. " +
+          "If this is a new deployment, trigger /api/cron/refresh-cdm manually to seed the cache.",
       });
     }
 

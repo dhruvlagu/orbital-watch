@@ -51,16 +51,17 @@ export default defineConfig(({ mode }) => {
                             const buildMetrics = (records) => {
                                 const now = Date.now();
                                 const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
-                                const totalTracked = Array.isArray(records) ? records.length : 0;
-                                const addedLast30Days = Array.isArray(records)
-                                    ? records.filter((record) => {
-                                        const launch = record?.LAUNCH;
-                                        if (!launch)
-                                            return false;
-                                        const launchTime = Date.parse(launch);
-                                        return Number.isFinite(launchTime) && launchTime >= thirtyDaysAgo;
-                                    }).length
-                                    : 0;
+                                const inOrbit = Array.isArray(records)
+                                    ? records.filter((r) => !r?.DECAY || String(r.DECAY).trim() === "")
+                                    : [];
+                                const totalTracked = inOrbit.length;
+                                const addedLast30Days = inOrbit.filter((record) => {
+                                    const launch = record?.LAUNCH;
+                                    if (!launch)
+                                        return false;
+                                    const launchTime = Date.parse(launch);
+                                    return Number.isFinite(launchTime) && launchTime >= thirtyDaysAgo;
+                                }).length;
                                 const debrisCount = Array.isArray(records)
                                     ? records.filter((record) => record?.OBJECT_TYPE?.toUpperCase() === "DEBRIS").length
                                     : 0;

@@ -2500,9 +2500,10 @@ html {
   border-color: rgba(10, 14, 26, 0.96) transparent transparent transparent;
 }
 
-/* Show tooltip on hover/focus */
+/* Show tooltip on hover/focus/touch-toggle */
 .tooltipContainer:hover .tooltipText,
-.tooltipContainer:focus-within .tooltipText {
+.tooltipContainer:focus-within .tooltipText,
+.tooltipContainer.is-open .tooltipText {
   visibility: visible;
   opacity: 1;
   transform: translateY(0);
@@ -2526,7 +2527,8 @@ html {
   }
 
   .tooltipContainer:hover .tooltipText,
-  .tooltipContainer:focus-within .tooltipText {
+  .tooltipContainer:focus-within .tooltipText,
+  .tooltipContainer.is-open .tooltipText {
     transform: translateX(-50%) translateY(0) scale(1);
   }
 }

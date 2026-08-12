@@ -134,6 +134,30 @@
   margin-bottom: 24px;
 }
 
+/* Controls bar (summary count & sort toggle) */
+.cw__controlsBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 600px) {
+  .cw__controlsBar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}
+
+.cw__summaryText {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  text-align: left;
+}
+
 /* ─── Card grid ───────────────────────────────────────────────────────────── */
 .cw__grid {
   display: grid;
@@ -146,6 +170,15 @@
   .cw__grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* Show all / pagination button wrapper */
+.cw__showMoreWrapper {
+  display: flex;
+  justify-content: center;
+  grid-column: 1 / -1;
+  margin-top: 12px;
+  margin-bottom: 36px;
 }
 
 /* ─── Conjunction card ────────────────────────────────────────────────────── */
@@ -169,19 +202,20 @@
   box-shadow: var(--glow-blue), 0 8px 30px rgba(0, 0, 0, 0.5);
 }
 
-/* Object names row */
+/* Object names row — 3-column symmetrical grid to prevent cross icon orphan wrapping on mobile */
 .cw__objects {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
+  gap: 8px;
+  text-align: center;
 }
 
 .cw__satName {
   font-family: var(--font-display);
   font-size: 13px;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-primary);
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.06);
   padding: 4px 10px;
@@ -195,6 +229,7 @@
   color: var(--text-secondary);
   flex-shrink: 0;
   opacity: 0.45;
+  justify-self: center;
 }
 
 /* Badge row */
