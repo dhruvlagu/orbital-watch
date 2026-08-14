@@ -59,7 +59,7 @@
   font-family: var(--font-display);
   font-size: clamp(64px, 8vw, 96px);
   font-weight: 700;
-  color: #00d4ff;
+  color: var(--accent-blue);
   line-height: 1;
   margin-bottom: 16px;
   letter-spacing: -0.02em;
@@ -159,7 +159,7 @@
   font-family: "Courier New", monospace;
   font-size: 16px;
   font-weight: 700;
-  color: #00d4ff;
+  color: var(--accent-blue);
 }
 
 .slider {
@@ -176,13 +176,18 @@
   cursor: pointer;
 }
 
+.slider:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+}
+
 .slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #00d4ff;
+  background: var(--accent-blue);
   cursor: pointer;
   box-shadow: 0 0 12px rgba(0, 212, 255, 0.6);
   border: 2px solid rgba(0, 212, 255, 0.8);
@@ -199,7 +204,7 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #00d4ff;
+  background: var(--accent-blue);
   cursor: pointer;
   box-shadow: 0 0 12px rgba(0, 212, 255, 0.6);
   border: 2px solid rgba(0, 212, 255, 0.8);
@@ -216,29 +221,6 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-}
-
-.presetBtn {
-  padding: 8px 16px;
-  background: rgba(0, 212, 255, 0.1);
-  border: 1px solid rgba(0, 212, 255, 0.3);
-  border-radius: 6px;
-  color: #00d4ff;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: var(--font-body);
-}
-
-.presetBtn:hover {
-  background: rgba(0, 212, 255, 0.2);
-  border-color: rgba(0, 212, 255, 0.6);
-  box-shadow: 0 0 12px rgba(0, 212, 255, 0.3);
-}
-
-.presetBtn:active {
-  transform: scale(0.98);
 }
 
 .resultsPanel {
@@ -279,7 +261,7 @@
 }
 
 .technicalNote strong {
-  color: #00d4ff;
+  color: var(--accent-blue);
 }
 
 .resultsGrid {
@@ -341,7 +323,7 @@
   font-family: "Courier New", monospace;
   font-size: 24px;
   font-weight: 700;
-  color: #00d4ff;
+  color: var(--accent-blue);
   text-align: center;
 }
 
@@ -380,7 +362,7 @@
   top: 24px;
   bottom: 24px;
   width: 2px;
-  background: linear-gradient(to bottom, var(--accent-blue), var(--accent-amber), #ff3b3b);
+  background: linear-gradient(to bottom, var(--accent-blue), var(--accent-amber), var(--accent-red));
   opacity: 0.35;
 }
 
@@ -504,8 +486,8 @@
   border-color: rgba(255, 59, 59, 0.15);
 }
 .cascadeStep--failure .cascadeStep__node {
-  color: #ff3b3b;
-  border-color: #ff3b3b;
+  color: var(--accent-red);
+  border-color: var(--accent-red);
   box-shadow: 0 0 12px rgba(255, 59, 59, 0.2);
 }
 .cascadeStep--failure:hover {
@@ -514,7 +496,7 @@
   transform: translateY(-2px);
 }
 .cascadeStep--failure:hover .cascadeStep__node {
-  background: #ff3b3b;
+  background: var(--accent-red);
   color: var(--text-primary);
   box-shadow: 0 0 20px rgba(255, 59, 59, 0.5);
 }
@@ -622,7 +604,7 @@
 .technicalCode {
   font-family: "Courier New", monospace;
   font-size: 13px;
-  color: #00d4ff;
+  color: var(--accent-blue);
   line-height: 1.8;
   margin: 0;
   word-wrap: break-word;

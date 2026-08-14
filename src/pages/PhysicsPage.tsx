@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
+import { useRevealOnScroll } from "../hooks/useRevealOnScroll";
 import { useCardSpotlight } from "../hooks/useCardSpotlight";
 import { useMagneticButton } from "../hooks/useMagneticButton";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarController, BarElement, Tooltip, Legend } from "chart.js";
@@ -32,6 +33,7 @@ export default function PhysicsPage() {
   useCardSpotlight(speedCalloutRef);
   useCardSpotlight(calculatorRef);
   useCardSpotlight(technicalCardRef);
+  useRevealOnScroll(".reveal-item", null, 0.15);
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 768px)");
@@ -75,7 +77,7 @@ export default function PhysicsPage() {
 
   // Derived values
   const tntEquivalent = kineticEnergy / 4184;
-  const grenadesEquivalent = kineticEnergy / 160000;
+  const grenadesEquivalent = kineticEnergy / 32000;
 
   // Danger level calculation
   const getDangerLevel = () => {
@@ -111,10 +113,10 @@ export default function PhysicsPage() {
     ? ["Bullet", "1cm (1g)", "1cm (5g)", "Grenade", "Tennis ball"]
     : [
       "Bullet\n(10g, 900 m/s)",
-      "1cm debris\n(1g, 7,900 m/s)",
-      "1cm debris\n(5g, 7,900 m/s)",
+      "1cm debris\n(1g, 7,800 m/s)",
+      "1cm debris\n(5g, 7,800 m/s)",
       "Hand grenade",
-      "Tennis ball debris\n(57g, 7,900 m/s)",
+      "Tennis ball debris\n(57g, 7,800 m/s)",
     ];
 
   // Chart.js data
@@ -210,7 +212,7 @@ export default function PhysicsPage() {
             <div className="hero__content">
               <h1 className="hero__headline">The Mathematics of Catastrophe</h1>
               <p className="hero__subheadline">
-                Why orbital debris isn't just a space problem — it's a physics problem with a mathematical deadline.
+                Orbital debris is more than a space operations challenge, it's a physics problem with a mathematical deadline.
               </p>
             </div>
           </div>
@@ -241,11 +243,11 @@ export default function PhysicsPage() {
           <h2>The Speed Problem</h2>
 
           <div ref={speedCalloutRef}>
-            <div className="speedCallout card">
+            <div className="speedCallout card reveal-item">
               <div className="speedCallout__stat">~17,500 mph</div>
               <div className="speedCallout__label">Average orbital velocity in LEO</div>
               <div className="speedCallout__description">
-                At this speed, a 1cm bolt carries kinetic energy comparable to a hand grenade. A 10cm fragment matches a small car crash. A 1kg object exceeds a military explosive.
+                At this speed, a 1cm bolt carries kinetic energy comparable to a hand grenade. A 10cm fragment carries the destructive energy of several kilograms of TNT. A 1kg object exceeds a military explosive.
               </div>
             </div>
           </div>
@@ -256,7 +258,7 @@ export default function PhysicsPage() {
               <Bar key={isMobileChart ? "mobile" : "desktop"} data={chartData} options={chartOptions} />
             </div>
             <p className="chartCaption">
-              Each bar represents kinetic energy in joules at orbital velocity. Red bars show impact energy exceeding military explosives.
+              Each bar represents kinetic energy in joules at orbital velocity. Red bars show impact energy exceeding some military explosives.
             </p>
           </div>
         </div>
@@ -268,18 +270,19 @@ export default function PhysicsPage() {
           <h2>Calculate Impact Energy</h2>
           <p className="section-subtitle">Adjust the mass and speed of a debris object to see its kinetic energy in real terms.</p>
 
-          <div ref={calculatorRef}>
+          <div ref={calculatorRef} className="reveal-item">
             <div className="calculator card calculator--dark">
             {/* Mass Slider */}
             <div className="calculatorRow">
               <div className="sliderGroup">
                 <div className="sliderHeader">
-                  <label className="sliderLabel">Object Mass</label>
+                  <label className="sliderLabel" htmlFor="mass-slider">Object Mass</label>
                   <span className="sliderValue">
                     {mass >= 1000 ? `${(mass / 1000).toFixed(2)} kg` : `${mass.toFixed(1)} g`}
                   </span>
                 </div>
                 <input
+                  id="mass-slider"
                   type="range"
                   min="0"
                   max="100"
@@ -294,19 +297,19 @@ export default function PhysicsPage() {
                   className="slider"
                 />
                 <div className="presetButtons">
-                  <button className="presetBtn" onClick={() => handleMassPreset(0.1)}>
+                  <button className="btn btn--secondary btn--sm" onClick={() => handleMassPreset(0.1)}>
                     Paint chip (0.1g)
                   </button>
-                  <button className="presetBtn" onClick={() => handleMassPreset(10)}>
+                  <button className="btn btn--secondary btn--sm" onClick={() => handleMassPreset(10)}>
                     Bolt (10g)
                   </button>
-                  <button className="presetBtn" onClick={() => handleMassPreset(200)}>
+                  <button className="btn btn--secondary btn--sm" onClick={() => handleMassPreset(200)}>
                     Camera lens (200g)
                   </button>
-                  <button className="presetBtn" onClick={() => handleMassPreset(1000)}>
+                  <button className="btn btn--secondary btn--sm" onClick={() => handleMassPreset(1000)}>
                     CubeSat (1kg)
                   </button>
-                  <button className="presetBtn" onClick={() => handleMassPreset(100000)}>
+                  <button className="btn btn--secondary btn--sm" onClick={() => handleMassPreset(100000)}>
                     Dead satellite (100kg)
                   </button>
                 </div>
@@ -317,10 +320,11 @@ export default function PhysicsPage() {
             <div className="calculatorRow">
               <div className="sliderGroup">
                 <div className="sliderHeader">
-                  <label className="sliderLabel">Impact Velocity</label>
+                  <label className="sliderLabel" htmlFor="velocity-slider">Impact Velocity</label>
                   <span className="sliderValue">{velocity.toFixed(2)} km/s</span>
                 </div>
                 <input
+                  id="velocity-slider"
                   type="range"
                   min="1"
                   max="15"
@@ -334,13 +338,13 @@ export default function PhysicsPage() {
                   className="slider"
                 />
                 <div className="presetButtons">
-                  <button className="presetBtn" onClick={() => handleVelocityPreset(3)}>
+                  <button className="btn btn--secondary btn--sm" onClick={() => handleVelocityPreset(3)}>
                     Slow (3 km/s)
                   </button>
-                  <button className="presetBtn" onClick={() => handleVelocityPreset(7.8)}>
+                  <button className="btn btn--secondary btn--sm" onClick={() => handleVelocityPreset(7.8)}>
                     LEO Average (7.8 km/s)
                   </button>
-                  <button className="presetBtn" onClick={() => handleVelocityPreset(11)}>
+                  <button className="btn btn--secondary btn--sm" onClick={() => handleVelocityPreset(11)}>
                     Max Orbital (11 km/s)
                   </button>
                 </div>
@@ -393,12 +397,12 @@ export default function PhysicsPage() {
           <h2>The Cascade Effect</h2>
           <p className="section-subtitle">Why debris doesn't just accumulate — it multiplies.</p>
 
-          <div className="cascadeFlow">
+          <div className="cascadeFlow reveal-item">
             <div className="cascadeTimeline">
               <div className="cascadeTimeline__track" />
 
               {/* Step 1: Initial Impact */}
-              <div className="cascadeStep cascadeStep--timeline cascadeStep--trigger">
+              <div className="cascadeStep cascadeStep--timeline cascadeStep--trigger" style={{ ["--reveal-i" as any]: 0 }}>
                 <div className="cascadeStep__node">01</div>
                 <div className="cascadeStepContent">
                   <div className="cascadeStepLeft">
@@ -406,14 +410,14 @@ export default function PhysicsPage() {
                   </div>
                   <div className="cascadeStepRight">
                     <p>
-                      A single hypervelocity collision shatters both objects into thousands of high-velocity fragments. Each fragment retains roughly the orbital energy of the original object.
+                      A single hypervelocity collision shatters both objects into thousands of high-velocity fragments. Each fragment retains much of the original object's orbital energy.
                     </p>
                   </div>
                 </div>
               </div>
 
               {/* Step 2: Fragmentation Cloud */}
-              <div className="cascadeStep cascadeStep--timeline cascadeStep--growth">
+              <div className="cascadeStep cascadeStep--timeline cascadeStep--growth" style={{ ["--reveal-i" as any]: 1 }}>
                 <div className="cascadeStep__node">02</div>
                 <div className="cascadeStepContent">
                   <div className="cascadeStepLeft">
@@ -428,7 +432,7 @@ export default function PhysicsPage() {
               </div>
 
               {/* Step 3: Self-Sustaining Cascade */}
-              <div className="cascadeStep cascadeStep--timeline cascadeStep--failure">
+              <div className="cascadeStep cascadeStep--timeline cascadeStep--failure" style={{ ["--reveal-i" as any]: 2 }}>
                 <div className="cascadeStep__node">03</div>
                 <div className="cascadeStepContent">
                   <div className="cascadeStepLeft">
@@ -436,7 +440,7 @@ export default function PhysicsPage() {
                   </div>
                   <div className="cascadeStepRight">
                     <p>
-                      Above a critical density threshold, collisions produce fragments faster than atmospheric drag can remove them. The cascade becomes self-sustaining — LEO unusable for centuries.
+                      Above a critical density threshold, collisions produce fragments faster than atmospheric drag can remove them. The cascade becomes self-sustaining, potentially rendering LEO unusable for centuries.
                     </p>
                   </div>
                 </div>
@@ -454,22 +458,22 @@ export default function PhysicsPage() {
           <h2>The Math Behind This Page</h2>
           <p className="section-subtitle">For the technically curious.</p>
 
-          <div ref={technicalCardRef}>
+          <div ref={technicalCardRef} className="reveal-item">
             <div className="technicalCard card">
             <pre className="technicalCode">{`Kinetic Energy Formula:
 KE = ½mv²
 Where m = mass in kilograms, v = velocity in meters/second
 
-At orbital velocity (7,900 m/s):
-- 1g object: KE = 0.5 × 0.001 × 7,900² = 31,205 J
-- 10g object: KE = 0.5 × 0.01 × 7,900² = 312,050 J
-- 1kg object: KE = 0.5 × 1 × 7,900² = 31,205,000 J
+At orbital velocity (7,800 m/s):
+- 1g object: KE = 0.5 × 0.001 × 7,800² = 30,420 J
+- 10g object: KE = 0.5 × 0.01 × 7,800² = 304,200 J
+- 1kg object: KE = 0.5 × 1 × 7,800² = 30,420,000 J
 
 TNT Equivalent Conversion:
 1 gram TNT = 4,184 Joules
 KE_TNT = KE(J) / 4,184
 
-Sources: Kessler & Cour-Palais (1978), NASA ODPO, 
+Sources: Kessler & Cour-Palais (1978), NASA ODPO,
 ESA Space Debris User's Handbook`}</pre>
             </div>
           </div>
@@ -486,7 +490,7 @@ ESA Space Debris User's Handbook`}</pre>
       <div className="container crisisCTA" style={{ marginBottom: "60px" }}>
         <h3>From Equations to Action</h3>
         <p>
-          Physics outlines the threat of collision cascades. Policy outlines our response.
+          Physics defines the collision cascade threat. Policy defines our response.
           See why international space law is currently failing to stop the cascade.
         </p>
         <div className="crisisCTA__actions">

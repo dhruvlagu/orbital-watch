@@ -506,7 +506,7 @@ const kineticEnergy = 0.5 * massKg * velocityMs * velocityMs;
 
 // Derived values
 const tntEquivalent = kineticEnergy / 4184;
-const grenadesEquivalent = kineticEnergy / 160000;
+const grenadesEquivalent = kineticEnergy / 32000;
 
 // Danger level calculation
 const getDangerLevel = () => {
