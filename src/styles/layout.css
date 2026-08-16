@@ -2739,19 +2739,6 @@ html {
     min-height: 200px;
   }
 
-  /* Policy scorecard table: horizontally scrollable with edge hint */
-  .policyTableWrap {
-    -webkit-overflow-scrolling: touch;
-    background:
-      linear-gradient(to right, rgba(13, 17, 23, 1) 24px, transparent 48px),
-      linear-gradient(to left, rgba(13, 17, 23, 0.95) 24px, transparent 48px) 100% 0,
-      radial-gradient(farthest-side at 0% 50%, rgba(0, 0, 0, 0.35), transparent),
-      radial-gradient(farthest-side at 100% 50%, rgba(0, 0, 0, 0.35), transparent) 100% 0;
-    background-repeat: no-repeat;
-    background-size: 48px 100%, 48px 100%, 16px 100%, 16px 100%;
-    background-attachment: local, local, scroll, scroll;
-  }
-
   /* Policy section header: stack on mobile */
   .policySection__header {
     flex-direction: column;

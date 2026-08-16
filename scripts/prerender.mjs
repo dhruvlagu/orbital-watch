@@ -87,7 +87,7 @@ function outputPathForRoute(route) {
 }
 
 async function prerenderRoute(page, route) {
-  const expectedCanonical = `https://orbitalwatch.vercel.app${route}`;
+  const expectedCanonical = `https://orbitalwatch.app${route}`;
   await page.goto(`${baseUrl}${route}`, { waitUntil: "networkidle0" });
   await page.waitForSelector("h1", { timeout: 30_000 });
   await page.waitForFunction(

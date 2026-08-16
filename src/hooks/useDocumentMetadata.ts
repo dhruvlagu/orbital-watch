@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-const SITE_URL = "https://orbitalwatch.vercel.app";
+const SITE_URL = "https://orbitalwatch.app";
 const SITE_NAME = "Orbital Watch";
 const SITE_AUTHOR = "Dhruv Lagu";
 const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.png`;

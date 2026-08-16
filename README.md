@@ -2,7 +2,7 @@
 
 **A space debris policy research site tracking the legal and scientific crisis in low Earth orbit.**
 
-🌐 [orbitalwatch.vercel.app](https://orbitalwatch.vercel.app)
+🌐 [orbitalwatch.app](https://orbitalwatch.app)
 
 ---
 
@@ -68,7 +68,7 @@ Instead:
 
 The Contact Your Representative workflow uses a separate server-side lookup endpoint. It sends the entered ZIP code to Geocodio only from the server, identifies the House representative for the most likely congressional district, and returns the representative name, district number, and official contact options. It does not use or expose a legislator email address.
 
-This guarantees a fixed, compliant Space-Track request volume (4 requests/day total) no matter how many people visit the site. The real implementation — including the session-caching auth logic, cascade animation spawn logic, and civic-action lookup/message flow — is shown directly on the About page under [The Code Behind It](https://orbitalwatch.vercel.app/about#the-code).
+This guarantees a fixed, compliant Space-Track request volume (4 requests/day total) no matter how many people visit the site. The real implementation — including the session-caching auth logic, cascade animation spawn logic, and civic-action lookup/message flow — is shown directly on the About page under [The Code Behind It](https://orbitalwatch.app/about#the-code).
 
 ---
 

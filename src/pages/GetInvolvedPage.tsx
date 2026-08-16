@@ -59,7 +59,7 @@ export default function GetInvolvedPage() {
   };
 
   const shareText = "Check out Orbital Watch — Tracking the orbital debris crisis and active debris removal solutions.";
-  const shareUrl = "https://orbitalwatch.vercel.app";
+  const shareUrl = "https://orbitalwatch.app";
 
   return (
     <section className="getInvolvedPage">
