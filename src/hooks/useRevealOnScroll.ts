@@ -12,40 +12,60 @@ export function useRevealOnScroll(
   threshold: number = 0.08
 ) {
   useEffect(() => {
-    const elements = document.querySelectorAll<HTMLElement>(selector);
-    if (elements.length === 0) return;
+    let intersectionObserver: IntersectionObserver | null = null;
 
-    // Immediately reveal elements already in or above the viewport on mount
-    elements.forEach((el) => {
-      const rect = el.getBoundingClientRect();
-      if (rect.top < window.innerHeight - 50) {
-        el.classList.add("is-visible");
+    const revealExisting = () => {
+      const elements = document.querySelectorAll<HTMLElement>(selector);
+      if (elements.length === 0) return;
+
+      elements.forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        // Immediately reveal elements already near or above the viewport
+        if (rect.top < window.innerHeight + 100) {
+          el.classList.add("is-visible");
+        }
+      });
+
+      if (intersectionObserver) {
+        intersectionObserver.disconnect();
       }
+
+      intersectionObserver = new IntersectionObserver(
+        (entries, obs) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-visible");
+              obs.unobserve(entry.target);
+            }
+          });
+        },
+        {
+          threshold,
+          rootMargin: "150px 0px 150px 0px",
+        }
+      );
+
+      elements.forEach((el) => {
+        if (!el.classList.contains("is-visible")) {
+          intersectionObserver!.observe(el);
+        }
+      });
+    };
+
+    revealExisting();
+
+    // Watch for dynamically appended nodes (e.g. clicking "Show All Conjunctions")
+    const mutationObserver = new MutationObserver(() => {
+      revealExisting();
     });
 
-    const observer = new IntersectionObserver(
-      (entries, obs) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-visible");
-            // Performance optimization: stop watching once revealed
-            obs.unobserve(entry.target);
-          }
-        });
-      },
-      {
-        threshold,
-        // Trigger reveal slightly before the element enters the middle viewport
-        rootMargin: "0px 0px -50px 0px",
-      }
-    );
+    mutationObserver.observe(document.body, { childList: true, subtree: true });
 
-    elements.forEach((el) => {
-      if (!el.classList.contains("is-visible")) {
-        observer.observe(el);
+    return () => {
+      if (intersectionObserver) {
+        intersectionObserver.disconnect();
       }
-    });
-
-    return () => observer.disconnect();
+      mutationObserver.disconnect();
+    };
   }, [selector, dependency, threshold]);
 }

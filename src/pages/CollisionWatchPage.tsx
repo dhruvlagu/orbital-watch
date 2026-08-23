@@ -296,8 +296,7 @@ export default function CollisionWatchPage() {
     });
   };
 
-  // Scroll-reveal IntersectionObserver
-  useRevealOnScroll(".reveal-item", loading, 0.1);
+
 
   useEffect(() => {
     let isCancelled = false;
@@ -403,6 +402,9 @@ export default function CollisionWatchPage() {
     }
     return sortedEvents.slice(0, INITIAL_CARD_LIMIT);
   }, [sortedEvents, showAll]);
+
+  // Scroll-reveal IntersectionObserver — watches for additions/expansions dynamically
+  useRevealOnScroll(".reveal-item", [loading, showAll, sortMode, visibleEvents.length], 0.1);
 
   return (
     <>
