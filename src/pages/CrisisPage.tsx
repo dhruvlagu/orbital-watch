@@ -1246,30 +1246,32 @@ export default function CrisisPage() {
       </div>
 
       <div className="container timeline" ref={timelineRef}>
-        {crisisEvents.map((event, idx) => (
-          <article
-            className={`timelineEvent reveal-item ${idx % 2 === 0 ? "" : "timelineEvent--flip"} ${event.tone === "amber" ? "timelineEvent--amber" : ""
-              }`}
-            key={event.year}
-            aria-label={`${event.year}: ${event.title}`}
-            style={{ ["--reveal-i" as any]: idx }}
-          >
-            <div className="timelineEvent__text">
-              <div className="card timelineEvent__content">
-                <span className="badge badge--blue timelineEvent__yearPill">{event.year}</span>
-                <h3>{event.title}</h3>
-                <p>{event.context}</p>
-                <div className="timelineEvent__significance">
-                  <span>SIGNIFICANCE</span> {event.significance}
+        <div className="timelineEvents">
+          {crisisEvents.map((event, idx) => (
+            <article
+              className={`timelineEvent reveal-item ${idx % 2 === 0 ? "" : "timelineEvent--flip"} ${event.tone === "amber" ? "timelineEvent--amber" : ""
+                }`}
+              key={event.year}
+              aria-label={`${event.year}: ${event.title}`}
+              style={{ ["--reveal-i" as any]: idx }}
+            >
+              <div className="timelineEvent__text">
+                <div className="card timelineEvent__content">
+                  <span className="badge badge--blue timelineEvent__yearPill">{event.year}</span>
+                  <h3>{event.title}</h3>
+                  <p>{event.context}</p>
+                  <div className="timelineEvent__significance">
+                    <span>SIGNIFICANCE</span> {event.significance}
+                  </div>
                 </div>
+                <div className="timelineEvent__watermark">{event.year}</div>
               </div>
-              <div className="timelineEvent__watermark">{event.year}</div>
-            </div>
-            <div className="timelineEvent__visual">
-              <TimelineVisual type={event.visualType} />
-            </div>
-          </article>
-        ))}
+              <div className="timelineEvent__visual">
+                <TimelineVisual type={event.visualType} />
+              </div>
+            </article>
+          ))}
+        </div>
 
         <article className="timelineEvent timelineEvent--today is-visible">
           <div className="timelineEvent__text">

@@ -33,8 +33,8 @@ export default async function handler(req, res) {
 
     const metrics = JSON.parse(metricsJson);
 
-    // 24-hour edge cache — cron refreshes once daily, so stale data is always < 24h old
-    res.setHeader("Cache-Control", "s-maxage=86400, stale-while-revalidate");
+    // 5-minute edge cache — updates reflect on production within 5 mins of Redis refresh
+    res.setHeader("Cache-Control", "public, s-maxage=300, stale-while-revalidate=600");
     return res.status(200).json({
       ...metrics,
       lastUpdatedAt,

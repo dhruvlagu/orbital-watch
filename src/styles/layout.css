@@ -795,12 +795,18 @@
   gap: 38px;
 }
 
-.timeline::before {
+.timelineEvents {
+  position: relative;
+  display: grid;
+  gap: 38px;
+}
+
+.timelineEvents::before {
   content: "";
   position: absolute;
   left: 50%;
   top: 40px;
-  bottom: 40px;
+  bottom: 0;
   width: 2px;
   transform: translateX(-50%);
   background: linear-gradient(
@@ -818,13 +824,13 @@
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
+  grid-template-columns: 1fr 1fr;
   gap: 30px;
   align-items: center;
 }
 
 .timelineEvent--flip {
-  grid-template-columns: 0.9fr 1.1fr;
+  grid-template-columns: 1fr 1fr;
 }
 
 /* Ensure reveal-item works with timeline-specific transitions */
@@ -1107,6 +1113,10 @@
 }
 
 @media (max-width: 900px) {
+
+  .timelineEvents::before {
+    display: none;
+  }
 
   .timelineEvent,
   .timelineEvent--flip {

@@ -33,8 +33,8 @@ export default async function handler(req, res) {
 
     const records = JSON.parse(cdmJson);
 
-    // 1-hour edge cache — CDM cron runs 3x daily (~8h apart)
-    res.setHeader("Cache-Control", "s-maxage=3600, stale-while-revalidate");
+    // 5-minute edge cache — updates reflect on production within 5 mins of Redis refresh
+    res.setHeader("Cache-Control", "public, s-maxage=300, stale-while-revalidate=600");
     return res.status(200).json({
       records,
       lastUpdatedAt: lastChecked,
