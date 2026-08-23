@@ -26,7 +26,7 @@ function WarningIcon() {
 
 const FALLBACK: LiveOrbitalResponse = {
   data: {
-    totalTracked: 27000,
+    totalTracked: 46410,
     addedLast30Days: 420,
     debrisToActiveRatio: "3:1",
     highestRiskShell: "LEO 800–1000km",

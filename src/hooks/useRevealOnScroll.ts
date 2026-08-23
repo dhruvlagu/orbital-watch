@@ -9,11 +9,19 @@ import { useEffect } from "react";
 export function useRevealOnScroll(
   selector: string = ".reveal-item",
   dependency: any = null,
-  threshold: number = 0.15
+  threshold: number = 0.08
 ) {
   useEffect(() => {
     const elements = document.querySelectorAll<HTMLElement>(selector);
     if (elements.length === 0) return;
+
+    // Immediately reveal elements already in or above the viewport on mount
+    elements.forEach((el) => {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight - 50) {
+        el.classList.add("is-visible");
+      }
+    });
 
     const observer = new IntersectionObserver(
       (entries, obs) => {
@@ -27,12 +35,17 @@ export function useRevealOnScroll(
       },
       {
         threshold,
-        // Start revealing slightly before the element enters the viewport
-        rootMargin: "0px 0px -10% 0px",
+        // Trigger reveal slightly before the element enters the middle viewport
+        rootMargin: "0px 0px -50px 0px",
       }
     );
 
-    elements.forEach((el) => observer.observe(el));
+    elements.forEach((el) => {
+      if (!el.classList.contains("is-visible")) {
+        observer.observe(el);
+      }
+    });
+
     return () => observer.disconnect();
   }, [selector, dependency, threshold]);
 }

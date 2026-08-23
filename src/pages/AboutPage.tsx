@@ -189,47 +189,67 @@ export default function AboutPage() {
             </div>
             {expandedBlocks.block1 && (
               <>
-                <pre className="technicalCode">{`// api/cron/_spacetrackAuth.mjs — shared by both scheduled jobs
+                <pre className="technicalCode">{`// api/cron/_spacetrackAuth.mjs — shared session cookie auth
 const AUTH_URL = "https://www.space-track.org/ajaxauth/login";
 const COOKIE_TTL_MS = 90 * 60 * 1000; // 90 minutes
 
 let cachedCookieHeader = null;
 let cachedCookieIssuedAt = 0;
 
-// Cookie reused across warm invocations — only re-authenticates
-// with Space-Track when the cached session has actually expired
-// (full auth + retry logic in the real file)
+function getCookieHeaderValue(headers) {
+  const rawCookies = typeof headers.getSetCookie === "function" 
+    ? headers.getSetCookie() : null;
+  return rawCookies
+    ? rawCookies.map((cookie) => cookie.split(";")[0]).join("; ")
+    : headers.get("set-cookie")?.split(";")[0] ?? null;
+}
 
-// api/conjunctions.mjs — what users' browsers actually hit
+async function authenticateWithSpaceTrack(user, pass) {
+  const authResponse = await fetch(AUTH_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ identity: user, password: pass }).toString(),
+  });
+  const cookieHeader = getCookieHeaderValue(authResponse.headers);
+  if (!authResponse.ok || !cookieHeader) {
+    throw new Error(\`Space-Track authentication failed (HTTP \${authResponse.status})\`);
+  }
+  cachedCookieHeader = cookieHeader;
+  cachedCookieIssuedAt = Date.now();
+  return cookieHeader;
+}
+
+export async function getValidSessionCookie() {
+  const user = process.env.SPACE_TRACK_USER;
+  const pass = process.env.SPACE_TRACK_PASS;
+  const hasFreshCookie = Boolean(
+    cachedCookieHeader && Date.now() - cachedCookieIssuedAt < COOKIE_TTL_MS,
+  );
+  if (hasFreshCookie) return cachedCookieHeader;
+  return authenticateWithSpaceTrack(user, pass);
+}
+
+// api/conjunctions.mjs — user-facing endpoint (Redis read-only)
+import { withRedis } from "./_redisClient.mjs";
+
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed" });
   }
-
   try {
     const [cdmJson, lastChecked] = await withRedis((c) =>
-      Promise.all([
-        c.get("cdm:latest"),
-        c.get("cdm:lastChecked"),
-      ]),
+      Promise.all([c.get("cdm:latest"), c.get("cdm:lastChecked")]),
     );
-
     if (!cdmJson) {
       return res.status(503).json({
         error: "Conjunction data not yet available.",
         dataNotYetAvailable: true,
-        message:
-          "Data is populated 3x daily by a scheduled job. " +
-          "If this is a new deployment, trigger /api/cron/refresh-cdm manually to seed the cache.",
+        message: "Data is populated 3x daily by a scheduled job.",
       });
     }
-
     const records = JSON.parse(cdmJson);
     res.setHeader("Cache-Control", "s-maxage=3600, stale-while-revalidate");
-    return res.status(200).json({
-      records,
-      lastUpdatedAt: lastChecked,
-    });
+    return res.status(200).json({ records, lastUpdatedAt: lastChecked });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error reading cached data";
     console.error("[/api/conjunctions] Redis read error:", message);
@@ -283,28 +303,29 @@ export default async function handler(req, res) {
 
     if (progress < 1) {
       // Add new debris randomly every few frames (respect per-cascade cap)
+      let spawnedThisFrame = 0;
       if (Math.random() < 0.4 && debrisAddedInCascade < maxDebrisCount) {
         const newRadius = 0.25 + Math.random() * 0.15;
         const newAngle = Math.random() * Math.PI * 2;
         const newInclination = (Math.random() - 0.5) * 0.8;
-
+        
         // Calculate 3D position using spherical coordinates with inclination
         const cosAngle = Math.cos(newAngle);
         const sinAngle = Math.sin(newAngle);
         const cosInc = Math.cos(newInclination);
         const sinInc = Math.sin(newInclination);
-
+        
         // 3D coordinates centered at origin
         const x3d = newRadius * cosAngle;
         const y3d = newRadius * sinAngle * cosInc;
         const z3d = newRadius * sinAngle * sinInc;
-
+        
         // Calculate orbital velocity (tangential to orbit)
         const orbitalSpeed = 0.02;
         const vx = -orbitalSpeed * sinAngle;
         const vy = orbitalSpeed * cosAngle * cosInc;
         const vz = orbitalSpeed * cosAngle * sinInc;
-
+        
         const newDebris: Debris = {
           id: \`d-\${Date.now()}-\${Math.random()}\`,
           angle: newAngle,
@@ -320,12 +341,13 @@ export default async function handler(req, res) {
         };
         currentDebrisRef.current = [...currentDebrisRef.current, newDebris];
         debrisAddedInCascade++;
+        spawnedThisFrame++;
       }
 
       // Update positions with stable orbital mechanics and detect collisions
       const collisionThreshold = 0.04; // Distance threshold for collision
       const newFragments: Debris[] = [];
-
+      
       // Update positions using stable orbital mechanics (angle-based)
       currentDebrisRef.current = currentDebrisRef.current.map((d: Debris) => {
         const nextAngle = (d.angle + 0.02) % (Math.PI * 2);
@@ -394,8 +416,9 @@ export default async function handler(req, res) {
       }
 
       // Remove collided debris and add fragments (respect per-cascade cap)
-      currentDebrisRef.current = [...currentDebrisRef.current.filter((d: Debris) => d.size > 0), ...newFragments];
-      debrisAddedInCascade += newFragments.length;
+      const fragmentsToAdd = newFragments;
+      currentDebrisRef.current = [...currentDebrisRef.current.filter((d: Debris) => d.size > 0), ...fragmentsToAdd];
+      debrisAddedInCascade += fragmentsToAdd.length;
 
       drawCanvas(currentDebrisRef.current, rippleRef.current);
       animationRef.current = requestAnimationFrame(animate);
@@ -434,13 +457,19 @@ export default async function handler(req, res) {
 const ask = policyAsks[selectedAskId];
 const generated = \`Dear Representative \${repName},
 
-I'm a constituent in your district, and I'm writing because I care about protecting the space infrastructure our communities rely on. \${ask.askSummary}
+\${ask.opening}
 
-I hope you'll \${ask.repCanDo}.\${statText}
+\${ask.issueParagraph}
 
-[Add a sentence about why this matters to you personally ...]
+\${ask.supportingStat || ""}
 
-Thank you for your time,
+I hope you'll \${ask.repCanDo}.
+\${ask.closingSentence}
+
+As someone who cares about the long-term sustainability of space, I hope Congress continues treating orbital debris as an issue worthy of bipartisan attention.
+[Add one sentence about why this matters to you personally — messages with a personal note are far more likely to be read as genuine by congressional staff than a form letter.]
+
+Thank you,
 \${nameFormatted}
 \${zip.trim()}\`;
 
@@ -448,20 +477,20 @@ const hasPlaceholder = messageText.includes(
   "[Add a sentence"
 );
 
-  const handleCopyMessage = () => {
-    if (hasPlaceholder || !selectedAskId) return;
+const handleCopyMessage = () => {
+  if (!selectedAskId) return;
 
-    navigator.clipboard.writeText(messageText).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
-    });
+  navigator.clipboard.writeText(messageText).then(() => {
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+  });
 
-    // GA4 Event 2: representative_contact_sent
-    trackGA4Event("representative_contact_sent", {
-      ask_id: selectedAskId,
-      action_type: "copy",
-    });
-  };
+  // GA4 Event: representative_contact_sent
+  trackGA4Event("representative_contact_sent", {
+    ask_id: selectedAskId,
+    action_type: "copy",
+  });
+};
 
 // api/representative.mjs
 const rep = legislators.find((l) => l.type === "representative");
@@ -479,7 +508,7 @@ return res.status(200).json({
   },
 });`}</pre>
                 <p className="codeBlock__caption">
-                  This tool turns a selected policy ask and a constituent&apos;s district into an editable message. The browser calls a server-side representative lookup, which selects the House representative from Geocodio&apos;s congressional-district data and returns official contact options only. The copy and contact actions stay disabled until the personal-note placeholder is replaced, while the existing analytics records each generated message and completed action.
+                  This tool turns a selected policy ask and a constituent&apos;s district into an editable message. The browser calls a server-side representative lookup, which selects the House representative from Geocodio&apos;s congressional-district data and returns official contact options only. The copy and contact actions track analytics events for each generated message and completed action.
                 </p>
               </>
             )}
@@ -589,6 +618,12 @@ const getDangerLevel = () => {
                   <span className="sourceItem__title">European Space Agency (ESA)</span>
                   <span className="sourceItem__details">
                     <em>Annual Space Environment Report.</em> Space Debris Office. Published annually.
+                  </span>
+                </li>
+                <li className="sourceItem">
+                  <span className="sourceItem__title">European Space Agency (ESA)</span>
+                  <span className="sourceItem__details">
+                    <em>DISCOSweb Environment Statistics.</em> Space Debris Office, ESOC. Updated 31 July 2026.
                   </span>
                 </li>
                 <li className="sourceItem">

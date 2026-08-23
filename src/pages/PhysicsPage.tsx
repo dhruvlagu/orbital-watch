@@ -52,7 +52,7 @@ export default function PhysicsPage() {
 
   const handleScrollIndicatorClick = () => {
     window.scrollTo({
-      top: window.innerHeight,
+      top: window.innerHeight - 64,
       behavior: "smooth",
     });
   };

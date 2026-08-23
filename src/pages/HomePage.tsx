@@ -14,7 +14,7 @@ const STATS_GROUP = (
     </div>
     <div className="quickStats__divider" />
     <div className="quickStats__item">
-      Total mass in orbit: <span>15,000+ tons</span>
+      Total mass in orbit: <span>17,000+ tons</span>
     </div>
     <div className="quickStats__divider" />
     <div className="quickStats__item">
@@ -81,7 +81,7 @@ export default function HomePage() {
 
   const handleScrollIndicatorClick = () => {
     window.scrollTo({
-      top: window.innerHeight,
+      top: window.innerHeight - 64,
       behavior: "smooth",
     });
   };
@@ -105,7 +105,6 @@ export default function HomePage() {
               <div className="hero__liveData">
                 <LiveDataSection variant="hero" />
 
-                {/* Conjunction teaser */}
                 {/* Conjunction teaser */}
                 <Link to="/collision-watch" className="cw__teaserCard" aria-label="View conjunction alerts on Collision Watch">
                   <div className="cw__teaserCard__left">
@@ -144,7 +143,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-  
+
       <section className="quickStats">
         <div className="quickStats__track">
           {STATS_GROUP}
@@ -157,14 +156,10 @@ export default function HomePage() {
       <section className="homeExplore">
         <div className="container">
           <div className="homeExplore__header">
-            <span className="homeExplore__label">EXPLORE THE PLATFORM</span>
-            <h2 className="homeExplore__title">Platform Modules &amp; Policy Tools</h2>
+            <span className="homeExplore__label">RESEARCH PATHWAYS</span>
+            <h2 className="homeExplore__title">Orbital Debris Research &amp; Action</h2>
             <p className="homeExplore__subtitle">
-              Navigate the full Orbital Watch workflow: explore live Space-Track data,
-              investigate predicted collisions, understand the physics of orbital debris,
-              uncover the legal barriers created by the 1967 Outer Space Treaty, and turn
-              that knowledge into civic action through a personalized message to your U.S.
-              representative.
+              From live satellite tracking data and hypervelocity physics to international space law and direct civic advocacy—explore each pillar of the crisis.
             </p>
           </div>
 
@@ -180,10 +175,10 @@ export default function HomePage() {
               </div>
               <h3 className="homeExploreCard__title">The Crisis</h3>
               <p className="homeExploreCard__description">
-                Trace the historical buildup of orbital debris, map object distribution across critical altitudes, and examine the international treaties governing space.
+                Trace how 70 years of Cold War launches and anti-satellite missile tests created over 35,000 tracked objects in low Earth orbit.
               </p>
               <Link to="/crisis" className="btn btn--secondary homeExploreCard__btn">
-                Analyze the Crisis
+                Historical Timeline →
               </Link>
             </div>
 
@@ -202,10 +197,10 @@ export default function HomePage() {
               </div>
               <h3 className="homeExploreCard__title">Collision Watch</h3>
               <p className="homeExploreCard__description">
-                Predicted close approaches between tracked objects, updated 3x daily from the U.S. Space Force's public conjunction data feed. Includes active countdown timers.
+                See which close approaches deserve context—and which alarming-looking numbers do not.
               </p>
               <Link to="/collision-watch" className="btn btn--secondary homeExploreCard__btn">
-                View Conjunctions
+                Live Conjunction Feed →
               </Link>
             </div>
 
@@ -217,10 +212,10 @@ export default function HomePage() {
               </div>
               <h3 className="homeExploreCard__title">The Physics</h3>
               <p className="homeExploreCard__description">
-                Analyze the extreme kinetic energy of orbital debris, map high-risk altitude shells, and run interactive simulations of Kessler Syndrome cascade events.
+                A 1 cm fragment can disable a spacecraft. This is why speed matters more than size.
               </p>
               <Link to="/physics" className="btn btn--secondary homeExploreCard__btn">
-                Run the Simulator
+                Impact &amp; Cascade Simulator →
               </Link>
             </div>
 
@@ -232,10 +227,10 @@ export default function HomePage() {
               </div>
               <h3 className="homeExploreCard__title">Policy</h3>
               <p className="homeExploreCard__description">
-                Explore legal liability under international space law, track treaty compliance, and review our nation-by-nation sustainability scorecard.
+                Who owns a dead satellite—and who is allowed to move it?
               </p>
               <Link to="/policy" className="btn btn--secondary homeExploreCard__btn">
-                Inspect Policy
+                Treaty &amp; Scorecard Breakdown →
               </Link>
             </div>
 
@@ -249,10 +244,10 @@ export default function HomePage() {
               </div>
               <h3 className="homeExploreCard__title">Solutions</h3>
               <p className="homeExploreCard__description">
-                Evaluate emerging active debris removal (ADR) tech—like robotic capture—and study economic frameworks for maintaining space as a global commons.
+                Robots can grab debris. International law is the harder part.
               </p>
               <Link to="/solutions" className="btn btn--secondary homeExploreCard__btn">
-                View ADR Tech
+                Active Debris Removal Tech →
               </Link>
             </div>
 
@@ -267,12 +262,10 @@ export default function HomePage() {
               </div>
               <h3 className="homeExploreCard__title">Get Involved</h3>
               <p className="homeExploreCard__description">
-                Contact your U.S. representative and discover how citizens,
-                students, and policymakers can collaborate on space stewardship,
-                advocacy, and STEM education.
+                Turn research into legislative advocacy. Look up your U.S. House representative and send a personalized policy letter.
               </p>
               <Link to="/get-involved" className="btn btn--secondary homeExploreCard__btn">
-                Take Action
+                Contact Your Representative →
               </Link>
             </div>
 
@@ -285,13 +278,13 @@ export default function HomePage() {
                 </svg>
               </div>
               <div>
-                <h3 className="homeExploreCard__title">About</h3>
+                <h3 className="homeExploreCard__title">About &amp; Methodology</h3>
                 <p className="homeExploreCard__description">
-                  Review the development methodology, learn about Orbital Watch, and access the comprehensive library of peer-reviewed data sources.
+                  Inspect our primary data sources, Redis caching pipeline, and actual production code excerpts.
                 </p>
               </div>
               <Link to="/about" className="btn btn--secondary homeExploreCard__btn">
-                Read More
+                Read Research Methodology →
               </Link>
             </div>
           </div>

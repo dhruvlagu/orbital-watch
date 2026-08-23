@@ -20,7 +20,7 @@ const policyOptions: Policy[] = [
     name: "Make IADC Guidelines Legally Binding",
     description: "Transform voluntary international debris mitigation standards into enforceable international law with compliance monitoring.",
     impact: 8000,
-    tooltip: "Based on ESA compliance modeling showing ~16% reduction in debris generation if all spacefaring nations followed IADC guidelines",
+    tooltip: "Based on ESA's own reporting that only about 60% of LEO missions and 85% of GEO missions currently complete planned post-mission disposal — binding guidelines would close that compliance gap",
   },
   {
     id: "asat",
@@ -41,7 +41,7 @@ const policyOptions: Policy[] = [
     name: "Extend 5-Year De-orbit Rule Globally",
     description: "Apply the FCC's 5-Year Rule to all spacefaring nations through an international agreement — not just US-licensed operators.",
     impact: 10000,
-    tooltip: "Currently only ~30% of global launches are FCC-licensed; global extension covers the remaining 70%",
+    tooltip: "FCC jurisdiction covers US-licensed and US-market-access satellites, leaving many foreign-licensed operators outside its reach",
   },
 ];
 
@@ -116,7 +116,7 @@ const treaties: Treaty[] = [
     enforcementTone: "red",
     enforcementLabel: "Voluntary / No Legal Force",
     enforcementLevel: 1,
-    whyItMatters: "Nations routinely ignored these guidelines when compliance was expensive.",
+    whyItMatters: "Because the guidelines are voluntary, adoption and enforcement vary widely across spacefaring nations.",
   },
   {
     year: "2022",
@@ -128,18 +128,18 @@ const treaties: Treaty[] = [
     enforcementLabel: "Legally Binding / Actively Enforced",
     enforcementLevel: 4,
     whyItMatters:
-      "The first real enforcement mechanism, but covers less than 30% of global launches.",
+      "One of the few binding de-orbit rules, though limited in geographic scope to US-licensed operators.",
   },
   {
     year: "MISSING",
     name: "International ADR Framework",
     jurisdiction: "Does Not Exist",
     description:
-      "No international treaty currently authorizes or funds active debris removal missions targeting objects owned by other nations. The combination of the 1967 Treaty's sovereignty clause and geopolitical distrust between major spacefaring nations has prevented any binding agreement on mandatory cleanup. This is the most critical gap in space law.",
+      "No international treaty currently authorizes or funds active debris removal missions targeting objects owned by other nations. The combination of the 1967 Treaty's sovereignty clause and geopolitical distrust between major spacefaring nations has prevented any binding agreement on mandatory cleanup. Orbital Watch identifies this as a major unresolved gap in space law.",
     enforcementTone: "red",
     enforcementLabel: "Does Not Exist",
     enforcementLevel: 0,
-    whyItMatters: "Without this, the Sovereignty Trap cannot be broken.",
+    whyItMatters: "Without an international framework, active debris removal remains legally constrained.",
     isMissing: true,
   },
 ];
@@ -363,13 +363,13 @@ export default function PolicyPage() {
     <section className="policyPage">
       <div className="container policyHero">
         <div className="policyHero__label">The Policy Landscape</div>
-        <h1>Why Policy Is Failing Orbit</h1>
+        <h1>Where Today&apos;s Space-Debris Rules Break Down</h1>
         <p>
-          A complete picture of space law, what exists, what's enforced, and what's missing.
+          An analytical review of international space law—what exists, what is enforced, and where legal gaps remain.
         </p>
         <div className="policyWarningBanner">
           <span aria-hidden="true">⚠</span>
-          The 1967 Outer Space Treaty has not been meaningfully amended in 59 years.
+          The 1967 Outer Space Treaty has not been meaningfully amended since 1967.
         </div>
       </div>
 
@@ -511,7 +511,7 @@ export default function PolicyPage() {
               <div className="bestCaseBanner">
                 <span className="bestCaseIcon">✓</span>
                 <p>
-                  <strong>Best Case Scenario:</strong> With all reforms enacted, models suggest LEO debris could stabilize below current levels by 2075.
+                  <strong>Best Case Scenario:</strong> With all reforms enacted, models suggest LEO debris could stabilize below current levels by 2075, though this distant projection carries significant uncertainty.
                 </p>
               </div>
             )}
@@ -585,8 +585,8 @@ export default function PolicyPage() {
         <div className="obstaclesGrid" ref={obstaclesRef}>
           <Link to="/solutions" className="card obstacleCard">
             <div>
-              <h3>The Sovereignty Trap</h3>
-              <p>The 1967 Outer Space Treaty prevents any nation from cleaning up or touching space debris without the owner nation's explicit consent, legally blocking active cleanup.</p>
+              <h3>Ownership Rules &amp; Cleanup Barriers</h3>
+              <p>Article VIII of the 1967 Outer Space Treaty grants launching nations perpetual jurisdiction over their space objects, making active debris removal legally complex without owner consent.</p>
             </div>
             <span className="obstacleLink">Explore Solutions →</span>
           </Link>

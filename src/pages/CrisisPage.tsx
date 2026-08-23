@@ -46,6 +46,7 @@ const debrisGrowthData = [
   { year: 2020, count: 20000 },
   { year: 2023, count: 31773 },
   { year: 2024, count: 39246 },
+  { year: 2026, count: 46410 },
 ];
 
 const markedEvents = [
@@ -1109,7 +1110,7 @@ function getInitialLiveCount(): number {
       }
     }
   } catch { }
-  return 27000;
+  return 46410;
 }
 
 // MAGNETIC BUTTON AUDIT: "Explore The Physics" button uses magnetic effect
@@ -1241,7 +1242,7 @@ export default function CrisisPage() {
         ) : (
           <div className="crisisChart__skeleton" />
         )}
-        <div className="crisisChart__source">Source: ESA Space Environment Report 2025 (data through end of 2024); earlier years illustrative, based on published ESA/NASA ODPO historical trend data.</div>
+        <div className="crisisChart__source">Source: ESA Space Environment Report 2025 (data through end of 2024); earlier years illustrative, based on published ESA/NASA ODPO historical trend data; ESA DISCOSweb Environment Statistics, updated 31 July 2026.</div>
       </div>
 
       <div className="container timeline" ref={timelineRef}>

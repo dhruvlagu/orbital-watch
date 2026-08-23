@@ -97,6 +97,7 @@ This guarantees a fixed, compliant Space-Track request volume (4 requests/day to
 
 **Primary Data**
 - ESA Annual Space Environment Report, Issue 9.1 (October 2025) — Space Debris Office, ESOC
+- ESA DISCOSweb Environment Statistics (updated 31 July 2026) — Space Debris Office, ESOC
 - Space-Track.org Satellite Catalog (SATCAT) API — US Space Force / 18th Space Defense Squadron
 - Space-Track.org Public Conjunction Data Message (CDM) feed — US Space Force / 18th Space Defense Squadron
 - CSET Georgetown Space-Track.org Analysis (April 2025) — LEO object distribution by orbital regime

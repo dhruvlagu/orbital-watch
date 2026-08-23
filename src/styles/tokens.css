@@ -5,11 +5,14 @@
   --accent-blue: #00d4ff;
   --accent-amber: #f5a623;
   --accent-red: #ff3b3b;
+  --accent-green: #00d464;
   --text-primary: #ffffff;
-  --text-secondary: #8b9ab0;
+  --text-secondary: #a8b5c8;
+  --text-muted: #718096;
   --border-subtle: rgba(255, 255, 255, 0.08);
   --glow-blue: 0 0 20px rgba(0, 212, 255, 0.3);
   --glow-amber: 0 0 20px rgba(245, 166, 35, 0.3);
+  --glow-green: 0 0 20px rgba(0, 212, 100, 0.3);
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --transition-reveal: 0.8s var(--ease-out-expo);
 
