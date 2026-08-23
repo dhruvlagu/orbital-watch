@@ -154,12 +154,12 @@ function CountdownCell({ tcaMs }: { tcaMs: number }) {
   );
 }
 
-function ConjunctionCard({ event, index }: { event: ConjunctionEvent; index?: number }) {
+function ConjunctionCard({ event }: { event: ConjunctionEvent }) {
   const dist = formatMissDistance(event.missDistanceM);
   const pcFormatted = event.pc === null ? "Not publicly disclosed" : formatPc(event.pc);
 
   return (
-    <article className="card cw__card reveal-item" style={{ ["--reveal-i" as any]: Math.min(index ?? 0, 8) }}>
+    <article className="card cw__card">
       {/* Object names */}
       <div className="cw__objects">
         <span className="cw__satName">{event.sat1Name}</span>
@@ -590,8 +590,8 @@ export default function CollisionWatchPage() {
                 </p>
               </div>
             ) : (
-              visibleEvents.map((event, index) => (
-                <ConjunctionCard key={event.id} event={event} index={index} />
+              visibleEvents.map((event) => (
+                <ConjunctionCard key={event.id} event={event} />
               ))
             )}
           </div>
