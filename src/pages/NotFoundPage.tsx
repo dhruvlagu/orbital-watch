@@ -5,6 +5,8 @@ export default function NotFoundPage() {
   useDocumentMetadata(
     "Page Not Found | Orbital Watch",
     "The requested Orbital Watch page could not be found.",
+    undefined,
+    "noindex, follow",
   );
 
   return (

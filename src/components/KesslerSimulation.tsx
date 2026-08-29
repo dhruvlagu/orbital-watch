@@ -369,8 +369,11 @@ export default function KesslerSimulation() {
 
   return (
     <div className="kesslerSimulation">
-      <div className="simulationLabel">Kessler Cascade Simulation</div>
-      <canvas ref={canvasRef} className="simulationCanvas" />
+      <h3 className="simulationLabel simulationLabel--title">Kessler Cascade Simulation</h3>
+      <div className="simulationCanvasWrapper">
+        <canvas ref={canvasRef} className="simulationCanvas" />
+        <p className="simulationDisclaimer">Illustrative educational visualization; not an orbital-mechanics model.</p>
+      </div>
       <div className="simulationLabel simulationLabel--bottom">Debris collisions create fragments, triggering exponential chain reactions</div>
       <div className="simulationControls">
         <button ref={triggerButtonRef} className="btn btn--primary" onClick={triggerCascade} disabled={isRunning}>

@@ -87,7 +87,6 @@ function buildMetrics(records) {
       totalTracked,
       addedLast30Days,
       debrisToActiveRatio,
-      highestRiskShell: "LEO 800–1000km",
     },
     maxFileNumber,
   };

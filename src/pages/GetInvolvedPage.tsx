@@ -11,8 +11,8 @@ import { useMagneticButton } from "../hooks/useMagneticButton";
 // MAGNETIC BUTTON AUDIT: "About the Project →" button uses magnetic effect
 export default function GetInvolvedPage() {
   useDocumentMetadata(
-    "Get Involved | Space Stewardship & Advocacy",
-    "Learn how students, citizens, and policymakers can support orbital sustainability, treaty reform, and public education."
+    "Get Involved | Take Action for Orbital Sustainability | Orbital Watch",
+    "Find practical ways to support orbital sustainability, advocate for treaty reform, and contact your representative."
   );
 
   const location = useLocation();

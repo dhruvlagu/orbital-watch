@@ -499,6 +499,10 @@
   .policyAskPicker {
     grid-template-columns: 1fr 1fr;
   }
+
+  .policyAskCard--full {
+    grid-column: 1 / -1;
+  }
 }
 
 .policyAskCard {

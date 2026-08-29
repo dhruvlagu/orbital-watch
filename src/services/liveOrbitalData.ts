@@ -17,7 +17,6 @@ export type LiveOrbitalData = {
   totalTracked: number;
   addedLast30Days: number;
   debrisToActiveRatio: string;
-  highestRiskShell: string;
 };
 
 export type LiveOrbitalResponse = {
@@ -67,7 +66,6 @@ async function fetchLiveMetrics(): Promise<{ data: LiveOrbitalData; lastUpdatedA
     totalTracked: body.totalTracked,
     addedLast30Days: body.addedLast30Days,
     debrisToActiveRatio: body.debrisToActiveRatio,
-    highestRiskShell: body.highestRiskShell,
   } as LiveOrbitalData;
   
   if (!metrics || typeof metrics.totalTracked !== "number") {
@@ -142,4 +140,3 @@ export async function fetchLiveOrbitalEnvironment(
 export async function forceRefreshLiveOrbitalEnvironment(): Promise<LiveOrbitalResponse> {
   return fetchAndCacheLiveMetrics();
 }
-

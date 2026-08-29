@@ -20,7 +20,7 @@ const policyOptions: Policy[] = [
     name: "Make IADC Guidelines Legally Binding",
     description: "Transform voluntary international debris mitigation standards into enforceable international law with compliance monitoring.",
     impact: 8000,
-    tooltip: "Based on ESA's own reporting that only about 60% of LEO missions and 85% of GEO missions currently complete planned post-mission disposal — binding guidelines would close that compliance gap",
+    tooltip: "Based on ESA's 2025 Space Environment Report: about 90% of rocket bodies in LEO now comply with the 25-year disposal standard, but only about 80% comply with ESA's stricter 5-year standard adopted in 2023 — and payload compliance in LEO remains well below the 90% target used across the industry. ESA Space Environment Report 2025, esa.int",
   },
   {
     id: "asat",
@@ -34,7 +34,7 @@ const policyOptions: Policy[] = [
     name: "Create International Debris Removal Authority",
     description: "A UN-backed body with legal authority and dedicated funding to conduct active debris removal missions on high-risk objects.",
     impact: 15000,
-    tooltip: "Modeled on Liou et al. (2021) finding that removing 5 large objects per year stabilizes LEO debris density",
+    tooltip: "Modeled on Liou & Johnson (2009) finding that removing 5 large objects per year stabilizes LEO debris density",
   },
   {
     id: "fiveyear",
@@ -86,9 +86,9 @@ const treaties: Treaty[] = [
   {
     year: "1967",
     name: "Outer Space Treaty",
-    jurisdiction: "International (118 nations)",
+    jurisdiction: "International (over 115 parties)",
     description:
-      "The foundational document of space law. Declares space the 'province of all mankind' and prohibits weapons of mass destruction in orbit. Critically, Article VIII establishes that nations retain permanent jurisdiction and control over objects they launch, even after those objects become debris. This sovereignty clause is the primary legal barrier to international debris removal today.",
+      "The foundation of international space law. It declares space the 'province of all mankind' and bans weapons of mass destruction in orbit. Critically, Article VIII establishes that nations retain permanent jurisdiction and control over objects they launch, even after those objects become debris. This sovereignty clause is the primary legal barrier to international debris removal today.",
     enforcementTone: "red",
     enforcementLabel: "Voluntary / No Enforcement Mechanism",
     enforcementLevel: 1,
@@ -123,7 +123,7 @@ const treaties: Treaty[] = [
     name: "FCC 5-Year Rule",
     jurisdiction: "United States Only",
     description:
-      "The Federal Communications Commission updated its orbital debris rules to require that US-licensed satellites operating in LEO must de-orbit within five years of mission end, down from the previous 25-year standard. This is the strongest enforceable debris regulation in existence. However, it applies only to operators licensed by the FCC, leaving China, Russia, and others uncovered.",
+      "The Federal Communications Commission updated its orbital debris rules to require that US-licensed satellites operating in LEO must de-orbit within five years of mission end, down from the previous 25-year standard. This is one of the strongest enforceable debris regulations. However, it applies only to operators licensed by the FCC, leaving China, Russia, and others uncovered.",
     enforcementTone: "green",
     enforcementLabel: "Legally Binding / Actively Enforced",
     enforcementLevel: 4,
@@ -250,8 +250,10 @@ function StarRating({ value }: { value: number }) {
   return (
     <span className="policyStars" aria-label={`${value} out of 5`}>
       {Array.from({ length: 5 }, (_, index) => (
-        <span className={index < value ? "is-filled" : ""} key={index}>
-          {index < value ? "★" : "☆"}
+        <span className={index < value ? "is-filled" : ""} key={index} aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill={index < value ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+          </svg>
         </span>
       ))}
     </span>
@@ -275,6 +277,7 @@ export default function PolicyPage() {
 
   const [sortKey, setSortKey] = useState<SortKey>("grade");
   const [activeToggles, setActiveToggles] = useState<string[]>([]);
+  const [openTooltipId, setOpenTooltipId] = useState<string | null>(null);
 
   const timelineRef = useRef<HTMLDivElement>(null);
   const togglesRef = useRef<HTMLDivElement>(null);
@@ -322,19 +325,19 @@ export default function PolicyPage() {
   if (resultValue > 40000) {
     statusBadgeText = "⚠ CRITICAL — Kessler Cascade Risk";
     statusBadgeColor = "red";
-    displayColor = "#ff3b3b";
+    displayColor = "var(--accent-red)";
   } else if (resultValue >= 25000) {
     statusBadgeText = "⚡ DANGEROUS";
     statusBadgeColor = "amber";
-    displayColor = "#f5a623";
+    displayColor = "var(--accent-amber)";
   } else if (resultValue >= 15000) {
     statusBadgeText = "↓ MANAGEABLE";
     statusBadgeColor = "blue";
-    displayColor = "#00d4ff";
+    displayColor = "var(--accent-blue)";
   } else {
     statusBadgeText = "✓ STABILIZING";
     statusBadgeColor = "green";
-    displayColor = "#00d464";
+    displayColor = "var(--accent-green)";
   }
 
   const needlePos = Math.max(5, Math.min(95, (resultValue / 50000) * 90));
@@ -365,10 +368,16 @@ export default function PolicyPage() {
         <div className="policyHero__label">The Policy Landscape</div>
         <h1>Where Today&apos;s Space-Debris Rules Break Down</h1>
         <p>
-          An analytical review of international space law—what exists, what is enforced, and where legal gaps remain.
+          An analysis of international space law: what exists, what's enforced, and where the gaps are.
         </p>
         <div className="policyWarningBanner">
-          <span aria-hidden="true">⚠</span>
+          <span className="policyWarningBanner__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+              <line x1="12" y1="9" x2="12" y1="13" />
+              <line x1="12" y1="17" x2="12.01" y1="17" />
+            </svg>
+          </span>
           The 1967 Outer Space Treaty has not been meaningfully amended since 1967.
         </div>
       </div>
@@ -468,8 +477,7 @@ export default function PolicyPage() {
         </div>
 
         <div className="policySourceNote">
-          Ratings based on public records from ESA Annual Space Environment Report, NASA ODPO, and
-          Secure World Foundation Annual Report. Research by Dhruv Lagu.
+          Ratings based on publicly available national compliance records from ESA Annual Space Environment Report and NASA ODPO. Research by Dhruv Lagu.
         </div>
       </div>
 
@@ -478,7 +486,7 @@ export default function PolicyPage() {
         <div className="simulatorHeader">
           <h2>What If We Fixed It?</h2>
           <p>
-            Toggle policy reforms below and see their projected impact on LEO debris density by 2050.
+            Toggle the policy reforms below to see their projected impact on LEO debris density by 2050.
             Projections are illustrative, modeled on debris growth research from Liou et al. (2021) and
             ESA Space Environment Report 2023.
           </p>
@@ -496,7 +504,14 @@ export default function PolicyPage() {
             </div>
 
             <div className="progressBarContainer">
-              <div className="progressBarTrack" aria-hidden="true">
+              <div 
+                className="progressBarTrack" 
+                role="slider"
+                aria-valuenow={Math.round(needlePos)}
+                aria-valuemin="5"
+                aria-valuemax="95"
+                aria-label="Current debris level position"
+              >
                 <div className="progressBarNeedle" style={{ left: `${needlePos}%` }} />
               </div>
               <div className="progressBarLabels">
@@ -541,9 +556,25 @@ export default function PolicyPage() {
                       <span className={isOn ? "toggleSwitch is-on" : "toggleSwitch"} />
                     </div>
                     <span className="policyName">{policy.name}</span>
-                    <div className="tooltipContainer" onClick={(e) => e.stopPropagation()}>
-                      <span className="infoIcon" tabIndex={0} aria-label="Learn more about this logic">ⓘ</span>
-                      <div className="tooltipText">{policy.tooltip}</div>
+                    <div 
+                      className="tooltipContainer" 
+                      onClick={(e) => e.stopPropagation()}
+                      onFocus={() => setOpenTooltipId(policy.id)}
+                      onBlur={() => setOpenTooltipId(null)}
+                    >
+                      <span 
+                        className="infoIcon" 
+                        tabIndex={0} 
+                        aria-label="Learn more about this logic"
+                        aria-expanded={openTooltipId === policy.id}
+                      >
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <circle cx="12" cy="12" r="10" />
+                          <path d="M12 16v-4" />
+                          <path d="M12 8h.01" />
+                        </svg>
+                      </span>
+                      <div className={`tooltipText ${openTooltipId === policy.id ? 'is-open' : ''}`}>{policy.tooltip}</div>
                     </div>
                   </div>
                   <p className="policyDesc">{policy.description}</p>
@@ -580,7 +611,7 @@ export default function PolicyPage() {
       <div className="container policySection policySection--obstacles">
         <div className="obstaclesHeader">
           <h2>What's Standing in the Way?</h2>
-          <p>Enacting these reforms requires overcoming deep structural and geopolitical barriers.</p>
+          <p>These reforms face deep structural and geopolitical barriers.</p>
         </div>
         <div className="obstaclesGrid" ref={obstaclesRef}>
           <Link to="/solutions" className="card obstacleCard">
@@ -600,7 +631,7 @@ export default function PolicyPage() {
           <Link to="/solutions" className="card obstacleCard">
             <div>
               <h3>The Economics</h3>
-              <p>Space orbits are a global commons. Like oceanic plastic, no single nation or private operator has a direct financial incentive to pay for cleaning up debris they don't own.</p>
+              <p>Space orbits are a global commons. Like oceanic plastic, debris cleanup lacks a clear financial incentive for any single nation or private operator.</p>
             </div>
             <span className="obstacleLink">Explore Solutions →</span>
           </Link>

@@ -46,7 +46,7 @@ const debrisGrowthData = [
   { year: 2020, count: 20000 },
   { year: 2023, count: 31773 },
   { year: 2024, count: 39246 },
-  { year: 2026, count: 46410 },
+  { year: 2026, count: 46420 },
 ];
 
 const markedEvents = [
@@ -1100,7 +1100,7 @@ function TimelineVisual({ type }: { type: string }) {
   );
 }
 
-function getInitialLiveCount(): number {
+function getInitialLiveCount(): number | null {
   try {
     const raw = localStorage.getItem("spaceTrackSatcatCacheV1");
     if (raw) {
@@ -1110,13 +1110,13 @@ function getInitialLiveCount(): number {
       }
     }
   } catch { }
-  return 46410;
+  return null;
 }
 
 // MAGNETIC BUTTON AUDIT: "Explore The Physics" button uses magnetic effect
 export default function CrisisPage() {
   useDocumentMetadata(
-    "The Crisis | Space Debris History & Orbital Risks",
+    "The Crisis | Orbital Debris History & Risks | Orbital Watch",
     "Follow the growth of space junk from Sputnik to today, compare debris size classes, and see how treaty gaps shaped modern orbital risk."
   );
 
@@ -1124,7 +1124,7 @@ export default function CrisisPage() {
   const timelineRef = useRef<HTMLDivElement | null>(null);
   const physicsButtonRef = useRef<HTMLAnchorElement>(null);
   const [chartVisible, setChartVisible] = useState(false);
-  const [liveCount, setLiveCount] = useState<number>(getInitialLiveCount);
+  const [liveCount, setLiveCount] = useState<number | null>(getInitialLiveCount);
 
   useMagneticButton(physicsButtonRef);
   useCardSpotlight(timelineRef);
@@ -1168,27 +1168,27 @@ export default function CrisisPage() {
 
   const chartData = useMemo(
     () => ({
-      labels: debrisGrowthData.map((point) => String(point.year)),
-      datasets: [
-        {
-          label: "Trackable objects",
-          data: debrisGrowthData.map((point) => point.count),
-          borderColor: CANVAS_COLORS.accentBlue,
-          backgroundColor: ((ctx: { chart: ChartJS<"line"> }) => {
-            const chart = ctx.chart;
-            const area = chart.chartArea;
-            if (!area) return "rgba(0,212,255,0.15)";
-            const gradient = chart.ctx.createLinearGradient(0, area.top, 0, area.bottom);
-            gradient.addColorStop(0, "rgba(0,212,255,0.2)");
-            gradient.addColorStop(1, "rgba(0,212,255,0)");
-            return gradient;
-          }) as any,
-          fill: true,
-          borderWidth: 3,
-          tension: 0.25,
-          pointRadius: 0,
-        },
-      ],
+        labels: debrisGrowthData.map((point) => String(point.year)),
+        datasets: [
+          {
+            label: "Trackable objects",
+            data: debrisGrowthData.map((point) => point.count),
+            borderColor: CANVAS_COLORS.accentBlue,
+            backgroundColor: ((ctx: { chart: ChartJS<"line"> }) => {
+              const chart = ctx.chart;
+              const area = chart.chartArea;
+              if (!area) return "rgba(0,212,255,0.15)";
+              const gradient = chart.ctx.createLinearGradient(0, area.top, 0, area.bottom);
+              gradient.addColorStop(0, "rgba(0,212,255,0.2)");
+              gradient.addColorStop(1, "rgba(0,212,255,0)");
+              return gradient;
+            }) as any,
+            fill: true,
+            borderWidth: 3,
+            tension: 0.25,
+            pointRadius: 0,
+          },
+        ],
     } as any),
     [],
   );
@@ -1278,9 +1278,15 @@ export default function CrisisPage() {
             <div className="card timelineEvent__content">
               <span className="badge badge--red timelineEvent__yearPill">Today</span>
               <h3>The Tipping Point</h3>
-            <p>
-              <strong style={{ color: "var(--accent-blue)" }}>{liveCount.toLocaleString()}</strong> tracked objects across all orbital regimes — and growing. In LEO alone, thousands of new objects are added each year, the large majority of them active megaconstellation payloads. Millions of additional fragments remain too small to track but large enough to destroy a satellite. Active debris removal technology exists but faces legal paralysis under the 1967 Treaty. The window to act may be closing.
-            </p>
+              <p>
+                {liveCount === null ? (
+                  "The latest tracked-object count is currently unavailable."
+                ) : (
+                  <>
+                    <strong style={{ color: "var(--accent-blue)" }}>{liveCount.toLocaleString()}</strong> tracked objects across all orbital regimes — and growing.
+                  </>
+                )} In LEO alone, thousands of new objects are added each year, the large majority of them active megaconstellation payloads. Millions of additional fragments remain too small to track but large enough to destroy a satellite. Active debris removal technology exists but faces legal paralysis under the 1967 Treaty. The window to act may be closing.
+              </p>
             <p>
               See the conjunctions being tracked right now on the{" "}
               <Link to="/collision-watch" style={{ color: "var(--accent-blue)", textDecoration: "underline" }}>
@@ -1311,4 +1317,3 @@ export default function CrisisPage() {
     </section>
   );
 }
-

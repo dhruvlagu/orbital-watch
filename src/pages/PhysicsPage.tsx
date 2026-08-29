@@ -13,8 +13,8 @@ ChartJS.register(CategoryScale, LinearScale, BarController, BarElement, Tooltip,
 // MAGNETIC BUTTON AUDIT: "Read Policy Pathways →" button uses magnetic effect
 export default function PhysicsPage() {
   useDocumentMetadata(
-    "The Physics | Kessler Simulator & Collision Energy",
-    "Understand the physics of orbital debris impacts, kinetic energy, and Kessler Syndrome with interactive simulations."
+    "The Physics | Impact Energy & Kessler Visualization | Orbital Watch",
+    "Explore orbital-debris impact energy and an educational Kessler cascade visualization."
   );
 
   const [mass, setMass] = useState(10); // grams

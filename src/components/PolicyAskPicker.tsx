@@ -22,11 +22,12 @@ export default function PolicyAskPicker({
       {askOrder.map((id) => {
         const ask = policyAsks[id];
         const isSelected = selectedId === id;
+        const isFullWidth = id === "general";
 
         return (
           <div
             key={id}
-            className={`card policyAskCard ${isSelected ? "is-selected" : ""}`}
+            className={`card policyAskCard ${isSelected ? "is-selected" : ""} ${isFullWidth ? "policyAskCard--full" : ""}`}
             onClick={() => onSelectAsk(id)}
             role="radio"
             aria-checked={isSelected}

@@ -25,13 +25,17 @@ const STATS_GROUP = (
       Objects added to LEO in 2025: <span>4,772</span>
     </div>
     <div className="quickStats__divider" />
+    <div className="quickStats__item">
+      Highest risk orbital shell: <span>LEO 800–1000 km</span>
+    </div>
+    <div className="quickStats__divider" />
   </div>
 );
 
 export default function HomePage() {
   useDocumentMetadata(
     "Orbital Watch | Space Debris Tracker & Policy Explorer",
-    "Explore live orbital debris data, collision-risk science, and policy tools for building a safer low Earth orbit."
+    "Explore daily updated orbital debris data, collision-risk science, and policy tools for building a safer low Earth orbit."
   );
 
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);

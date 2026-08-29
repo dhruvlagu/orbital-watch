@@ -623,7 +623,7 @@ const getDangerLevel = () => {
                 <li className="sourceItem">
                   <span className="sourceItem__title">European Space Agency (ESA)</span>
                   <span className="sourceItem__details">
-                    <em>DISCOSweb Environment Statistics.</em> Space Debris Office, ESOC. Updated 31 July 2026.
+                    <em>DISCOSweb Environment Statistics.</em> Space Debris Office, ESOC. Updated 31 July 2025.
                   </span>
                 </li>
                 <li className="sourceItem">

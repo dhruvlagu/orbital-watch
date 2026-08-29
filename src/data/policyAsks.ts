@@ -108,7 +108,7 @@ export const policyAsks: Record<PolicyAskId, PolicyAsk> = {
     repCanDo:
       "support legislation, oversight, and appropriations that keep orbital debris mitigation on the national agenda",
     supportingStat:
-      "Recent analysis suggests that keeping debris mitigation visible in U.S. space policy can prevent thousands of additional tracked objects from crowding low Earth orbit over the coming decades.",
+      "Debris mitigation policy can prevent thousands of new tracked objects by 2050.",
     closingSentence:
       "Please let me know whether you support keeping debris mitigation a continuing priority.",
     whyItMatters: [

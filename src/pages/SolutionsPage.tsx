@@ -197,7 +197,7 @@ function SSRGauge({ score, total }: { score: number; total: number }) {
 // MAGNETIC BUTTON AUDIT: "Get Involved →" button uses magnetic effect
 export default function SolutionsPage() {
   useDocumentMetadata(
-    "Solutions | ADR Technology & Debris Removal",
+    "Solutions | Active Debris Removal & Sustainability | Orbital Watch",
     "Inspect active debris removal concepts, robotic capture systems, and the legal and economic barriers to cleaning up low Earth orbit."
   );
 

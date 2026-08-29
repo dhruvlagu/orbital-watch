@@ -86,7 +86,6 @@ function buildMetrics(records) {
     totalTracked,
     addedLast30Days,
     debrisToActiveRatio,
-    highestRiskShell: "LEO 800–1000km",
   };
 }
 
@@ -220,4 +219,3 @@ const server = http.createServer(async (req, res) => {
 server.listen(port, () => {
   console.log(`Local preview running at http://localhost:${port}`);
 });
-

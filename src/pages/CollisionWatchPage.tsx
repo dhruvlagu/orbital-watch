@@ -257,7 +257,7 @@ const FALLBACK_RESPONSE: ConjunctionResponse = {
 // MAGNETIC BUTTON AUDIT: "Try the Impact Calculator →" button uses magnetic effect
 export default function CollisionWatchPage() {
   useDocumentMetadata(
-    "Collision Watch | Conjunction Alerts | Orbital Watch",
+    "Collision Watch | Predicted Conjunction Alerts | Orbital Watch",
     "Predicted close approaches between tracked objects in orbit, updated 3x daily and sourced from the U.S. Space Force's public conjunction data feed (CDM Public class).",
   );
 

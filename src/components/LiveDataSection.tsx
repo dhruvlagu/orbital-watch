@@ -24,18 +24,6 @@ function WarningIcon() {
   );
 }
 
-const FALLBACK: LiveOrbitalResponse = {
-  data: {
-    totalTracked: 46410,
-    addedLast30Days: 420,
-    debrisToActiveRatio: "3:1",
-    highestRiskShell: "LEO 800–1000km",
-  },
-  isFresh: false,
-  fromCache: true,
-  lastUpdatedAt: null,
-};
-
 interface LiveDataSectionProps {
   /** "hero" renders without the outer <section> wrapper, for embedding inside the hero */
   variant?: "hero" | "standalone";
@@ -43,7 +31,8 @@ interface LiveDataSectionProps {
 
 export default function LiveDataSection({ variant = "standalone" }: LiveDataSectionProps) {
   const [loading, setLoading] = useState(true);
-  const [payload, setPayload] = useState<LiveOrbitalResponse>(FALLBACK);
+  const [payload, setPayload] = useState<LiveOrbitalResponse | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const isMountedRef = useRef(true);
   const gridRef = useRef<HTMLDivElement>(null);
 
@@ -60,6 +49,7 @@ export default function LiveDataSection({ variant = "standalone" }: LiveDataSect
 
     const load = async () => {
       setLoading(true);
+      setError(null);
       try {
         const response = await fetchLiveOrbitalEnvironment((freshResponse) => {
           if (!isCancelled) {
@@ -69,9 +59,10 @@ export default function LiveDataSection({ variant = "standalone" }: LiveDataSect
         if (!isCancelled) {
           setPayload(response);
         }
-      } catch {
+      } catch (error) {
         if (!isCancelled) {
-          setPayload(FALLBACK);
+          setPayload(null);
+          setError(error instanceof Error ? error.message : "Orbital data is temporarily unavailable.");
         }
       } finally {
         if (!isCancelled) {
@@ -86,8 +77,8 @@ export default function LiveDataSection({ variant = "standalone" }: LiveDataSect
     };
   }, []);
 
-  const totalTrackedTarget = loading ? 0 : payload.data.totalTracked;
-  const added30DaysTarget = loading ? 0 : payload.data.addedLast30Days;
+  const totalTrackedTarget = loading || !payload ? 0 : payload.data.totalTracked;
+  const added30DaysTarget = loading || !payload ? 0 : payload.data.addedLast30Days;
 
   const animatedTotalTracked = useCountUp(totalTrackedTarget, {
     formatter: (val) => val.toLocaleString(),
@@ -101,19 +92,15 @@ export default function LiveDataSection({ variant = "standalone" }: LiveDataSect
     () => [
       {
         label: "Total tracked objects across all orbital regimes",
-        value: animatedTotalTracked,
+        value: payload ? animatedTotalTracked : "—",
       },
       {
         label: "Objects added in last 30 days",
-        value: animatedAddedLast30Days,
+        value: payload ? animatedAddedLast30Days : "—",
       },
       {
         label: "Current debris-to-active-satellite ratio",
-        value: payload.data.debrisToActiveRatio,
-      },
-      {
-        label: "Highest risk orbital shell",
-        value: payload.data.highestRiskShell,
+        value: payload ? payload.data.debrisToActiveRatio : "—",
       },
     ],
     [animatedTotalTracked, animatedAddedLast30Days, payload],
@@ -133,7 +120,7 @@ export default function LiveDataSection({ variant = "standalone" }: LiveDataSect
             <span className="badge badge--blue">
               UPDATED DAILY
             </span>
-            {payload.lastUpdatedAt ? (
+            {payload?.lastUpdatedAt ? (
               <div className="liveData__meta" style={{ margin: 0 }}>
                 Last updated: {hoursAgo(payload.lastUpdatedAt)}
               </div>
@@ -142,28 +129,30 @@ export default function LiveDataSection({ variant = "standalone" }: LiveDataSect
         </div>
       </div>
 
-      <div className="liveData__grid" ref={gridRef}>
-        {loading
-          ? Array.from({ length: 4 }).map((_, idx) => (
-              <div className="card liveDataCard liveDataCard--skeleton" key={idx}>
-                <div className="liveDataCard__skeletonValue" />
-                <div className="liveDataCard__skeletonLabel" />
-              </div>
-            ))
-          : metricCards.map((metric) => (
-              <div className="card liveDataCard" key={metric.label}>
-                <div className="liveDataCard__value">{metric.value}</div>
-                <div className="liveDataCard__label">{metric.label}</div>
-              </div>
-            ))}
-      </div>
+      {(loading || payload) && (
+        <div className="liveData__grid" ref={gridRef}>
+          {loading
+            ? Array.from({ length: 4 }).map((_, idx) => (
+                <div className="card liveDataCard liveDataCard--skeleton" key={idx}>
+                  <div className="liveDataCard__skeletonValue" />
+                  <div className="liveDataCard__skeletonLabel" />
+                </div>
+              ))
+            : metricCards.map((metric) => (
+                <div className="card liveDataCard" key={metric.label}>
+                  <div className="liveDataCard__value">{metric.value}</div>
+                  <div className="liveDataCard__label">{metric.label}</div>
+                </div>
+              ))}
+        </div>
+      )}
 
       {/* Error banner - shown below cards when there's an error and NO cached data */}
-      {!loading && payload.error && !payload.lastUpdatedAt && (
+      {!loading && error && (
         <div className="liveData__errorBanner" role="alert">
           <WarningIcon />
           <p className="liveData__errorBannerText">
-            {payload.error}
+            {error}
           </p>
         </div>
       )}

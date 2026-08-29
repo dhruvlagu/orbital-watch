@@ -82,7 +82,6 @@ export default defineConfig(({ mode }) => {
                                     totalTracked,
                                     addedLast30Days,
                                     debrisToActiveRatio,
-                                    highestRiskShell: "LEO 800–1000km",
                                 };
                             };
                             const fetchSatcatData = async () => {

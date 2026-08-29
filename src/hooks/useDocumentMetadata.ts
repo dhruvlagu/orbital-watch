@@ -45,7 +45,8 @@ function setCanonicalUrl(url: string) {
 export function useDocumentMetadata(
   title: string,
   description: string,
-  ogImage: string = DEFAULT_OG_IMAGE
+  ogImage: string = DEFAULT_OG_IMAGE,
+  robotsContent?: string,
 ) {
   useEffect(() => {
     const prevTitle = document.title;
@@ -81,6 +82,12 @@ export function useDocumentMetadata(
       document.head.appendChild(metaKeywords);
     }
     metaKeywords.setAttribute("content", DEFAULT_KEYWORDS);
+
+    const metaRobots = document.querySelector('meta[name="robots"]');
+    const previousRobotsContent = metaRobots?.getAttribute("content") || "";
+    if (robotsContent && metaRobots) {
+      metaRobots.setAttribute("content", robotsContent);
+    }
 
     setCanonicalUrl(canonicalUrl);
 
@@ -142,10 +149,13 @@ export function useDocumentMetadata(
           document.head.removeChild(metaDescription);
         }
       }
+      if (robotsContent && metaRobots) {
+        metaRobots.setAttribute("content", previousRobotsContent);
+      }
       const scriptToRemove = document.head.querySelector('script[type="application/ld+json"]#page-schema');
       if (scriptToRemove) {
         document.head.removeChild(scriptToRemove);
       }
     };
-  }, [title, description, ogImage]);
+  }, [title, description, ogImage, robotsContent]);
 }
