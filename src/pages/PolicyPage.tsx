@@ -251,7 +251,7 @@ function StarRating({ value }: { value: number }) {
     <span className="policyStars" aria-label={`${value} out of 5`}>
       {Array.from({ length: 5 }, (_, index) => (
         <span className={index < value ? "is-filled" : ""} key={index} aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill={index < value ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg viewBox="0 0 24 24" width={14} height={14} fill={index < value ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
           </svg>
         </span>
@@ -372,10 +372,10 @@ export default function PolicyPage() {
         </p>
         <div className="policyWarningBanner">
           <span className="policyWarningBanner__icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-              <line x1="12" y1="9" x2="12" y1="13" />
-              <line x1="12" y1="17" x2="12.01" y1="17" />
+              <line x1={12} y1={9} x2={12} y2={13} />
+              <line x1={12} y1={17} x2={12.01} y2={17} />
             </svg>
           </span>
           The 1967 Outer Space Treaty has not been meaningfully amended since 1967.
@@ -508,8 +508,8 @@ export default function PolicyPage() {
                 className="progressBarTrack" 
                 role="slider"
                 aria-valuenow={Math.round(needlePos)}
-                aria-valuemin="5"
-                aria-valuemax="95"
+                aria-valuemin={5}
+                aria-valuemax={95}
                 aria-label="Current debris level position"
               >
                 <div className="progressBarNeedle" style={{ left: `${needlePos}%` }} />
@@ -568,8 +568,8 @@ export default function PolicyPage() {
                         aria-label="Learn more about this logic"
                         aria-expanded={openTooltipId === policy.id}
                       >
-                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                          <circle cx="12" cy="12" r="10" />
+                        <svg viewBox="0 0 24 24" width={14} height={14} fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <circle cx={12} cy={12} r={10} />
                           <path d="M12 16v-4" />
                           <path d="M12 8h.01" />
                         </svg>
