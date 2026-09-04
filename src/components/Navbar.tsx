@@ -4,20 +4,12 @@ import { NAV_LINKS } from "../services/navLinks";
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [isClosing, setIsClosing] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [indicatorLeft, setIndicatorLeft] = useState(0);
   const [indicatorWidth, setIndicatorWidth] = useState(0);
   const navRef = useRef<HTMLElement | null>(null);
+  const menuButtonRef = useRef<HTMLButtonElement | null>(null);
   const location = useLocation();
-
-  const closeMobileNav = () => {
-    setIsClosing(true);
-    setTimeout(() => {
-      setMobileOpen(false);
-      setIsClosing(false);
-    }, 200);
-  };
 
   const measureActiveLink = () => {
     const navEl = navRef.current;
@@ -32,16 +24,25 @@ export default function Navbar() {
     setIndicatorWidth(linkRect.width);
   };
 
+  // Lock body scroll while mobile panel is open, restore on close or unmount
   useEffect(() => {
-    document.body.style.overflow = mobileOpen ? "hidden" : "unset";
+    document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => {
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = "";
     };
   }, [mobileOpen]);
 
+  // Close mobile nav on route changes
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
+
+  // Close mobile nav on Escape key
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") closeMobileNav();
+      if (event.key === "Escape") {
+        setMobileOpen(false);
+      }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
@@ -81,76 +82,83 @@ export default function Navbar() {
   }, []);
 
   return (
-    <header className={`navbar ${isScrolled ? "navbar--scrolled" : ""}`} role="banner">
-      <div className="container navbar__inner">
-        <NavLink className="navbar__logo" to="/" aria-label="Go to home">
-          ORBITAL WATCH
-        </NavLink>
+    <>
+      <header className={`navbar ${isScrolled ? "navbar--scrolled" : ""}`} role="banner">
+        <div className="container navbar__inner">
+          <NavLink className="navbar__logo" to="/" aria-label="Go to home">
+            ORBITAL WATCH
+          </NavLink>
 
-        <nav ref={navRef} className="navbar__nav" aria-label="Primary">
-          {NAV_LINKS.map((link) => (
-            <NavLink
-              key={link.path}
-              to={link.path}
-              className={({ isActive }) =>
-                isActive ? "navlink is-active" : "navlink"
-              }
-            >
-              {link.label}
-            </NavLink>
-          ))}
-          <span
-            className="navbar__activeIndicator"
-            style={{ left: indicatorLeft, width: indicatorWidth }}
-            aria-hidden="true"
-          />
-        </nav>
+          {/* Desktop Nav - untouched */}
+          <nav ref={navRef} className="navbar__nav" aria-label="Primary">
+            {NAV_LINKS.map((link) => (
+              <NavLink
+                key={link.path}
+                to={link.path}
+                className={({ isActive }) =>
+                  isActive ? "navlink is-active" : "navlink"
+                }
+              >
+                {link.label}
+              </NavLink>
+            ))}
+            <span
+              className="navbar__activeIndicator"
+              style={{ left: indicatorLeft, width: indicatorWidth }}
+              aria-hidden="true"
+            />
+          </nav>
 
-        {!mobileOpen && (
+          {/* Mobile Hamburger/X Toggle */}
           <button
+            ref={menuButtonRef}
             className="icon-button navbar__menuButton"
             type="button"
-            aria-label="Open menu"
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
             aria-controls="mobileNav"
             aria-expanded={mobileOpen}
-            onClick={() => setMobileOpen(true)}
+            onClick={() => setMobileOpen((prev) => !prev)}
           >
-            <span className="hamburger" aria-hidden="true">
-              <span />
-            </span>
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              {mobileOpen ? (
+                <path d="M18 6L6 18M6 6l12 12" />
+              ) : (
+                <path d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
           </button>
-        )}
-      </div>
+        </div>
+      </header>
 
-      {!mobileOpen ? null : (
-        <>
-          <button
-            className={`icon-button mobileNav__close ${isClosing ? '' : 'mobileNav__close--visible'}`}
-            type="button"
-            aria-label="Close menu"
-            onClick={closeMobileNav}
-          >
-            <span className="closeIcon" aria-hidden="true" />
-          </button>
-          <div className={`mobileNav__backdrop ${isClosing ? '' : 'mobileNav__backdrop--visible'}`} onClick={closeMobileNav} />
-          <div className={`mobileNav ${isClosing ? "mobileNav--closing" : "mobileNav--open"}`} id="mobileNav">
-            <nav className="mobileNav__links" aria-label="Mobile">
-              {NAV_LINKS.map((link) => (
-                <NavLink
-                  key={link.path}
-                  to={link.path}
-                  className={({ isActive }) =>
-                    isActive ? "mobileNav__link is-active" : "mobileNav__link"
-                  }
-                  onClick={closeMobileNav}
-                >
-                  {link.label}
-                </NavLink>
-              ))}
-            </nav>
-          </div>
-        </>
+      {/* Mobile Nav Panel rendered outside header to span full viewport */}
+      {mobileOpen && (
+        <div id="mobileNav" className="mobileNav" role="dialog" aria-label="Mobile Navigation">
+          <nav className="mobileNav__links" aria-label="Mobile Navigation">
+            {NAV_LINKS.map((link) => (
+              <NavLink
+                key={link.path}
+                to={link.path}
+                onClick={() => setMobileOpen(false)}
+                className={({ isActive }) =>
+                  isActive ? "mobileNav__link is-active" : "mobileNav__link"
+                }
+              >
+                {link.label}
+              </NavLink>
+            ))}
+          </nav>
+        </div>
       )}
-    </header>
+    </>
   );
 }

@@ -219,6 +219,11 @@
   color: var(--accent-blue);
 }
 
+.shareBtn:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+}
+
 .shareWidget__status {
   font-size: 13px;
   padding: 8px 12px;

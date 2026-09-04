@@ -82,10 +82,14 @@ export default function LiveDataSection({ variant = "standalone" }: LiveDataSect
 
   const animatedTotalTracked = useCountUp(totalTrackedTarget, {
     formatter: (val) => val.toLocaleString(),
+    startFromZero: false,
+    startFromPercentage: 0.975,
   });
 
   const animatedAddedLast30Days = useCountUp(added30DaysTarget, {
     formatter: (val) => val.toLocaleString(),
+    startFromZero: false,
+    startFromPercentage: 0.975,
   });
 
   const metricCards = useMemo(

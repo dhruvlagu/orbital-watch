@@ -434,10 +434,22 @@
   background: rgba(0, 212, 255, 0.05);
   border-bottom: 1px solid var(--border-subtle);
   transition: all 0.2s ease;
+  width: 100%;
+  text-align: left;
+  border: none;
+  appearance: none;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
 }
 
 .codeBlock__header:hover {
   background: rgba(0, 212, 255, 0.1);
+}
+
+.codeBlock__header:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: -2px;
 }
 
 .codeBlock__title {

@@ -8,7 +8,7 @@ type UseCountUpOptions = {
 };
 
 export function useCountUp(target: number, options: UseCountUpOptions = {}) {
-  const { durationMs = 2000, formatter, startFromZero = true, startFromPercentage = 0.8 } = options;
+  const { durationMs = 2500, formatter, startFromZero = true, startFromPercentage = 0.025 } = options;
   const [display, setDisplay] = useState("0");
   const formatterRef = useRef(formatter);
   const prevTargetRef = useRef(startFromZero ? 0 : target);
@@ -27,11 +27,9 @@ export function useCountUp(target: number, options: UseCountUpOptions = {}) {
       const elapsed = now - start;
       const t = Math.min(1, elapsed / durationMs);
 
-      // easeOutExpo with subtle bounce
-      const easeOutExpo = t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
-      const bounce = t < 1 ? Math.sin(t * Math.PI * 2) * 0.02 : 0;
-      const eased = easeOutExpo + bounce;
-      const value = Math.round(startVal + diff * eased);
+      // smooth easeOutCubic easing (no bounce)
+      const easeOutCubic = 1 - Math.pow(1 - t, 3);
+      const value = Math.round(startVal + diff * easeOutCubic);
 
       if (formatterRef.current) {
         setDisplay(formatterRef.current(value));

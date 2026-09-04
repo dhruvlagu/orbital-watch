@@ -179,14 +179,22 @@ export default function AboutPage() {
           {/* SOURCE: api/cron/_spacetrackAuth.mjs + api/conjunctions.mjs
                UPDATE THIS BLOCK if either file changes */}
           <div className="codeBlock reveal-item">
-            <div className="codeBlock__header" onClick={() => toggleBlock('block1')}>
+            <button
+              className="codeBlock__header"
+              onClick={() => toggleBlock('block1')}
+              aria-expanded={expandedBlocks.block1}
+              aria-controls="block1-content"
+            >
               <div className="codeBlock__title">
                 <span>Scheduled Data Refresh</span>
               </div>
-              <button className="codeBlock__toggle">
+              <span className="codeBlock__toggle" aria-hidden="true">
                 {expandedBlocks.block1 ? '−' : '+'}
-              </button>
-            </div>
+              </span>
+            </button>
+            <div id="block1-content" role="region" aria-label="Scheduled Data Refresh code">
+            {expandedBlocks.block1 && (
+              <>
             {expandedBlocks.block1 && (
               <>
                 <pre className="technicalCode">{`// api/cron/_spacetrackAuth.mjs — shared session cookie auth
@@ -261,20 +269,27 @@ export default async function handler(req, res) {
                 </p>
               </>
             )}
+            </div>
           </div>
 
           {/* BLOCK 2: Kessler Cascade Simulation */}
           {/* SOURCE: src/components/KesslerSimulation.tsx (triggerCascade function)
                UPDATE THIS BLOCK if that function changes */}
           <div className="codeBlock reveal-item">
-            <div className="codeBlock__header" onClick={() => toggleBlock('block2')}>
+            <button
+              className="codeBlock__header"
+              onClick={() => toggleBlock('block2')}
+              aria-expanded={expandedBlocks.block2}
+              aria-controls="block2-content"
+            >
               <div className="codeBlock__title">
                 <span>Kessler Cascade Simulation</span>
               </div>
-              <button className="codeBlock__toggle">
+              <span className="codeBlock__toggle" aria-hidden="true">
                 {expandedBlocks.block2 ? '−' : '+'}
-              </button>
-            </div>
+              </span>
+            </button>
+            <div id="block2-content" role="region" aria-label="Kessler Cascade Simulation code">
             {expandedBlocks.block2 && (
               <>
                 <pre className="technicalCode">{`const triggerCascade = () => {
@@ -437,20 +452,27 @@ export default async function handler(req, res) {
                 </p>
               </>
             )}
+            </div>
           </div>
 
           {/* CIVIC ACTION: Contact Your Representative */}
           {/* SOURCES: src/components/CivicActionSection.tsx + api/representative.mjs
                UPDATE THIS BLOCK if either implementation changes */}
           <div className="codeBlock reveal-item">
-            <div className="codeBlock__header" onClick={() => toggleBlock('civicAction')}>
+            <button
+              className="codeBlock__header"
+              onClick={() => toggleBlock('civicAction')}
+              aria-expanded={expandedBlocks.civicAction}
+              aria-controls="civicAction-content"
+            >
               <div className="codeBlock__title">
                 <span>Contact Your Representative</span>
               </div>
-              <button className="codeBlock__toggle">
+              <span className="codeBlock__toggle" aria-hidden="true">
                 {expandedBlocks.civicAction ? '−' : '+'}
-              </button>
-            </div>
+              </span>
+            </button>
+            <div id="civicAction-content" role="region" aria-label="Contact Your Representative code">
             {expandedBlocks.civicAction && (
               <>
                 <pre className="technicalCode">{`// src/components/CivicActionSection.tsx
@@ -512,20 +534,27 @@ return res.status(200).json({
                 </p>
               </>
             )}
+            </div>
           </div>
 
           {/* BLOCK 3: Kinetic Energy Calculator */}
           {/* SOURCE: src/pages/PhysicsPage.tsx (KE calculation + getDangerLevel function)
                UPDATE THIS BLOCK if that code changes */}
           <div className="codeBlock reveal-item">
-            <div className="codeBlock__header" onClick={() => toggleBlock('block3')}>
+            <button
+              className="codeBlock__header"
+              onClick={() => toggleBlock('block3')}
+              aria-expanded={expandedBlocks.block3}
+              aria-controls="block3-content"
+            >
               <div className="codeBlock__title">
                 <span>Kinetic Energy Calculator</span>
               </div>
-              <button className="codeBlock__toggle">
+              <span className="codeBlock__toggle" aria-hidden="true">
                 {expandedBlocks.block3 ? '−' : '+'}
-              </button>
-            </div>
+              </span>
+            </button>
+            <div id="block3-content" role="region" aria-label="Kinetic Energy Calculator code">
             {expandedBlocks.block3 && (
               <>
                 <pre className="technicalCode">{`// Calculate kinetic energy in joules
@@ -549,6 +578,7 @@ const getDangerLevel = () => {
                 </p>
               </>
             )}
+            </div>
           </div>
 
           {/* Final paragraph */}
@@ -751,7 +781,15 @@ const getDangerLevel = () => {
           Return to the home dashboard to analyze other pillars.
         </p>
         <div className="crisisCTA__actions">
-          <Link className="btn btn--primary" to="/">
+          <Link 
+            className="btn btn--primary" 
+            to="/#"
+            onClick={(e) => {
+              e.preventDefault();
+              window.location.href = "/";
+              window.scrollTo(0, 0);
+            }}
+          >
             Return to Dashboard →
           </Link>
           <Link className="btn btn--secondary" to="/get-involved">
