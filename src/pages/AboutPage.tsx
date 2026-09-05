@@ -195,8 +195,6 @@ export default function AboutPage() {
             <div id="block1-content" role="region" aria-label="Scheduled Data Refresh code">
             {expandedBlocks.block1 && (
               <>
-            {expandedBlocks.block1 && (
-              <>
                 <pre className="technicalCode">{`// api/cron/_spacetrackAuth.mjs — shared session cookie auth
 const AUTH_URL = "https://www.space-track.org/ajaxauth/login";
 const COOKIE_TTL_MS = 90 * 60 * 1000; // 90 minutes

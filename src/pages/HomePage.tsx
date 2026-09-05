@@ -179,7 +179,7 @@ export default function HomePage() {
               </div>
               <h3 className="homeExploreCard__title">The Crisis</h3>
               <p className="homeExploreCard__description">
-                Trace how 70 years of Cold War launches and anti-satellite missile tests created over 35,000 tracked objects in low Earth orbit.
+                Trace how 70 years of Cold War launches and anti-satellite missile tests created tens of thousands of tracked objects in low Earth orbit.
               </p>
               <Link to="/crisis" className="btn btn--secondary homeExploreCard__btn">
                 Historical Timeline →

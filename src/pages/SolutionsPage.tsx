@@ -9,7 +9,7 @@ import StarfieldCanvas from "../components/StarfieldCanvas";
 // ─── SSR Audit Data ───────────────────────────────────────────────────────────
 const auditCriteria = [
   { pass: true, text: "Pre-launch collision probability analysis filed" },
-  { pass: true, text: "Automatic identification system (AIS) installed" },
+  { pass: true, text: "Detectability, identification, and tracking (DIT) plan filed" },
   { pass: true, text: "Passivation plan submitted (venting fuel tanks at end of life)" },
   { pass: true, text: "De-orbit plan within 5 years documented" },
   { pass: true, text: "Propulsion system for active maneuverability" },
@@ -27,11 +27,11 @@ const adrMissions = [
     org: "ESA",
     badgeClass: "badge--amber",
     badgeLabel: "In Development",
-    meta: "Planned 2028 · ESA / ClearSpace SA",
+    meta: "Planned 2029 · ESA / ClearSpace SA",
     method: "Four-armed robotic claw capture",
-    target: "PROBA-1 satellite (~94 kg, retired 2018)",
+    target: "PROBA-1 satellite (~94 kg; Earth-observation operations ended December 2022)",
     description:
-      "The first ESA-contracted debris removal mission. ClearSpace-1 will rendezvous with, capture, and de-orbit ESA's own retired PROBA-1 Earth-observation satellite — sidestepping the sovereignty problem by targeting ESA property. The original target (the VESPA adapter) was struck by debris in 2023 and replaced. A precursor technology demo, PRELUDE, is planned for 2027.",
+      "The first ESA-contracted debris removal mission. ClearSpace-1 will rendezvous with, capture, and de-orbit ESA's own PROBA-1 Earth-observation satellite — sidestepping the sovereignty problem by targeting ESA property. The original target (the VESPA adapter) was struck by debris in 2023 and replaced. A precursor technology demo, PRELUDE, is planned for 2027.",
     challenge: "Scaling from one object to thousands remains unsolved.",
     source: "ESA",
     accentColor: "amber",
@@ -47,21 +47,21 @@ const adrMissions = [
     description:
       "Astroscale's End-of-Life Services mission successfully demonstrated magnetic docking and proximity operations in 2021, validating the core capture mechanism with a cooperative (non-tumbling) client. A planned tumbling-target phase was cut short by an on-orbit anomaly in 2022. The mission concluded with a controlled de-orbit in January 2024 — proving proximity navigation works, with caveats.",
     challenge: "Legacy debris has no docking plates, and tumbling capture remains unproven at scale.",
-    source: null,
+    source: "Astroscale",
     accentColor: "blue",
   },
   {
-    name: "JAXA ADR Program",
-    org: "JAXA",
+    name: "ADRAS-J2 (CRD2)",
+    org: "JAXA / Astroscale",
     badgeClass: "badge--blue",
     badgeLabel: "Planned",
-    meta: "JAXA · Japan",
-    method: "Electrodynamic tether / robotic arm",
-    target: "Large rocket bodies (H-IIA upper stages)",
+    meta: "Planned · JAXA / Astroscale · Japan",
+    method: "Robotic arm capture",
+    target: "H-IIA upper stage (launched 2009)",
     description:
-      "JAXA is developing technology to de-orbit large rocket upper stages using electrodynamic tethers that interact with Earth's magnetic field to slow orbital velocity without fuel.",
+      "JAXA's current active debris-removal effort is the Commercial Removal of Debris Demonstration 2 (CRD2) program, with ADRAS-J2 contracted to Astroscale. The mission will use robotic-arm capture to de-orbit a large H-IIA rocket upper stage left in orbit since 2009. An earlier JAXA electrodynamic-tether experiment (KITE, 2016) failed to deploy its tether — a separate, earlier concept.",
     challenge: "Requires international legal framework that doesn't yet exist.",
-    source: null,
+    source: "JAXA / Astroscale",
     accentColor: "blue",
   },
   {
@@ -104,7 +104,7 @@ const economicsPanels = [
       </svg>
     ),
     title: "The Cleanup Math",
-    body: "Removing one piece of large debris costs an estimated $100M\u2013$300M per object. At 25,000+ objects, the math is brutal: even at the low end, full LEO cleanup exceeds $2.5 trillion. The nation that pays gets no exclusive benefit \u2014 cleaner orbits help every spacefaring nation equally. So no single actor will volunteer to foot the bill.",
+    body: "Removing a single large derelict object costs roughly $80\u2013$100M per mission at today\u2019s prices (e.g., ESA ClearSpace-1 ~\u20AC86M; JAXA ADRAS-J2 ~$82M). Even clearing only the largest, most dangerous objects \u2014 a few thousand rocket bodies and dead satellites by most estimates \u2014 would cost tens of billions. Removing every tracked catalog object would cost far more. The nation that pays gets no exclusive benefit \u2014 cleaner orbits help every spacefaring nation equally. So no single actor will volunteer to foot the bill.",
     accent: "amber",
   },
   {
@@ -186,7 +186,7 @@ function SSRGauge({ score, total }: { score: number; total: number }) {
         </defs>
         {/* Score text */}
         <text x="70" y="64" textAnchor="middle" className="ssrGauge__scoreText">{score}/{total}</text>
-        <text x="70" y="84" textAnchor="middle" className="ssrGauge__ratingText">Silver</text>
+        <text x="70" y="84" textAnchor="middle" className="ssrGauge__ratingText">Mock</text>
       </svg>
     </div>
   );
@@ -228,8 +228,8 @@ export default function SolutionsPage() {
           <span className="solHero__title--dim">Law Doesn't.</span>
         </h1>
         <p className="solHero__subtitle">
-          Active debris removal is technically feasible. The barriers are legal
-          and economic — not scientific.
+          Active debris removal works in principle — and has been demonstrated in orbit.
+          The remaining barriers are legal, economic, and geopolitical — not a lack of basic engineering.
         </p>
         <div className="solHero__pills">
           <span className="badge badge--amber">Legal Paralysis</span>
@@ -255,10 +255,7 @@ export default function SolutionsPage() {
               </svg>
             </div>
             <p className="sovereigntyCallout__text">
-              "The same robot arm that removes dead satellite debris could
-              theoretically disable an active military satellite. This single
-              fact has paralyzed international debris removal negotiations for
-              over a decade."
+              The same robot arm that removes dead satellite debris could theoretically disable an active military satellite. This dual-use fear has shaped space security debates since at least the late 2010s, and no binding international framework has resolved it.
             </p>
           </div>
 
@@ -269,7 +266,7 @@ export default function SolutionsPage() {
               <p>
                 Under Article VIII of the 1967 Outer Space Treaty, a nation
                 retains 'jurisdiction and control' over objects it launches into
-                space — <em>permanently</em>. This means that a derelict Russian
+                space for as long as the object remains in space. This means that a derelict Russian
                 rocket body orbiting at 800 km is still legally Russian property.
                 No other nation or entity can touch it without explicit Russian
                 government consent.
@@ -299,20 +296,28 @@ export default function SolutionsPage() {
               </p>
               <p>
                 No inspection regime currently exists that could credibly verify
-                a removal craft's intent before it approaches a target. That
-                makes the dual-use concern technically unfalsifiable — and
-                therefore politically insurmountable without a new class of
-                international verification treaty.
+                a removal craft&apos;s intent before it approaches a target. The
+                Outer Space Treaty&apos;s Article XI requires only vague
+                &apos;due regard&apos; and general disclosure — not pre-approach
+                verification of intent. That makes the dual-use concern hard to
+                dismiss — which has so far blocked agreement without a new
+                verification framework.
               </p>
-              <div className="sovereigntyCard__dualUse">
-                <div className="dualUseRow">
-                  <span className="dualUseRow__label dualUseRow__label--blue">Intended Use</span>
-                  <span className="dualUseRow__value">Capture &amp; de-orbit dead debris</span>
-                </div>
-                <div className="dualUseRow__divider" aria-hidden="true">↕</div>
-                <div className="dualUseRow">
-                  <span className="dualUseRow__label dualUseRow__label--red">Perceived Risk</span>
-                  <span className="dualUseRow__value">Disable active military satellite</span>
+              <div className="adrCard__source">Source: Global Security Review (space-law analysis)</div>
+            </div>
+
+            <div className="sovereigntyDualUseBar reveal-item" style={{ ["--reveal-i" as any]: 2 }}>
+              <div className="card sovereigntyCard sovereigntyCard--amber">
+                <div className="sovereigntyCard__dualUse">
+                  <div className="dualUseRow">
+                    <span className="dualUseRow__label dualUseRow__label--blue">Intended Use</span>
+                    <span className="dualUseRow__value">Capture &amp; de-orbit dead debris</span>
+                  </div>
+                  <div className="dualUseRow__divider" aria-hidden="true">→</div>
+                  <div className="dualUseRow">
+                    <span className="dualUseRow__label dualUseRow__label--red">Perceived Risk</span>
+                    <span className="dualUseRow__value">Disable active military satellite</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -325,7 +330,7 @@ export default function SolutionsPage() {
         <div className="container">
           <div className="solSection__header reveal-item">
             <div className="hero__label">Section 02</div>
-            <h2>The Space Tow Trucks</h2>
+            <h2>Active Removal Missions</h2>
             <p className="solSection__subtitle">
               Current and planned missions attempting to solve the cleanup problem.
             </p>
@@ -395,7 +400,7 @@ export default function SolutionsPage() {
             {economicsPanels.map((panel, i) => (
               <div
                 key={panel.title}
-                className={`card economicsCard economicsCard--${panel.accent} reveal-item`}
+                className={`card economicsCard economicsCard--${panel.accent} ${panel.listItems ? 'economicsCard--full' : ''} reveal-item`}
                 style={{ ["--reveal-i" as any]: Math.min(i, 8) }}
               >
                 <div className="economicsCard__icon" aria-hidden="true">{panel.icon}</div>
@@ -425,9 +430,11 @@ export default function SolutionsPage() {
               satellite mission.
             </p>
             <p className="auditContext">
-              Hypothetical mid-size commercial satellite, assessed against SSR
-              v2.0 criteria. Criteria pre-selected to reflect common real-world
-              compliance gaps.
+              Hypothetical mid-size commercial satellite, scored on an illustrative
+              10-point checklist — not the official SSR scoring model. Real SSR uses
+              six weighted modules and percentage-based tiers (Bronze 40–55%, Silver
+              56–70%, Gold 71–80%, Platinum 81–100%). Criteria pre-selected to reflect
+              common real-world compliance gaps.
             </p>
           </div>
 
@@ -435,12 +442,12 @@ export default function SolutionsPage() {
             {/* Checklist */}
             <div className="card auditCard">
               <div className="auditCard__header">
-                <h3 className="auditCard__title">SSR Audit Checklist</h3>
+                <h3 className="auditCard__title">Mock Audit Checklist</h3>
                 <span className="badge badge--blue">10 Criteria</span>
               </div>
               <ul className="auditList" aria-label="SSR audit criteria">
                 {auditCriteria.map((item, i) => (
-                  <li key={i} className={`auditList__item auditList__item--reveal ${item.pass ? "auditList__item--pass" : "auditList__item--fail"}`} style={{ ["--reveal-i" as any]: Math.min(i, 8) }}>
+                  <li key={i} className={`auditList__item ${item.pass ? "auditList__item--pass" : "auditList__item--fail"} reveal-item`} style={{ ["--reveal-i" as any]: Math.min(i, 8) }}>
                     <span className="auditList__icon" aria-hidden="true">
                       {item.pass ? (
                         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#4ade80" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -462,9 +469,9 @@ export default function SolutionsPage() {
             {/* Score panel */}
             <div className="auditScore">
               <div className="card auditScoreCard">
-                <h3 className="auditScoreCard__title">SSR Score</h3>
+                <h3 className="auditScoreCard__title">Mock Score</h3>
                 <SSRGauge score={6} total={10} />
-                <div className="auditScoreCard__rating">Silver Rating</div>
+                <div className="auditScoreCard__rating">6/10 (Illustrative)</div>
                 <div className="auditScoreCard__breakdown">
                   <div className="auditScoreCard__row">
                     <span>Passed</span>
@@ -482,9 +489,10 @@ export default function SolutionsPage() {
 
                 <div className="auditRatingScale">
                   {[
-                    { label: "Bronze", range: "1–5", color: "#cd7f32", active: false },
-                    { label: "Silver", range: "6–8", color: "#f5a623", active: true },
-                    { label: "Gold", range: "9–10", color: "#ffd700", active: false },
+                    { label: "Bronze", range: "40–55%", color: "#cd7f32", active: false },
+                    { label: "Silver", range: "56–70%", color: "#f5a623", active: false },
+                    { label: "Gold", range: "71–80%", color: "#ffd700", active: false },
+                    { label: "Platinum", range: "81–100%", color: "#e8e8e8", active: false },
                   ].map((tier) => (
                     <div
                       key={tier.label}
@@ -509,9 +517,10 @@ export default function SolutionsPage() {
                   </svg>
                 </div>
                 <p className="auditNote__text">
-                  A <strong>Gold rating (9–10)</strong> earns preferred launch
-                  slots at ESA facilities and favorable insurance premiums from
-                  Lloyd's of London.
+                  Per the SSR program&apos;s operators (EPFL / WEF), a favorable
+                  score <em>might</em> result in lower insurance costs or improved
+                  funding conditions from financial backers — the incentive the
+                  rating is designed to create, not a guaranteed benefit.
                 </p>
               </div>
             </div>
@@ -523,8 +532,9 @@ export default function SolutionsPage() {
       <div className="container crisisCTA reveal-item" style={{ marginBottom: "60px" }}>
         <h3>From Solutions to Action</h3>
         <p>
-          Technology and scoring systems are only designs until they are implemented.
-          Explore how you can support space sustainability efforts and advocate for LEO protection.
+          Demonstrations prove the engineering. Scaling cleanup still depends on law,
+          funding, and political will. Explore how you can support space sustainability
+          efforts and advocate for LEO protection.
         </p>
         <div className="crisisCTA__actions">
           <Link ref={getInvolvedButtonRef} className="btn btn--primary" to="/get-involved">

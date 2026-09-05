@@ -72,36 +72,49 @@
 /* ── Section 1: Sovereignty ──────────────────────────────────────────────────── */
 .sovereigntyCallout {
   display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  padding: 28px 32px;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px 24px;
   border: 1px solid rgba(245, 166, 35, 0.35);
   border-radius: 16px;
   background: rgba(245, 166, 35, 0.06);
   box-shadow: 0 0 32px rgba(245, 166, 35, 0.12), inset 0 0 16px rgba(245, 166, 35, 0.04);
   margin-bottom: 44px;
-  max-width: 860px;
 }
 
 .sovereigntyCallout__icon {
-  font-size: 28px;
   flex-shrink: 0;
-  margin-top: 2px;
+  color: var(--accent-amber);
+  line-height: 0;
 }
 
 .sovereigntyCallout__text {
-  font-size: 17px;
+  flex: 1;
+  min-width: 0;
+  font-size: 16px;
   color: var(--accent-amber);
   font-style: italic;
   font-weight: 500;
-  line-height: 1.7;
+  line-height: 1.5;
   margin: 0;
 }
 
 .sovereigntyGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
   gap: 24px;
+  align-items: stretch;
+}
+
+.sovereigntyDualUseBar {
+  grid-column: 1 / -1;
+  margin-top: 24px;
+}
+
+.sovereigntyDualUseBar .sovereigntyCard {
+  max-width: 900px;
+  margin: 0 auto;
 }
 
 .sovereigntyCard {
@@ -164,8 +177,20 @@
   border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 12px;
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+
+.sovereigntyDualUseBar .sovereigntyCard__dualUse {
+  margin-top: 0;
+  justify-content: center;
+  flex-wrap: nowrap;
+}
+
+.sovereigntyDualUseBar .dualUseRow {
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .dualUseRow {
@@ -200,6 +225,7 @@
 .dualUseRow__value {
   font-size: 14px;
   color: var(--text-secondary);
+  white-space: nowrap;
 }
 
 .dualUseRow__divider {
@@ -207,11 +233,20 @@
   font-size: 20px;
   color: rgba(255, 255, 255, 0.2);
   line-height: 1;
+  flex-shrink: 0;
 }
 
 @media (max-width: 860px) {
   .sovereigntyGrid {
     grid-template-columns: 1fr;
+  }
+
+  .sovereigntyDualUseBar {
+    margin-top: 20px;
+  }
+
+  .sovereigntyDualUseBar .sovereigntyCard {
+    max-width: 100%;
   }
 }
 
@@ -259,11 +294,19 @@
 
 .adrCard:hover {
   transform: translateY(-4px);
+  border-color: rgba(0, 212, 255, 0.3);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), var(--glow-blue);
 }
 
-.adrCard--amber:hover { border-color: rgba(245,166,35,0.4);  box-shadow: 0 8px 32px rgba(0,0,0,0.5), var(--glow-amber); }
-.adrCard--green:hover { border-color: rgba(0,212,100,0.4);   box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 20px rgba(0,212,100,0.3); }
-.adrCard--blue:hover  { border-color: rgba(0,212,255,0.4);   box-shadow: 0 8px 32px rgba(0,0,0,0.5), var(--glow-blue); }
+.adrCard--amber:hover {
+  border-color: rgba(245, 166, 35, 0.3);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), var(--glow-amber);
+}
+
+.adrCard--green:hover {
+  border-color: rgba(0, 212, 100, 0.3);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 212, 100, 0.3);
+}
 
 .adrCard__header {
   display: flex;
@@ -363,8 +406,12 @@
 /* ── Section 3: Economics ────────────────────────────────────────────────────── */
 .economicsGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 20px;
+}
+
+.economicsCard--full {
+  grid-column: 1 / -1;
 }
 
 .economicsCard {
@@ -391,9 +438,20 @@
 .economicsCard--amber::after { background: var(--accent-amber); }
 .economicsCard--green::after { background: #00d464; }
 
-.economicsCard--blue:hover  { border-color: rgba(0,212,255,0.35);  box-shadow: 0 4px 24px rgba(0,0,0,0.4), var(--glow-blue); }
-.economicsCard--amber:hover { border-color: rgba(245,166,35,0.35); box-shadow: 0 4px 24px rgba(0,0,0,0.4), var(--glow-amber); }
-.economicsCard--green:hover { border-color: rgba(0,212,100,0.35);  box-shadow: 0 4px 24px rgba(0,0,0,0.4), 0 0 20px rgba(0,212,100,0.3); }
+.economicsCard--amber:hover {
+  border-color: rgba(245, 166, 35, 0.3);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), var(--glow-amber);
+}
+
+.economicsCard--green:hover {
+  border-color: rgba(0, 212, 100, 0.3);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 212, 100, 0.3);
+}
+
+.economicsCard--blue:hover {
+  border-color: rgba(0, 212, 255, 0.3);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), var(--glow-blue);
+}
 
 .economicsCard__icon {
   font-size: 40px;
@@ -459,6 +517,10 @@
 @media (max-width: 900px) {
   .economicsGrid {
     grid-template-columns: 1fr;
+  }
+
+  .economicsCard--full {
+    grid-column: 1;
   }
 }
 
