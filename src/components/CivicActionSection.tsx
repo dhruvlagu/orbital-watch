@@ -184,7 +184,7 @@ ${zip.trim()}`;
         <div className="hero__label">CIVIC ACTION</div>
         <h2>Contact Your Representative</h2>
         <p className="civicActionSubtitle">
-          Turn research into advocacy. Reach out to your US House representative to prioritize orbital debris policy.
+          Turn research into action. Write your US House representative about orbital debris policy.
         </p>
       </div>
 
@@ -316,7 +316,7 @@ ${zip.trim()}`;
                 </svg>
               </span>
               <div className="nudgeText">
-                <strong>Personalization Recommended:</strong> Consider adding a personal note before sending — congressional offices weight personalized messages more heavily than identical form letters.
+                <strong>Personalization Recommended:</strong> Add a personal sentence before sending — congressional offices weigh personalized messages more heavily than form letters.
               </div>
             </div>
           ) : null}

@@ -88,7 +88,7 @@ export default function GetInvolvedPage() {
             <div className="hero__label">Section 01</div>
             <h2>Immediate Impact</h2>
             <p className="involvedSection__subtitle">
-              Small steps you can take today to help safeguard LEO.
+              Small steps you can take today to help protect low Earth orbit.
             </p>
           </div>
 
@@ -127,8 +127,8 @@ export default function GetInvolvedPage() {
               </div>
               <h3 className="actionCard__title">Contact Your Representatives</h3>
               <p className="actionCard__body">
-                The 5-Year Rule passed because of FCC regulatory pressure. International treaty reform requires
-                Congressional awareness. A five-minute message to your representative about ASAT test bans can make a difference.
+                The FCC's 5-Year Rule proved that regulatory action on debris is possible. But international
+                reform needs political attention too — a five-minute message to your representative about ASAT test bans can help put it on the agenda.
               </p>
               <a
                 href="#contact-rep"
@@ -151,8 +151,8 @@ export default function GetInvolvedPage() {
               </div>
               <h3 className="actionCard__title">Share This Research</h3>
               <p className="actionCard__body">
-                Orbital debris is undercovered in mainstream media. Sharing this research with students,
-                educators, or policymakers creates the public awareness that drives political will.
+                Orbital debris rarely makes headlines. Sharing this research with students,
+                educators, or policymakers helps build the awareness that policy change depends on.
               </p>
 
               <div className="shareWidget">
@@ -333,7 +333,7 @@ export default function GetInvolvedPage() {
                 </li>
                 <li>
                   <strong>Liou et al. (2021)</strong>
-                  <span>"Active Debris Removal: Stabilization of LEO Environment" (NASA Space Debris Research)</span>
+                  <span>"Active Debris Removal: Stabilization of the LEO Environment" (NASA Space Debris Research)</span>
                 </li>
                 <li>
                   <strong>ESA Space Environment Report 2025 (Issue 9.1)</strong>
@@ -374,8 +374,7 @@ export default function GetInvolvedPage() {
       <div className="container crisisCTA" style={{ marginBottom: "60px" }}>
         <h3>Behind the Research</h3>
         <p>
-          Discover the development methodology, peer-reviewed academic database sources,
-          and creators of the Orbital Watch platform.
+          Explore the methodology, data sources, and research behind Orbital Watch.
         </p>
         <div className="crisisCTA__actions">
           <Link ref={aboutButtonRef} className="btn btn--primary" to="/about">

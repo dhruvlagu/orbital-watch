@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Multistage Rocket Animation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a202c;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        .sky {
+            position: relative;
+            width: 300px;
+            height: 500px;
+            background: linear-gradient(to top, #4a5568, #0f172a);
+            border-bottom: 8px solid #2d3748;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 20px auto;
+        }
+
+        .rocket {
+            position: absolute;
+            bottom: 0px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 50px;
+        }
+
+        .rocket-body {
+            width: 100%;
+            height: 100%;
+            background-color: #e2e8f0;
+            border-radius: 10px 10px 2px 2px;
+            position: relative;
+        }
+
+        .rocket-nose {
+            position: absolute;
+            top: -10px;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 10px solid #e53e3e;
+        }
+
+        .flame {
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 10px;
+            height: 15px;
+            background: orange;
+            border-radius: 50%;
+            opacity: 0;
+        }
+
+        /* Animation Keyframes */
+        .animating .rocket {
+            animation: flight 10s cubic-bezier(0.42, 0, 0.58, 1) forwards;
+        }
+
+        .animating .flame {
+            animation: thrust 10s ease-in-out forwards;
+        }
+
+        @keyframes flight {
+
+            /* 0s to 2.5s: Stage 1 Acceleration */
+            0% {
+                bottom: 0px;
+            }
+
+            25% {
+                bottom: 80px;
+            }
+
+            /* 2.5s to 3.5s: Stage 2 Acceleration (Faster boost) */
+            35% {
+                bottom: 200px;
+            }
+
+            /* 3.5s to 6s: Coasting upwards to Max Height under Gravity */
+            60% {
+                bottom: 420px;
+            }
+
+            /* 6s to 10s: Falling back to Launch Pad */
+            100% {
+                bottom: 0px;
+            }
+        }
+
+        @keyframes thrust {
+            0% {
+                opacity: 1;
+                background: orange;
+                height: 15px;
+            }
+
+            25% {
+                opacity: 1;
+                background: orange;
+                height: 15px;
+            }
+
+            26% {
+                opacity: 1;
+                background: #ecc94b;
+                height: 25px;
+            }
+
+            /* Stage 2 ignition */
+            35% {
+                opacity: 1;
+                background: #ecc94b;
+                height: 25px;
+            }
+
+            36% {
+                opacity: 0;
+            }
+
+            /* Fuel runs out, engines cut off */
+            100% {
+                opacity: 0;
+            }
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            background-color: #3182ce;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: #2b6cb0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>Multistage Rocket Flight Simulation</h2>
+        <div class="sky" id="sky">
+            <div class="rocket" id="rocket">
+                <div class="rocket-nose"></div>
+                <div class="rocket-body"></div>
+                <div class="flame" id="flame"></div>
+            </div>
+        </div>
+        <button onclick="launchRocket()">Launch Rocket</button>
+    </div>
+
+    <script>
+        function launchRocket() {
+            const sky = document.getElementById('sky');
+
+            // Reset animation
+            sky.classList.remove('animating');
+            void sky.offsetWidth; // Trigger reflow
+            sky.classList.add('animating');
+        }
+    </script>
+
+</body>
+
+</html>

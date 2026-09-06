@@ -271,8 +271,8 @@ export default async function handler(req, res) {
           </div>
 
           {/* BLOCK 2: Kessler Cascade Simulation */}
-          {/* SOURCE: src/components/KesslerSimulation.tsx (triggerCascade function)
-               UPDATE THIS BLOCK if that function changes */}
+          {/* SOURCE: src/components/KesslerSimulation.tsx (generateDebris + triggerCascade functions + altitude center logic)
+               UPDATE THIS BLOCK if those functions change */}
           <div className="codeBlock reveal-item">
             <button
               className="codeBlock__header"
@@ -290,37 +290,79 @@ export default async function handler(req, res) {
             <div id="block2-content" role="region" aria-label="Kessler Cascade Simulation code">
             {expandedBlocks.block2 && (
               <>
-                <pre className="technicalCode">{`const triggerCascade = () => {
+                <pre className="technicalCode">{`// Simulation parameters
+const [objectCount, setObjectCount] = useState(15);
+const [radiusMin, setRadiusMin] = useState(0.25);
+const [radiusMax, setRadiusMax] = useState(0.4);
+const [inclinationMin, setInclinationMin] = useState(-0.4);
+const [inclinationMax, setInclinationMax] = useState(0.4);
+
+// Derived altitude center for the slider
+const altitudeCenter = (radiusMin + radiusMax) / 2;
+
+// Physics-accurate debris generation with Keplerian orbital mechanics
+const generateDebris = (count: number, rMin: number, rMax: number, iMin: number, iMax: number) => {
+  return Array.from({ length: count }, (_, i) => {
+    const angle = (i / count) * Math.PI * 2;
+    const radius = rMin + Math.random() * (rMax - rMin);
+    const inclination = iMin + Math.random() * (iMax - iMin);
+
+    const cosAngle = Math.cos(angle);
+    const sinAngle = Math.sin(angle);
+    const cosInc = Math.cos(inclination);
+    const sinInc = Math.sin(inclination);
+
+    const x3d = radius * cosAngle;
+    const y3d = radius * sinAngle * cosInc;
+    const z3d = radius * sinAngle * sinInc;
+
+    // Keplerian motion: angular speed ∝ 1/radius^1.5 (slower for better visualization)
+    const keplerConstant = 0.0025;
+    const angularSpeed = keplerConstant / Math.pow(radius, 1.5);
+    const orbitalSpeed = angularSpeed * radius; // v = ωr
+    const vx = -orbitalSpeed * sinAngle;
+    const vy = orbitalSpeed * cosAngle * cosInc;
+    const vz = orbitalSpeed * cosAngle * sinInc;
+
+    return {
+      id: \`d-\${i}\`,
+      angle,
+      radius,
+      inclination,
+      x: 0.5 + x3d,
+      y: 0.5 + y3d,
+      z: z3d,
+      vx,
+      vy,
+      vz,
+      size: 3,
+    };
+  });
+};
+
+const triggerCascade = () => {
   setIsRunning(true);
+  setCascadeStatus("Cascade initiated — collision chain reaction starting");
   rippleRef.current = { radius: 0, opacity: 0.6, active: true };
   currentDebrisRef.current = [...currentDebrisRef.current];
   isAnimatingRef.current = true;
   let time = 0;
   const duration = 2500; // 2.5 seconds
   const maxDebrisCount = 150; // Cap per cascade
-  let debrisAddedInCascade = 0; // Track debris added during this cascade
+  let debrisAddedInCascade = 0;
+  let collisionCount = 0;
 
   const animate = () => {
     time += 16;
     const progress = Math.min(time / duration, 1);
 
-    // Update ripple
-    if (rippleRef.current.active) {
-      const rippleProgress = Math.min((time) / 600, 1);
-      rippleRef.current = {
-        radius: rippleProgress * 0.5,
-        opacity: 0.6 * (1 - rippleProgress),
-        active: rippleProgress < 1
-      };
-    }
-
     if (progress < 1) {
-      // Add new debris randomly every few frames (respect per-cascade cap)
-      let spawnedThisFrame = 0;
+      // Add new debris randomly (respect per-cascade cap and current parameters)
       if (Math.random() < 0.4 && debrisAddedInCascade < maxDebrisCount) {
-        const newRadius = 0.25 + Math.random() * 0.15;
+        setCascadeStatus(\`Debris field expanding — \${currentDebrisRef.current.length} objects in orbit (cap: \${maxDebrisCount})\`);
+        const newRadius = radiusMin + Math.random() * (radiusMax - radiusMin);
         const newAngle = Math.random() * Math.PI * 2;
-        const newInclination = (Math.random() - 0.5) * 0.8;
+        const newInclination = inclinationMin + Math.random() * (inclinationMax - inclinationMin);
         
         // Calculate 3D position using spherical coordinates with inclination
         const cosAngle = Math.cos(newAngle);
@@ -328,13 +370,14 @@ export default async function handler(req, res) {
         const cosInc = Math.cos(newInclination);
         const sinInc = Math.sin(newInclination);
         
-        // 3D coordinates centered at origin
         const x3d = newRadius * cosAngle;
         const y3d = newRadius * sinAngle * cosInc;
         const z3d = newRadius * sinAngle * sinInc;
         
-        // Calculate orbital velocity (tangential to orbit)
-        const orbitalSpeed = 0.02;
+        // Keplerian motion: angular speed ∝ 1/radius^1.5 (slower for better visualization)
+        const keplerConstant = 0.0025;
+        const angularSpeed = keplerConstant / Math.pow(newRadius, 1.5);
+        const orbitalSpeed = angularSpeed * newRadius;
         const vx = -orbitalSpeed * sinAngle;
         const vy = orbitalSpeed * cosAngle * cosInc;
         const vz = orbitalSpeed * cosAngle * sinInc;
@@ -354,23 +397,22 @@ export default async function handler(req, res) {
         };
         currentDebrisRef.current = [...currentDebrisRef.current, newDebris];
         debrisAddedInCascade++;
-        spawnedThisFrame++;
       }
 
-      // Update positions with stable orbital mechanics and detect collisions
-      const collisionThreshold = 0.04; // Distance threshold for collision
+      // Update positions with Keplerian orbital mechanics and detect collisions
+      const collisionThreshold = 0.04;
       const newFragments: Debris[] = [];
       
-      // Update positions using stable orbital mechanics (angle-based)
+      // Update positions using Keplerian angular motion (slower for better visualization)
+      const keplerConstant = 0.0025;
       currentDebrisRef.current = currentDebrisRef.current.map((d: Debris) => {
-        const nextAngle = (d.angle + 0.02) % (Math.PI * 2);
-        // Calculate 3D position using spherical coordinates with inclination
+        const angularSpeed = keplerConstant / Math.pow(d.radius, 1.5);
+        const nextAngle = (d.angle + angularSpeed) % (Math.PI * 2);
         const cosAngle = Math.cos(nextAngle);
         const sinAngle = Math.sin(nextAngle);
         const cosInc = Math.cos(d.inclination);
         const sinInc = Math.sin(d.inclination);
 
-        // 3D coordinates centered at origin
         const x3d = d.radius * cosAngle;
         const y3d = d.radius * sinAngle * cosInc;
         const z3d = d.radius * sinAngle * sinInc;
@@ -385,19 +427,19 @@ export default async function handler(req, res) {
       });
 
       // Collision detection (optimized with early exit)
-      const maxDebrisToCheck = Math.min(currentDebrisRef.current.length, 50); // Limit to prevent lag
+      const maxDebrisToCheck = Math.min(currentDebrisRef.current.length, 50);
       for (let i = 0; i < maxDebrisToCheck; i++) {
         for (let j = i + 1; j < maxDebrisToCheck; j++) {
           const d1 = currentDebrisRef.current[i];
           const d2 = currentDebrisRef.current[j];
 
-          // Calculate 3D distance
           const dx = d1.x - d2.x;
           const dy = d1.y - d2.y;
           const dz = d1.z - d2.z;
           const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
           if (distance < collisionThreshold) {
+            collisionCount++;
             const fragmentCount = 2;
             const remainingCap = maxDebrisCount - debrisAddedInCascade - newFragments.length;
             if (
@@ -408,13 +450,15 @@ export default async function handler(req, res) {
               continue;
             }
 
+            setCascadeStatus(\`Collision! Creating fragments — \${collisionCount} collisions, \${currentDebrisRef.current.length + newFragments.length} objects\`);
+
             for (let f = 0; f < fragmentCount; f++) {
               newFragments.push({
                 id: \`frag-\${Date.now()}-\${Math.random()}\`,
                 x: d1.x,
                 y: d1.y,
                 z: d1.z,
-                vx: 0, vy: 0, vz: 0, // Not used in orbital mechanics
+                vx: 0, vy: 0, vz: 0,
                 angle: d1.angle + (Math.random() - 0.5) * 0.5,
                 radius: d1.radius * (0.9 + Math.random() * 0.2),
                 inclination: d1.inclination + (Math.random() - 0.5) * 0.1,
@@ -428,17 +472,16 @@ export default async function handler(req, res) {
         }
       }
 
-      // Remove collided debris and add fragments (respect per-cascade cap)
-      const fragmentsToAdd = newFragments;
-      currentDebrisRef.current = [...currentDebrisRef.current.filter((d: Debris) => d.size > 0), ...fragmentsToAdd];
-      debrisAddedInCascade += fragmentsToAdd.length;
+      currentDebrisRef.current = [...currentDebrisRef.current.filter((d: Debris) => d.size > 0), ...newFragments];
+      debrisAddedInCascade += newFragments.length;
 
       drawCanvas(currentDebrisRef.current, rippleRef.current);
       animationRef.current = requestAnimationFrame(animate);
     } else {
       setIsRunning(false);
       isAnimatingRef.current = false;
-      setDebris(currentDebrisRef.current); // Sync state only when animation ends
+      setCascadeStatus(\`Cascade complete — \${collisionCount} collisions created \${currentDebrisRef.current.length} debris objects\`);
+      setDebris(currentDebrisRef.current);
       drawCanvas(currentDebrisRef.current, rippleRef.current);
     }
   };
@@ -446,7 +489,7 @@ export default async function handler(req, res) {
   animationRef.current = requestAnimationFrame(animate);
 };`}</pre>
                 <p className="codeBlock__caption">
-                  Debris orbits in 3D space with inclination, using spherical coordinates for realistic orbital mechanics. Collision detection runs between debris pieces — when they collide, they fragment into smaller pieces with modified orbital parameters, creating an exponential chain reaction characteristic of Kessler syndrome. A per-cascade cap of 150 debris prevents runaway performance issues while still demonstrating the cascade effect.
+                  The simulation uses Keplerian orbital mechanics where angular speed scales with radius (ω ∝ r^(-1.5)), so objects at higher altitude move more slowly. When debris collides, new fragments are spawned with altered radius and inclination, creating the runaway chain reaction characteristic of Kessler syndrome. The model preserves the core orbital relationship implied by Kepler's third law rather than focusing on interface controls or presentation details.
                 </p>
               </>
             )}

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useMagneticButton } from "../hooks/useMagneticButton";
 
 interface Debris {
@@ -28,12 +28,29 @@ export default function KesslerSimulation() {
 
   useMagneticButton(triggerButtonRef);
 
+  // Simulation parameters
+  const [objectCount, setObjectCount] = useState(15);
+  const [radiusMin, setRadiusMin] = useState(0.25);
+  const [radiusMax, setRadiusMax] = useState(0.4);
+  const [inclinationMin, setInclinationMin] = useState(-0.4);
+  const [inclinationMax, setInclinationMax] = useState(0.4);
+  const [explanationExpanded, setExplanationExpanded] = useState(false);
+  const [cascadeStatus, setCascadeStatus] = useState("");
+  const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
+
+  // Derived altitude center for the slider
+  const altitudeCenter = (radiusMin + radiusMax) / 2;
+
+
+
   const initialDebrisRef = useRef<Debris[] | null>(null);
-  if (!initialDebrisRef.current) {
-    initialDebrisRef.current = Array.from({ length: 15 }, (_, i) => {
-      const angle = (i / 15) * Math.PI * 2;
-      const radius = 0.25 + Math.random() * 0.15;
-      const inclination = (Math.random() - 0.5) * 0.8;
+  
+  // Function to generate debris based on current parameters
+  const generateDebris = useCallback((count: number, rMin: number, rMax: number, iMin: number, iMax: number) => {
+    return Array.from({ length: count }, (_, i) => {
+      const angle = (i / count) * Math.PI * 2;
+      const radius = rMin + Math.random() * (rMax - rMin);
+      const inclination = iMin + Math.random() * (iMax - iMin);
 
       const cosAngle = Math.cos(angle);
       const sinAngle = Math.sin(angle);
@@ -44,7 +61,10 @@ export default function KesslerSimulation() {
       const y3d = radius * sinAngle * cosInc;
       const z3d = radius * sinAngle * sinInc;
 
-      const orbitalSpeed = 0.02;
+      // Keplerian motion: angular speed ∝ 1/radius^1.5 (slower for better visualization)
+      const keplerConstant = 0.0025;
+      const angularSpeed = keplerConstant / Math.pow(radius, 1.5);
+      const orbitalSpeed = angularSpeed * radius; // v = ωr
       const vx = -orbitalSpeed * sinAngle;
       const vy = orbitalSpeed * cosAngle * cosInc;
       const vz = orbitalSpeed * cosAngle * sinInc;
@@ -63,17 +83,25 @@ export default function KesslerSimulation() {
         size: 3,
       };
     });
+  }, []);
+
+  if (!initialDebrisRef.current) {
+    initialDebrisRef.current = generateDebris(objectCount, radiusMin, radiusMax, inclinationMin, inclinationMax);
   }
-  const initialDebris = initialDebrisRef.current;
 
   useEffect(() => {
-    setDebris(initialDebris);
-    currentDebrisRef.current = initialDebris;
-    drawCanvas(initialDebris, rippleRef.current);
-  }, []);
+    const newDebris = generateDebris(objectCount, radiusMin, radiusMax, inclinationMin, inclinationMax);
+    setDebris(newDebris);
+    currentDebrisRef.current = newDebris;
+    if (!isAnimatingRef.current) {
+      initialDebrisRef.current = newDebris;
+      drawCanvas(newDebris, rippleRef.current);
+    }
+  }, [objectCount, radiusMin, radiusMax, inclinationMin, inclinationMax, generateDebris]);
 
   const triggerCascade = () => {
     setIsRunning(true);
+    setCascadeStatus("Cascade initiated — collision chain reaction starting");
     rippleRef.current = { radius: 0, opacity: 0.6, active: true };
     currentDebrisRef.current = [...currentDebrisRef.current];
     isAnimatingRef.current = true;
@@ -81,6 +109,7 @@ export default function KesslerSimulation() {
     const duration = 2500; // 2.5 seconds
     const maxDebrisCount = 150; // Cap per cascade
     let debrisAddedInCascade = 0; // Track debris added during this cascade
+    let collisionCount = 0;
 
     const animate = () => {
       time += 16;
@@ -100,9 +129,10 @@ export default function KesslerSimulation() {
         // Add new debris randomly every few frames (respect per-cascade cap)
         let spawnedThisFrame = 0;
         if (Math.random() < 0.4 && debrisAddedInCascade < maxDebrisCount) {
-          const newRadius = 0.25 + Math.random() * 0.15;
+          setCascadeStatus(`Debris field expanding — ${currentDebrisRef.current.length} objects in orbit (cap: ${maxDebrisCount})`);
+          const newRadius = radiusMin + Math.random() * (radiusMax - radiusMin);
           const newAngle = Math.random() * Math.PI * 2;
-          const newInclination = (Math.random() - 0.5) * 0.8;
+          const newInclination = inclinationMin + Math.random() * (inclinationMax - inclinationMin);
           
           // Calculate 3D position using spherical coordinates with inclination
           const cosAngle = Math.cos(newAngle);
@@ -115,8 +145,10 @@ export default function KesslerSimulation() {
           const y3d = newRadius * sinAngle * cosInc;
           const z3d = newRadius * sinAngle * sinInc;
           
-          // Calculate orbital velocity (tangential to orbit)
-          const orbitalSpeed = 0.02;
+          // Calculate orbital velocity (tangential to orbit) using Keplerian motion
+          const keplerConstant = 0.0025;
+          const angularSpeed = keplerConstant / Math.pow(newRadius, 1.5);
+          const orbitalSpeed = angularSpeed * newRadius; // v = ωr
           const vx = -orbitalSpeed * sinAngle;
           const vy = orbitalSpeed * cosAngle * cosInc;
           const vz = orbitalSpeed * cosAngle * sinInc;
@@ -144,8 +176,11 @@ export default function KesslerSimulation() {
         const newFragments: Debris[] = [];
         
         // Update positions using stable orbital mechanics (angle-based)
+        // Keplerian motion: angular speed ∝ 1/radius^1.5 (Kepler's third law)
+        const keplerConstant = 0.0025; // Slower rotation for better visualization
         currentDebrisRef.current = currentDebrisRef.current.map((d: Debris) => {
-          const nextAngle = (d.angle + 0.02) % (Math.PI * 2);
+          const angularSpeed = keplerConstant / Math.pow(d.radius, 1.5);
+          const nextAngle = (d.angle + angularSpeed) % (Math.PI * 2);
           // Calculate 3D position using spherical coordinates with inclination
           const cosAngle = Math.cos(nextAngle);
           const sinAngle = Math.sin(nextAngle);
@@ -180,6 +215,7 @@ export default function KesslerSimulation() {
             const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
             if (distance < collisionThreshold) {
+              collisionCount++;
               const fragmentCount = 2;
               const remainingCap = maxDebrisCount - debrisAddedInCascade - newFragments.length;
               if (
@@ -189,6 +225,8 @@ export default function KesslerSimulation() {
               ) {
                 continue;
               }
+
+              setCascadeStatus(`Collision! Creating fragments — ${collisionCount} collisions, ${currentDebrisRef.current.length + newFragments.length} objects`);
 
               for (let f = 0; f < fragmentCount; f++) {
                 newFragments.push({
@@ -220,6 +258,7 @@ export default function KesslerSimulation() {
       } else {
         setIsRunning(false);
         isAnimatingRef.current = false;
+        setCascadeStatus(`Cascade complete — ${collisionCount} collisions created ${currentDebrisRef.current.length} debris objects`);
         setDebris(currentDebrisRef.current); // Sync state only when animation ends
         drawCanvas(currentDebrisRef.current, rippleRef.current);
       }
@@ -232,10 +271,22 @@ export default function KesslerSimulation() {
     if (animationRef.current) cancelAnimationFrame(animationRef.current);
     setIsRunning(false);
     isAnimatingRef.current = false;
-    setDebris(initialDebris);
-    currentDebrisRef.current = initialDebris;
+    setCascadeStatus("");
+    
+    // Reset slider values to defaults
+    setObjectCount(15);
+    setRadiusMin(0.25);
+    setRadiusMax(0.4);
+    setInclinationMin(-0.4);
+    setInclinationMax(0.4);
+    
+    // Generate debris with default values
+    const newDebris = generateDebris(15, 0.25, 0.4, -0.4, 0.4);
+    setDebris(newDebris);
+    currentDebrisRef.current = newDebris;
+    initialDebrisRef.current = newDebris;
     rippleRef.current = { radius: 0, opacity: 0, active: false };
-    drawCanvas(initialDebris, rippleRef.current);
+    drawCanvas(newDebris, rippleRef.current);
   };
 
   const drawCanvas = (debrisToDraw: Debris[], rippleToDraw: { radius: number; opacity: number; active: boolean }) => {
@@ -257,17 +308,35 @@ export default function KesslerSimulation() {
     ctx.fillStyle = "rgba(10, 14, 26, 0.95)";
     ctx.fillRect(0, 0, width, height);
 
-    // Draw subtle grid
-    ctx.strokeStyle = "rgba(0, 212, 255, 0.05)";
+    // Draw technical grid (graph-paper style)
+    ctx.strokeStyle = "rgba(0, 212, 255, 0.08)";
     ctx.lineWidth = 1;
-    const gridSize = 40;
-    for (let x = 0; x < width; x += gridSize) {
+    
+    // Fine grid
+    const fineGridSize = 20;
+    for (let x = 0; x < width; x += fineGridSize) {
       ctx.beginPath();
       ctx.moveTo(x, 0);
       ctx.lineTo(x, height);
       ctx.stroke();
     }
-    for (let y = 0; y < height; y += gridSize) {
+    for (let y = 0; y < height; y += fineGridSize) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(width, y);
+      ctx.stroke();
+    }
+    
+    // Coarse grid (every 4 fine lines)
+    ctx.strokeStyle = "rgba(0, 212, 255, 0.12)";
+    const coarseGridSize = 80;
+    for (let x = 0; x < width; x += coarseGridSize) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, height);
+      ctx.stroke();
+    }
+    for (let y = 0; y < height; y += coarseGridSize) {
       ctx.beginPath();
       ctx.moveTo(0, y);
       ctx.lineTo(width, y);
@@ -370,6 +439,154 @@ export default function KesslerSimulation() {
   return (
     <div className="kesslerSimulation">
       <h3 className="simulationLabel simulationLabel--title">Kessler Cascade Simulation</h3>
+      
+      {/* Explanatory Panel */}
+      <div className="explanationPanel">
+        <button 
+          className="explanationToggle" 
+          onClick={() => setExplanationExpanded(!explanationExpanded)}
+        >
+          {explanationExpanded ? "▼ What's happening" : "▶ What's happening"}
+        </button>
+        {explanationExpanded && (
+          <div className="explanationContent">
+            <p><strong>Orbital Speed & Altitude:</strong> Gravity is what keeps debris in orbit, and it gets weaker with distance — so at higher altitude, less centripetal force is needed to stay in orbit, meaning objects move slower (v = √(GM/r)). This is Kepler's third law in action: orbital period grows with altitude, so farther-out objects take longer to complete one trip around Earth.</p>
+            <p><strong>Inclination & Collisions:</strong> Wider orbital tilt spread means more path crossings, often at higher relative speeds — both raise collision risk.</p>
+            <p><strong>Kessler Syndrome:</strong> One collision creates debris that raises the odds of further collisions — potentially triggering exponential growth.</p>
+          </div>
+        )}
+      </div>
+
+      {/* Parameter Controls */}
+      <div className={`parameterControls ${isRunning ? 'parameterControls--disabled' : ''}`}>
+        {isRunning && (
+          <div className="disabledNotice">
+            Parameters locked during cascade — press Reset to adjust
+          </div>
+        )}
+        <div className="controlGroup">
+          <label className="controlLabel">
+            <span className="controlValue">Initial Objects: {objectCount} — {objectCount <= 15 ? "low density" : objectCount <= 25 ? "moderate density" : "high density"}</span>
+            <span className="controlHelp">
+              <button
+                type="button"
+                className="controlTooltip"
+                aria-label="Explain initial object count"
+                aria-expanded={activeTooltip === "objects"}
+                onMouseEnter={() => setActiveTooltip("objects")}
+                onMouseLeave={() => setActiveTooltip(null)}
+                onFocus={() => setActiveTooltip("objects")}
+                onBlur={() => setActiveTooltip(null)}
+                onClick={() => setActiveTooltip((current) => (current === "objects" ? null : "objects"))}
+              >
+                ?
+              </button>
+              {activeTooltip === "objects" && (
+                <div className="tooltipContent">
+                  Starting number of debris objects in stable orbit. More objects raise collision probability even before a cascade begins.
+                </div>
+              )}
+            </span>
+          </label>
+          <input
+            type="range"
+            min="5"
+            max="40"
+            value={objectCount}
+            onChange={(e) => setObjectCount(parseInt(e.target.value))}
+            disabled={isRunning}
+            className="controlSlider"
+          />
+        </div>
+
+        <div className="controlGroup">
+          <label className="controlLabel">
+            <span className="controlValue">Orbital Altitude: {altitudeCenter.toFixed(2)} — {altitudeCenter < 0.3 ? "low-LEO band" : altitudeCenter < 0.4 ? "mid-LEO band" : "high-LEO band"}</span>
+            <span className="controlHelp">
+              <button
+                type="button"
+                className="controlTooltip"
+                aria-label="Explain orbital altitude"
+                aria-expanded={activeTooltip === "altitude"}
+                onMouseEnter={() => setActiveTooltip("altitude")}
+                onMouseLeave={() => setActiveTooltip(null)}
+                onFocus={() => setActiveTooltip("altitude")}
+                onBlur={() => setActiveTooltip(null)}
+                onClick={() => setActiveTooltip((current) => (current === "altitude" ? null : "altitude"))}
+              >
+                ?
+              </button>
+              {activeTooltip === "altitude" && (
+                <div className="tooltipContent">
+                  Sets the starting altitude band for debris. Higher altitude means slower orbital speed and a longer period — see "What's happening" above for why.
+                </div>
+              )}
+            </span>
+          </label>
+          <input
+            type="range"
+            min="0.2"
+            max="0.55"
+            step="0.05"
+            value={altitudeCenter}
+            onChange={(e) => {
+              const center = parseFloat(e.target.value);
+              const spread = 0.075; // Fixed spread for simplicity
+              setRadiusMin(center - spread);
+              setRadiusMax(center + spread);
+            }}
+            disabled={isRunning}
+            className="controlSlider"
+          />
+        </div>
+
+        <div className="controlGroup">
+          <label className="controlLabel">
+            <span className="controlValue">Inclination Spread: {((inclinationMax - inclinationMin) / 2).toFixed(2)} — {((inclinationMax - inclinationMin) / 2) < 0.3 ? "tight" : ((inclinationMax - inclinationMin) / 2) < 0.6 ? "moderate" : "wide"}</span>
+            <span className="controlHelp">
+              <button
+                type="button"
+                className="controlTooltip"
+                aria-label="Explain inclination spread"
+                aria-expanded={activeTooltip === "inclination"}
+                onMouseEnter={() => setActiveTooltip("inclination")}
+                onMouseLeave={() => setActiveTooltip(null)}
+                onFocus={() => setActiveTooltip("inclination")}
+                onBlur={() => setActiveTooltip(null)}
+                onClick={() => setActiveTooltip((current) => (current === "inclination" ? null : "inclination"))}
+              >
+                ?
+              </button>
+              {activeTooltip === "inclination" && (
+                <div className="tooltipContent tooltipContent--wide">
+                  Sets how much orbital tilt varies across debris. Wider spread means more crossing points between orbits — see "What's happening" above for why that raises collision risk.
+                </div>
+              )}
+            </span>
+          </label>
+          <input
+            type="range"
+            min="0.1"
+            max="1.0"
+            step="0.1"
+            value={(inclinationMax - inclinationMin) / 2}
+            onChange={(e) => {
+              const spread = parseFloat(e.target.value);
+              setInclinationMin(-spread);
+              setInclinationMax(spread);
+            }}
+            disabled={isRunning}
+            className="controlSlider"
+          />
+        </div>
+      </div>
+
+      {cascadeStatus && (
+        <div className="cascadeStatus">
+          {cascadeStatus}
+        </div>
+      )}
+
       <div className="simulationCanvasWrapper">
         <canvas ref={canvasRef} className="simulationCanvas" />
         <p className="simulationDisclaimer">Illustrative educational visualization; not an orbital-mechanics model.</p>

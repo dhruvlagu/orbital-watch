@@ -24,16 +24,15 @@ export function useMagneticButton(
     if (!hasFinePointer || prefersReducedMotion) return;
 
     let rect: DOMRect;
-    let centerX: number;
-    let centerY: number;
 
     const updateMagneticPosition = (clientX: number, clientY: number) => {
-      const deltaX = clientX - centerX;
-      const deltaY = clientY - centerY;
+      const localX = clientX - rect.left;
+      const localY = clientY - rect.top;
+      const normalizedX = (localX / rect.width) * 2 - 1;
+      const normalizedY = (localY / rect.height) * 2 - 1;
 
-      // Apply magnetic strength and clamp to max movement
-      const magneticX = Math.max(-maxMovement, Math.min(maxMovement, deltaX * strength));
-      const magneticY = Math.max(-maxMovement, Math.min(maxMovement, deltaY * strength));
+      const magneticX = Math.max(-maxMovement, Math.min(maxMovement, normalizedX * maxMovement * strength));
+      const magneticY = Math.max(-maxMovement, Math.min(maxMovement, normalizedY * maxMovement * strength));
 
       element.style.setProperty("--magnetic-x", `${magneticX}px`);
       element.style.setProperty("--magnetic-y", `${magneticY}px`);
@@ -54,8 +53,6 @@ export function useMagneticButton(
 
     const handlePointerEnter = () => {
       rect = element.getBoundingClientRect();
-      centerX = rect.left + rect.width / 2;
-      centerY = rect.top + rect.height / 2;
       isActiveRef.current = true;
       element.style.willChange = "transform";
     };

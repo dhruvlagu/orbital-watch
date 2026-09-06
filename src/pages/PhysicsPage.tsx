@@ -456,11 +456,22 @@ export default function PhysicsPage() {
       <section className="section physics-section section--appendix">
         <div className="container">
           <h2>The Math Behind This Page</h2>
-          <p className="section-subtitle">For the technically curious.</p>
+          <p className="section-subtitle">The equations that turn orbital speed into catastrophe.</p>
 
           <div ref={technicalCardRef} className="reveal-item">
             <div className="technicalCard card">
-            <pre className="technicalCode">{`Kinetic Energy Formula:
+              <pre className="technicalCode">{`Orbital Mechanics (Kepler's 3rd Law):
+ω ∝ r^(-3/2)
+angular speed decreases with orbital radius
+
+Visualization approximation used in the cascade sim:
+angularSpeed = k / r^(3/2)
+orbitalSpeed = angularSpeed × r
+
+Circular-orbit velocity relation:
+v = √(GM / r)
+Higher orbit radius r ⇒ lower orbital speed`}</pre>
+              <pre className="technicalCode">{`Kinetic Energy Formula:
 KE = ½mv²
 Where m = mass in kilograms, v = velocity in meters/second
 
@@ -472,6 +483,11 @@ At orbital velocity (7,800 m/s):
 TNT Equivalent Conversion:
 1 gram TNT = 4,184 Joules
 KE_TNT = KE(J) / 4,184
+
+Fragmentation / cascade trigger:
+Each collision creates more debris,
+raising the probability of additional collisions
+until the density threshold is crossed.
 
 Sources: Kessler & Cour-Palais (1978), NASA ODPO,
 ESA Space Debris User's Handbook`}</pre>
