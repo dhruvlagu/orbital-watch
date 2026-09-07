@@ -94,7 +94,7 @@ export default function GetInvolvedPage() {
 
           <div className="actionsGrid" ref={actionsGridRef}>
             {/* Card 1 */}
-            <article className="card actionCard reveal-item">
+            <article className="card actionCard reveal-item" style={{ ["--reveal-i" as any]: 0 }}>
               <div className="actionCard__iconWrapper star-icon">
                 <svg viewBox="0 0 24 24" width="36" height="36" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" className="css-i6dzq1">
                   <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
@@ -116,7 +116,7 @@ export default function GetInvolvedPage() {
             </article>
 
             {/* Card 2 */}
-            <article className="card actionCard reveal-item">
+            <article className="card actionCard reveal-item" style={{ ["--reveal-i" as any]: 1 }}>
               <div className="actionCard__iconWrapper gov-icon">
                 <svg viewBox="0 0 24 24" width="36" height="36" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" className="css-i6dzq1">
                   <path d="M4 22h16"></path>
@@ -139,7 +139,7 @@ export default function GetInvolvedPage() {
             </article>
 
             {/* Card 3 */}
-            <article className="card actionCard actionCard--share reveal-item">
+            <article className="card actionCard actionCard--share reveal-item" style={{ ["--reveal-i" as any]: 2 }}>
               <div className="actionCard__iconWrapper share-icon">
                 <svg viewBox="0 0 24 24" width="36" height="36" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" className="css-i6dzq1">
                   <circle cx="18" cy="5" r="3"></circle>
@@ -187,7 +187,8 @@ export default function GetInvolvedPage() {
                   <button
                     onClick={handleInstaClick}
                     className="shareBtn shareBtn--instagram"
-                    aria-label="Share on Instagram"
+                    aria-label="Instagram sharing tips"
+                    title="Get Instagram sharing tips"
                   >
                     <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
@@ -213,7 +214,7 @@ export default function GetInvolvedPage() {
                 {copied && <div className="shareWidget__status shareWidget__status--success">Link copied to clipboard!</div>}
                 {showInstaTip && (
                   <div className="shareWidget__status shareWidget__status--info">
-                    Copy the link and add it to your Instagram bio or share in your Stories!
+                    Instagram doesn't support direct link sharing. Copy the link above and add it to your bio or Stories!
                   </div>
                 )}
               </div>

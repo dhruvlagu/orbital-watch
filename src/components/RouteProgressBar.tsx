@@ -3,12 +3,14 @@ import { useLocation } from "react-router-dom";
 
 /**
  * RouteProgressBar — thin blue line at the top of the viewport.
- * Fires on every route change: rushes to ~80%, then completes on next tick.
+ * Fires on every route change: rushes to ~80% via CSS transition, then completes.
+ * Animation is CSS-driven to avoid main thread blocking on pages with heavy canvas animations.
  */
 export default function RouteProgressBar() {
   const location = useLocation();
   const [progress, setProgress] = useState(0);
   const [visible, setVisible] = useState(false);
+  const [transitionEnabled, setTransitionEnabled] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const rafRef = useRef<number | null>(null);
   const isCompletingRef = useRef(false);
@@ -22,22 +24,18 @@ export default function RouteProgressBar() {
     // Reset completion flag on new route
     isCompletingRef.current = false;
     
-    // Start bar
+    // Start bar: reset to 0 with no transition
     setVisible(true);
     setProgress(0);
+    setTransitionEnabled(false);
 
-    // Animate to ~80% quickly, then hold
-    let current = 0;
-    const tick = () => {
-      current = Math.min(current + (80 - current) * 0.12 + 0.4, 80);
-      setProgress(current);
-      if (current < 79.5) {
-        rafRef.current = requestAnimationFrame(tick);
-      }
-    };
-    rafRef.current = requestAnimationFrame(tick);
+    // In the next frame, enable transition and animate to 80%
+    rafRef.current = requestAnimationFrame(() => {
+      setTransitionEnabled(true);
+      setProgress(80);
+    });
 
-    // Complete the bar shortly after
+    // Complete the bar after a short delay
     timerRef.current = setTimeout(() => {
       if (isCompletingRef.current) return;
       isCompletingRef.current = true;
@@ -46,8 +44,9 @@ export default function RouteProgressBar() {
       timerRef.current = setTimeout(() => {
         setVisible(false);
         setProgress(0);
+        setTransitionEnabled(false);
       }, 300);
-    }, 250);
+    }, 350);
 
     return clear;
   }, [location.pathname]);
@@ -62,6 +61,7 @@ export default function RouteProgressBar() {
         setTimeout(() => {
           setVisible(false);
           setProgress(0);
+          setTransitionEnabled(false);
         }, 300);
       }, 2000);
       return () => clearTimeout(fallbackTimer);
@@ -73,7 +73,11 @@ export default function RouteProgressBar() {
   return (
     <div
       className="routeProgress"
-      style={{ width: `${progress}%`, opacity: progress === 100 ? 0 : 1 }}
+      style={{
+        width: `${progress}%`,
+        opacity: progress === 100 ? 0 : 1,
+        transition: transitionEnabled ? 'width 250ms ease-out' : 'none'
+      }}
       aria-hidden="true"
     />
   );

@@ -14,6 +14,10 @@
   --glow-blue: 0 0 20px rgba(0, 212, 255, 0.3);
   --glow-amber: 0 0 20px rgba(245, 166, 35, 0.3);
   --glow-green: 0 0 20px rgba(0, 212, 100, 0.3);
+  --brand-linkedin: #0077b5;
+  --brand-instagram: #e1306c;
+  --error-text: #ff9999;
+  --nudge-amber: #ffce54;
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --transition-reveal: 0.8s var(--ease-out-expo);
 

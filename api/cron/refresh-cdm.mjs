@@ -51,7 +51,7 @@ async function logExecution({ success, error, fetched, stored }) {
 // ─── Deduplicate CDM records ──────────────────────────────────────────────────
 
 /**
- * Deduplicates raw CDM records by the canonical pair (sorted sat names) + TCA.
+ * Deduplicates raw CDM records by the canonical pair (sorted sat IDs if available, else names) + TCA.
  * Mirrors the logic in src/services/conjunctionData.ts#dedupeRawCdmRecords.
  *
  * @param {Array<Record<string, string>>} records
@@ -60,9 +60,16 @@ async function logExecution({ success, error, fetched, stored }) {
 function dedupeRawCdmRecords(records) {
   const seen = new Set();
   return records.filter((r) => {
-    const sat1 = (r.SAT_1_NAME || "").trim();
-    const sat2 = (r.SAT_2_NAME || "").trim();
-    const [first, second] = sat1 < sat2 ? [sat1, sat2] : [sat2, sat1];
+    const sat1Id = (r.SAT_1_ID || "").trim();
+    const sat2Id = (r.SAT_2_ID || "").trim();
+    const sat1Name = (r.SAT_1_NAME || "").trim();
+    const sat2Name = (r.SAT_2_NAME || "").trim();
+
+    // Use catalog IDs for dedupe key if available, fallback to names
+    const useIds = sat1Id && sat2Id;
+    const id1 = useIds ? sat1Id : sat1Name;
+    const id2 = useIds ? sat2Id : sat2Name;
+    const [first, second] = id1 < id2 ? [id1, id2] : [id2, id1];
     const key = `${first}|${second}|${r.TCA}`;
     if (seen.has(key)) return false;
     seen.add(key);

@@ -14,6 +14,8 @@ export type RawCdmRecord = {
   CDM_ID: string;
   SAT_1_NAME: string;
   SAT_2_NAME: string;
+  SAT_1_ID: string;
+  SAT_2_ID: string;
   TCA: string; // ISO 8601 datetime string e.g. "2025-07-10T14:22:00"
   MIN_RNG: string; // metres, as string e.g. "342.5"
   PC: string; // probability of collision as string e.g. "0.0002372735"
@@ -27,6 +29,8 @@ export type ConjunctionEvent = {
   id: string;
   sat1Name: string;
   sat2Name: string;
+  sat1Id: string;
+  sat2Id: string;
   tcaMs: number; // unix ms — TCA parsed to number for countdowns
   missDistanceM: number;
   pc: number | null;
@@ -74,9 +78,16 @@ export function pcToOddsString(pc: number): string {
 export function dedupeRawCdmRecords(records: RawCdmRecord[]): RawCdmRecord[] {
   const seen = new Set<string>();
   return records.filter((record) => {
-    const sat1 = record.SAT_1_NAME.trim();
-    const sat2 = record.SAT_2_NAME.trim();
-    const [first, second] = sat1 < sat2 ? [sat1, sat2] : [sat2, sat1];
+    const sat1Id = (record.SAT_1_ID || "").trim();
+    const sat2Id = (record.SAT_2_ID || "").trim();
+    const sat1Name = record.SAT_1_NAME.trim();
+    const sat2Name = record.SAT_2_NAME.trim();
+
+    // Use catalog IDs for dedupe key if available, fallback to names
+    const useIds = sat1Id && sat2Id;
+    const id1 = useIds ? sat1Id : sat1Name;
+    const id2 = useIds ? sat2Id : sat2Name;
+    const [first, second] = id1 < id2 ? [id1, id2] : [id2, id1];
     const key = `${first}|${second}|${record.TCA}`;
     if (seen.has(key)) return false;
     seen.add(key);
@@ -106,6 +117,8 @@ function parseEvents(records: RawCdmRecord[]): ConjunctionEvent[] {
         id: r.CDM_ID,
         sat1Name: r.SAT_1_NAME || "UNKNOWN",
         sat2Name: r.SAT_2_NAME || "UNKNOWN",
+        sat1Id: (r.SAT_1_ID || "").trim(),
+        sat2Id: (r.SAT_2_ID || "").trim(),
         tcaMs,
         missDistanceM,
         pc,

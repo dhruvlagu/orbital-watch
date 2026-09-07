@@ -162,22 +162,54 @@ function ConjunctionCard({ event }: { event: ConjunctionEvent }) {
     <article className="card cw__card">
       {/* Object names */}
       <div className="cw__objects">
-        <span className="cw__satName">{event.sat1Name}</span>
-        <svg
-          className="cw__crossIcon"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          aria-hidden="true"
-          width="18"
-          height="18"
+        <div
+          className="tooltipContainer cw__satContainer"
+          style={{ marginLeft: 0 }}
+          onClick={(e) => {
+            e.stopPropagation();
+            (e.currentTarget as HTMLElement).classList.toggle("is-open");
+          }}
         >
-          <line x1="18" y1="6" x2="6" y2="18" />
-          <line x1="6" y1="6" x2="18" y2="18" />
-        </svg>
-        <span className="cw__satName">{event.sat2Name}</span>
+          <span className="cw__satName">{event.sat1Name}</span>
+          {event.sat1Id && (
+            <div className="cw__satId">NORAD {event.sat1Id}</div>
+          )}
+          <div className="tooltipText">
+            Satellite or debris object name. The NORAD catalog number below uniquely identifies this object in the U.S. Space Surveillance Network database.
+          </div>
+        </div>
+        <div className="cw__crossWrapper">
+          <svg
+            className="cw__crossIcon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            aria-hidden="true"
+            width="18"
+            height="18"
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </div>
+        <div
+          className="tooltipContainer cw__satContainer"
+          style={{ marginLeft: 0 }}
+          onClick={(e) => {
+            e.stopPropagation();
+            (e.currentTarget as HTMLElement).classList.toggle("is-open");
+          }}
+        >
+          <span className="cw__satName">{event.sat2Name}</span>
+          {event.sat2Id && (
+            <div className="cw__satId">NORAD {event.sat2Id}</div>
+          )}
+          <div className="tooltipText">
+            Satellite or debris object name. The NORAD catalog number below uniquely identifies this object in the U.S. Space Surveillance Network database.
+          </div>
+        </div>
       </div>
 
       {/* Risk badge row */}

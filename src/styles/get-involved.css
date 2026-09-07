@@ -24,7 +24,7 @@
   line-height: 1.1;
   letter-spacing: -0.02em;
   margin-bottom: 16px;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .involvedHero__title--highlight {
@@ -60,7 +60,7 @@
 .involvedSection__header h2 {
   margin-bottom: 8px;
   font-size: clamp(28px, 4vw, 40px);
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .involvedSection__subtitle {
@@ -79,6 +79,12 @@
   margin-top: 32px;
 }
 
+@media (max-width: 768px) {
+  .actionsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 .actionCard {
   padding: 36px;
   display: flex;
@@ -94,8 +100,6 @@
 }
 
 .actionCard:hover {
-  border-color: rgba(0, 212, 255, 0.25);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), var(--glow-blue);
   transform: translateY(-4px);
 }
 
@@ -130,7 +134,7 @@
 
 .actionCard__iconWrapper.share-icon {
   background: rgba(0, 212, 100, 0.1);
-  color: #00d464;
+  color: var(--accent-green);
   border: 1px solid rgba(0, 212, 100, 0.2);
   box-shadow: 0 0 15px rgba(0, 212, 100, 0.1);
 }
@@ -140,7 +144,7 @@
   margin-bottom: 12px;
   font-family: var(--font-display);
   font-weight: 700;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .actionCard__body {
@@ -198,19 +202,19 @@
 .shareBtn--twitter:hover {
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.25);
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .shareBtn--linkedin:hover {
   background: rgba(0, 119, 181, 0.12);
   border-color: rgba(0, 119, 181, 0.3);
-  color: #0077b5;
+  color: var(--brand-linkedin);
 }
 
 .shareBtn--instagram:hover {
   background: rgba(225, 48, 108, 0.12);
   border-color: rgba(225, 48, 108, 0.3);
-  color: #e1306c;
+  color: var(--brand-instagram);
 }
 
 .shareBtn--copy:hover {
@@ -234,7 +238,7 @@
 
 .shareWidget__status--success {
   background: rgba(0, 212, 100, 0.1);
-  color: #00d464;
+  color: var(--accent-green);
   border: 1px solid rgba(0, 212, 100, 0.2);
 }
 
@@ -280,7 +284,7 @@
   font-size: 24px;
   font-family: var(--font-display);
   font-weight: 700;
-  color: #fff;
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -322,7 +326,7 @@
   border: 1px solid var(--border-subtle);
   border-radius: 16px;
   padding: 32px;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(12px);
 }
 
 .studentCol__header {
@@ -371,7 +375,7 @@
 
 .studentCol__list li strong {
   font-size: 16px;
-  color: #fff;
+  color: var(--text-primary);
   font-weight: 600;
 }
 
@@ -388,7 +392,7 @@
 }
 
 .studentCol__list li span a:hover {
-  color: #fff;
+  color: var(--text-primary);
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -409,7 +413,7 @@
 .civicActionHeader h2 {
   font-size: clamp(1.75rem, 4vw, 2.5rem);
   font-weight: 700;
-  color: #fff;
+  color: var(--text-primary);
   margin: 12px 0 16px;
   letter-spacing: -0.02em;
 }
@@ -465,7 +469,7 @@
 .civicStepTitle h3 {
   font-size: 1.2rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -584,7 +588,7 @@
 .policyAskCard__label {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--text-primary);
   margin: 0;
   line-height: 1.4;
 }
@@ -642,7 +646,7 @@
   border-radius: 8px;
   border: 1.5px solid var(--border-subtle);
   background: rgba(255, 255, 255, 0.04);
-  color: #fff;
+  color: var(--text-primary);
   font-size: 0.95rem;
   font-family: inherit;
   width: 200px;
@@ -672,7 +676,7 @@
   border-radius: 8px;
   background: rgba(255, 77, 77, 0.08);
   border: 1px solid rgba(255, 77, 77, 0.25);
-  color: #ff9999;
+  color: var(--error-text);
   font-size: 0.88rem;
   line-height: 1.5;
   display: flex;
@@ -732,7 +736,7 @@
   margin-top: 1px;
   display: flex;
   align-items: center;
-  color: #ffce54;
+  color: var(--nudge-amber);
 }
 
 .civicBannerIcon {
@@ -760,7 +764,7 @@
 }
 
 .nudgeText strong {
-  color: #ffce54;
+  color: var(--nudge-amber);
 }
 
 /* ── Message Textarea ── */
@@ -907,12 +911,16 @@
 }
 
 .policyAskLink:hover {
-  color: #fff;
+  color: var(--text-primary);
   gap: 8px;
 }
 
 /* ── Responsive ── */
 @media (max-width: 600px) {
+  .actionsGrid {
+    grid-template-columns: 1fr;
+  }
+
   .repDashboardBlock {
     padding: 18px 16px;
   }
