@@ -51,15 +51,17 @@ async function logExecution({ success, error, fetched, stored }) {
 // ─── Deduplicate CDM records ──────────────────────────────────────────────────
 
 /**
- * Deduplicates raw CDM records by the canonical pair (sorted sat IDs if available, else names) + TCA.
+ * Deduplicates raw CDM records by the canonical pair (sorted sat IDs if available, else names) + TCA rounded to nearest hour.
+ * Within each group, keeps only the record with the latest CREATED timestamp (the most refined prediction).
  * Mirrors the logic in src/services/conjunctionData.ts#dedupeRawCdmRecords.
  *
  * @param {Array<Record<string, string>>} records
  * @returns {Array<Record<string, string>>}
  */
 function dedupeRawCdmRecords(records) {
-  const seen = new Set();
-  return records.filter((r) => {
+  const groups = new Map();
+
+  for (const r of records) {
     const sat1Id = (r.SAT_1_ID || "").trim();
     const sat2Id = (r.SAT_2_ID || "").trim();
     const sat1Name = (r.SAT_1_NAME || "").trim();
@@ -70,11 +72,32 @@ function dedupeRawCdmRecords(records) {
     const id1 = useIds ? sat1Id : sat1Name;
     const id2 = useIds ? sat2Id : sat2Name;
     const [first, second] = id1 < id2 ? [id1, id2] : [id2, id1];
-    const key = `${first}|${second}|${r.TCA}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
+
+    // Round TCA down to the nearest hour to group refinement messages
+    const tcaMs = Date.parse(r.TCA);
+    const tcaHourMs = Number.isFinite(tcaMs) ? Math.floor(tcaMs / (60 * 60 * 1000)) * (60 * 60 * 1000) : 0;
+    const key = `${first}|${second}|${tcaHourMs}`;
+
+    if (!groups.has(key)) {
+      groups.set(key, []);
+    }
+    groups.get(key).push(r);
+  }
+
+  // Keep only the record with the latest CREATED timestamp in each group
+  const result = [];
+  for (const group of groups.values()) {
+    const latest = group.reduce((a, b) => {
+      const createdA = Date.parse(a.CREATED);
+      const createdB = Date.parse(b.CREATED);
+      if (!Number.isFinite(createdA)) return b;
+      if (!Number.isFinite(createdB)) return a;
+      return createdA > createdB ? a : b;
+    });
+    result.push(latest);
+  }
+
+  return result;
 }
 
 // ─── Filter expired events ────────────────────────────────────────────────────

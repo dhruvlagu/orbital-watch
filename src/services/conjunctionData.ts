@@ -20,6 +20,7 @@ export type RawCdmRecord = {
   MIN_RNG: string; // metres, as string e.g. "342.5"
   PC: string; // probability of collision as string e.g. "0.0002372735"
   EMERGENCY_REPORTABLE: string; // "Y" | "N"
+  CREATED: string; // ISO 8601 datetime string e.g. "2025-07-10T10:15:00"
 };
 
 export type RiskTier = "ELEVATED" | "MONITORED" | "LOW" | "UNKNOWN";
@@ -38,6 +39,7 @@ export type ConjunctionEvent = {
   riskTier: RiskTier;
   /** e.g. "1 in 4,300" */
   oddsString: string;
+  createdMs: number; // unix ms — when this CDM was issued
 };
 
 export type ConjunctionResponse = {
@@ -76,8 +78,9 @@ export function pcToOddsString(pc: number): string {
 }
 
 export function dedupeRawCdmRecords(records: RawCdmRecord[]): RawCdmRecord[] {
-  const seen = new Set<string>();
-  return records.filter((record) => {
+  const groups = new Map<string, RawCdmRecord[]>();
+
+  for (const record of records) {
     const sat1Id = (record.SAT_1_ID || "").trim();
     const sat2Id = (record.SAT_2_ID || "").trim();
     const sat1Name = record.SAT_1_NAME.trim();
@@ -88,11 +91,32 @@ export function dedupeRawCdmRecords(records: RawCdmRecord[]): RawCdmRecord[] {
     const id1 = useIds ? sat1Id : sat1Name;
     const id2 = useIds ? sat2Id : sat2Name;
     const [first, second] = id1 < id2 ? [id1, id2] : [id2, id1];
-    const key = `${first}|${second}|${record.TCA}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
+
+    // Round TCA down to the nearest hour to group refinement messages
+    const tcaMs = Date.parse(record.TCA);
+    const tcaHourMs = Number.isFinite(tcaMs) ? Math.floor(tcaMs / (60 * 60 * 1000)) * (60 * 60 * 1000) : 0;
+    const key = `${first}|${second}|${tcaHourMs}`;
+
+    if (!groups.has(key)) {
+      groups.set(key, []);
+    }
+    groups.get(key)!.push(record);
+  }
+
+  // Keep only the record with the latest CREATED timestamp in each group
+  const result: RawCdmRecord[] = [];
+  for (const group of groups.values()) {
+    const latest = group.reduce((a, b) => {
+      const createdA = Date.parse(a.CREATED);
+      const createdB = Date.parse(b.CREATED);
+      if (!Number.isFinite(createdA)) return b;
+      if (!Number.isFinite(createdB)) return a;
+      return createdA > createdB ? a : b;
+    });
+    result.push(latest);
+  }
+
+  return result;
 }
 
 function parseEvents(records: RawCdmRecord[]): ConjunctionEvent[] {
@@ -103,6 +127,7 @@ function parseEvents(records: RawCdmRecord[]): ConjunctionEvent[] {
       const pc: number | null = Number.isFinite(parsedPc) ? parsedPc : null;
       const missDistanceM = parseFloat(r.MIN_RNG);
       const tcaMs = Date.parse(r.TCA);
+      const createdMs = Date.parse(r.CREATED);
 
       // Discard records with unparseable critical fields (MIN_RNG, TCA)
       if (!Number.isFinite(missDistanceM) || !Number.isFinite(tcaMs)) {
@@ -125,6 +150,7 @@ function parseEvents(records: RawCdmRecord[]): ConjunctionEvent[] {
         emergencyReportable,
         riskTier,
         oddsString,
+        createdMs: Number.isFinite(createdMs) ? createdMs : 0,
       };
     })
     .filter((e): e is ConjunctionEvent => e !== null)
