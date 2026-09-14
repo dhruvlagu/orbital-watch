@@ -157,13 +157,6 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.methodCard:hover {
-  border-color: rgba(0, 212, 255, 0.25);
-  box-shadow: 0 8px 30px rgba(0, 212, 255, 0.08);
-  transform: translateY(-3px);
 }
 
 .methodCard__icon {
@@ -208,17 +201,11 @@
   flex-direction: column;
   gap: 24px;
   min-height: 340px;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.reflectPanel:hover {
-  border-color: rgba(0, 212, 255, 0.25);
-  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.5), var(--glow-blue);
 }
 
 .reflectPanel--amber:hover {
-  border-color: rgba(245, 166, 35, 0.25);
-  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.5), var(--glow-amber);
+  border-color: rgba(245, 166, 35, 0.3);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), var(--glow-amber);
 }
 
 .reflectPanel__header {
@@ -545,4 +532,9 @@
     padding: 16px;
     font-size: 14px;
   }
+}
+
+/* About page specific CTA spacing */
+.crisisCTA--about {
+  margin-bottom: 60px;
 }

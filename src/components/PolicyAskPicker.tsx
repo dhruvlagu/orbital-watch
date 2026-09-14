@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { policyAsks, type PolicyAskId } from "../data/policyAsks";
 
 export interface PolicyAskPickerProps {
@@ -17,17 +18,37 @@ export default function PolicyAskPicker({
   selectedId,
   onSelectAsk,
 }: PolicyAskPickerProps) {
+  const [mousePositions, setMousePositions] = useState<Record<string, { x: string; y: string }>>({});
+
+  const handleMouseMove = (id: string, e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    setMousePositions(prev => ({
+      ...prev,
+      [id]: { x: `${x}%`, y: `${y}%` }
+    }));
+  };
+
+  const handleMouseLeave = (id: string) => {
+    setMousePositions(prev => ({
+      ...prev,
+      [id]: { x: '50%', y: '50%' }
+    }));
+  };
+
   return (
     <div className="policyAskPicker" role="radiogroup" aria-label="Select a policy reform to champion">
       {askOrder.map((id) => {
         const ask = policyAsks[id];
         const isSelected = selectedId === id;
         const isFullWidth = id === "general";
+        const mousePos = mousePositions[id] || { x: '50%', y: '50%' };
 
         return (
           <div
             key={id}
-            className={`card policyAskCard ${isSelected ? "is-selected" : ""} ${isFullWidth ? "policyAskCard--full" : ""}`}
+            className={`policyAskCard ${isSelected ? "is-selected" : ""} ${isFullWidth ? "policyAskCard--full" : ""}`}
             onClick={() => onSelectAsk(id)}
             role="radio"
             aria-checked={isSelected}
@@ -38,6 +59,9 @@ export default function PolicyAskPicker({
                 onSelectAsk(id);
               }
             }}
+            onMouseMove={(e) => handleMouseMove(id, e)}
+            onMouseLeave={() => handleMouseLeave(id)}
+            style={{ ['--mouse-x' as any]: mousePos.x, ['--mouse-y' as any]: mousePos.y }}
           >
             <div className="policyAskCard__header">
               <div className="policyAskCard__radio">

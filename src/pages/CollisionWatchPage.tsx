@@ -368,7 +368,7 @@ export default function CollisionWatchPage() {
       e.preventDefault();
       const el = document.getElementById("what-is-pc");
       if (el) {
-        const y = el.getBoundingClientRect().top + window.scrollY - 100;
+        const y = el.getBoundingClientRect().top + window.scrollY - 60;
         window.scrollTo({ top: y, behavior: "smooth" });
         // update the hash without jumping
         if (history && typeof history.replaceState === "function") {
@@ -385,13 +385,28 @@ export default function CollisionWatchPage() {
       setTimeout(() => {
         const el = document.getElementById("what-is-pc");
         if (el) {
-          const y = el.getBoundingClientRect().top + window.scrollY - 100;
+          const y = el.getBoundingClientRect().top + window.scrollY - 60;
           window.scrollTo({ top: y, behavior: "smooth" });
         }
       }, 120);
     }
 
     return () => anchors.forEach((a) => a.removeEventListener("click", handler));
+  }, []);
+
+  // Close tooltips when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.tooltipContainer')) {
+        document.querySelectorAll('.tooltipContainer.is-open').forEach(el => {
+          el.classList.remove('is-open');
+        });
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
   const hasEvents = payload.events.length > 0;
@@ -480,14 +495,19 @@ export default function CollisionWatchPage() {
                 <span>
                   This feed displays the <strong>publicly available subset</strong> of
                   conjunction screenings. Because certain satellite operators opt out of public
-                  release and sensitive defense assets may use rounded probability
+                  release and sensitive defense assets may use rounded probability{" "}
                   <span className="tooltipContainer" style={{ marginLeft: 0 }}>
-                    <span className="infoIcon" tabIndex={0} aria-label="Pc definition">ⓘ</span>
+                    <span 
+                      className="infoIcon" 
+                      tabIndex={0} 
+                      aria-label="Pc definition"
+                      style={{ padding: "4px 8px", minWidth: "auto", minHeight: "auto", fontSize: "0.95em", verticalAlign: "middle" }}
+                    >ⓘ</span>
                     <div className="tooltipText">
                       <a href="#what-is-pc">Click to view the definition of Pc</a>
                     </div>
                   </span>
-                  values, these alerts represent a monitored sample rather than a comprehensive global
+                  {" "}values, these alerts represent a monitored sample rather than a comprehensive global
                   risk map.
                 </span>
               </div>

@@ -6,6 +6,7 @@ import StarfieldCanvas from "../components/StarfieldCanvas";
 import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
 import { useCardSpotlight } from "../hooks/useCardSpotlight";
 import { fetchConjunctions, type ConjunctionResponse } from "../services/conjunctionData";
+import { fetchLiveOrbitalEnvironment, type LiveOrbitalResponse } from "../services/liveOrbitalData";
 
 const STATS_GROUP = (
   <div className="quickStats__group">
@@ -22,7 +23,7 @@ const STATS_GROUP = (
     </div>
     <div className="quickStats__divider" />
     <div className="quickStats__item">
-      Objects added to LEO in 2025: <span>4,772</span>
+      Objects added to LEO in 2025 (historical): <span>4,772</span>
     </div>
     <div className="quickStats__divider" />
     <div className="quickStats__item">
@@ -40,6 +41,7 @@ export default function HomePage() {
 
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
   const [conjunctionData, setConjunctionData] = useState<ConjunctionResponse | null>(null);
+  const [liveOrbitalData, setLiveOrbitalData] = useState<LiveOrbitalResponse | null>(null);
   const [timeTick, setTimeTick] = useState(() => Date.now());
   const exploreGridRef = useRef<HTMLDivElement>(null);
 
@@ -51,6 +53,19 @@ export default function HomePage() {
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Fetch live orbital environment (total tracked objects)
+  useEffect(() => {
+    let isCancelled = false;
+    fetchLiveOrbitalEnvironment((fresh) => {
+      if (!isCancelled) setLiveOrbitalData(fresh);
+    }).then((response) => {
+      if (!isCancelled) setLiveOrbitalData(response);
+    }).catch(() => {
+      // Optional; don't surface errors on home page
+    });
+    return () => { isCancelled = true; };
   }, []);
 
   // Lightweight conjunction data fetch — filter for active events client-side
@@ -168,79 +183,96 @@ export default function HomePage() {
           </div>
 
           <div className="homeExplore__grid" ref={exploreGridRef}>
+            {/* Card 0: The Crisis (Uncertainty Debris Cloud + Catalog Stat) */}
             <div className="card homeExploreCard reveal-item" style={{ ["--reveal-i" as any]: 0 }}>
-              <div className="homeExploreCard__icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 22a10 10 0 0 0 10-10C22 6.48 17.52 2 12 2S2 6.48 2 12" />
-                  <path d="M12 18a6 6 0 0 0 6-6c0-3.31-2.69-6-6-6S6 8.69 6 12" />
-                  <circle cx="12" cy="12" r="2" />
-                  <path d="M12 12L19 5" />
+              <div className="homeExploreCard__cloudIcon" aria-hidden="true">
+                <svg width="68" height="38" viewBox="0 0 68 38" fill="none">
+                  <ellipse cx="34" cy="24" rx="30" ry="11" stroke="rgba(0, 212, 255, 0.35)" strokeWidth="1" strokeDasharray="3 2" />
+                  <circle cx="34" cy="18" r="14" fill="var(--accent-red, #ff3b3b)" opacity="0.18" />
+                  <circle cx="34" cy="18" r="7" fill="var(--accent-red, #ff3b3b)" opacity="0.32" />
+                  <circle cx="28" cy="16" r="1.5" fill="#ff6b4a" />
+                  <circle cx="38" cy="20" r="1.5" fill="#ffb347" />
+                  <circle cx="34" cy="18" r="2.5" fill="#ffffff" />
+                  <circle cx="44" cy="14" r="1" fill="#00d4ff" />
                 </svg>
               </div>
               <h3 className="homeExploreCard__title">The Crisis</h3>
+              <div className="homeExploreCard__liveValue">
+                {liveOrbitalData ? liveOrbitalData.data.totalTracked.toLocaleString() : "28,000+"} <span className="homeExploreCard__liveUnit">Tracked Objects</span>
+              </div>
               <p className="homeExploreCard__description">
-                Trace how 70 years of Cold War launches and anti-satellite missile tests created tens of thousands of tracked objects in low Earth orbit.
+                Trace how 70 years of satellite launches and missile tests filled low Earth orbit with tens of thousands of lethal fragments.
               </p>
               <Link to="/crisis" className="btn btn--secondary homeExploreCard__btn">
                 Historical Timeline →
               </Link>
             </div>
 
+            {/* Card 1: Collision Watch (Uncertainty Cloud SVG + Live Conjunction Count) */}
             <div className="card homeExploreCard reveal-item" style={{ ["--reveal-i" as any]: 1 }}>
-              <div className="homeExploreCard__icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="8" cy="8" r="3" />
-                  <circle cx="16" cy="16" r="3" />
-                  <path d="M16 8l-6 6" />
-                  <path d="M8 16l6-6" />
-                  <path d="M12 6V2" />
-                  <path d="M12 18v4" />
-                  <path d="M6 12H2" />
-                  <path d="M18 12h4" />
+              <div className="homeExploreCard__cloudIcon" aria-hidden="true">
+                <svg width="72" height="38" viewBox="0 0 72 38" fill="none">
+                  <circle cx="20" cy="19" r="16" fill="var(--accent-blue, #00d4ff)" opacity="0.16" />
+                  <circle cx="20" cy="19" r="8" fill="var(--accent-blue, #00d4ff)" opacity="0.32" />
+                  <circle cx="20" cy="19" r="2.5" fill="var(--accent-blue, #00d4ff)" />
+                  <line x1="20" y1="19" x2="52" y2="19" stroke="rgba(255, 255, 255, 0.25)" strokeDasharray="2 2" strokeWidth="1" />
+                  <circle cx="52" cy="19" r="16" fill="var(--accent-amber, #ffb347)" opacity="0.16" />
+                  <circle cx="52" cy="19" r="8" fill="var(--accent-amber, #ffb347)" opacity="0.32" />
+                  <circle cx="52" cy="19" r="2.5" fill="var(--accent-amber, #ffb347)" />
                 </svg>
               </div>
               <h3 className="homeExploreCard__title">Collision Watch</h3>
+              <div className="homeExploreCard__liveValue">
+                {activeConjunctionCount !== null ? activeConjunctionCount : "—"}
+                <span className="homeExploreCard__liveUnit">Active Events</span>
+              </div>
               <p className="homeExploreCard__description">
-                See which close approaches deserve context—and which alarming-looking numbers do not.
+                Updated 3x daily from U.S. Space Force CDMs to contextualize real collision probability.
               </p>
               <Link to="/collision-watch" className="btn btn--secondary homeExploreCard__btn">
                 Live Conjunction Feed →
               </Link>
             </div>
 
+            {/* Card 2: The Physics (Live Stat: LEO Velocity) */}
             <div className="card homeExploreCard reveal-item" style={{ ["--reveal-i" as any]: 2 }}>
               <div className="homeExploreCard__icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
                 </svg>
               </div>
               <h3 className="homeExploreCard__title">The Physics</h3>
+              <div className="homeExploreCard__liveValue">
+                17,500 mph <span className="homeExploreCard__liveUnit">Orbital Speed</span>
+              </div>
               <p className="homeExploreCard__description">
-                A 1 cm fragment can disable a spacecraft. This is why speed matters more than size.
+                At orbital speed (7.8 km/s), even a 1 cm fragment carries the kinetic energy of an exploding hand grenade.
               </p>
               <Link to="/physics" className="btn btn--secondary homeExploreCard__btn">
                 Impact &amp; Cascade Simulator →
               </Link>
             </div>
 
+            {/* Card 3: Policy */}
             <div className="card homeExploreCard reveal-item" style={{ ["--reveal-i" as any]: 3 }}>
               <div className="homeExploreCard__icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                 </svg>
               </div>
               <h3 className="homeExploreCard__title">Policy</h3>
               <p className="homeExploreCard__description">
-                Who owns a dead satellite—and who is allowed to move it?
+                Who owns a dead satellite, who is liable for collisions, and how the FCC 5-year deorbit mandate replaces voluntary inaction.
               </p>
               <Link to="/policy" className="btn btn--secondary homeExploreCard__btn">
                 Treaty &amp; Scorecard Breakdown →
               </Link>
             </div>
 
+            {/* Card 4: Solutions */}
             <div className="card homeExploreCard reveal-item" style={{ ["--reveal-i" as any]: 4 }}>
               <div className="homeExploreCard__icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
                   <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
                   <line x1="12" y1="22.08" x2="12" y2="12" />
@@ -248,16 +280,17 @@ export default function HomePage() {
               </div>
               <h3 className="homeExploreCard__title">Solutions</h3>
               <p className="homeExploreCard__description">
-                Robots can grab debris. International law is the harder part.
+                From robotic arms to drag sails—explore active debris removal tech and the legal challenge of sovereign space salvage.
               </p>
               <Link to="/solutions" className="btn btn--secondary homeExploreCard__btn">
                 Active Debris Removal Tech →
               </Link>
             </div>
 
+            {/* Card 5: Get Involved (Live Stat + Crowned Primary Button) */}
             <div className="card homeExploreCard reveal-item" style={{ ["--reveal-i" as any]: 5 }}>
               <div className="homeExploreCard__icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                   <circle cx="9" cy="7" r="4" />
                   <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
@@ -265,26 +298,30 @@ export default function HomePage() {
                 </svg>
               </div>
               <h3 className="homeExploreCard__title">Get Involved</h3>
+              <div className="homeExploreCard__liveValue">
+                1 ZIP Code <span className="homeExploreCard__liveUnit">Direct Action</span>
+              </div>
               <p className="homeExploreCard__description">
-                Turn research into legislative advocacy. Look up your U.S. House representative and send a personalized policy letter.
+                Find your U.S. House representative and generate an evidence-backed orbital safety policy letter.
               </p>
-              <Link to="/get-involved" className="btn btn--secondary homeExploreCard__btn">
+              <Link to="/get-involved" className="btn btn--primary homeExploreCard__btn">
                 Contact Your Representative →
               </Link>
             </div>
 
+            {/* Card 6: About & Methodology (Wide Card + Compact Button) */}
             <div className="card homeExploreCard homeExploreCard--wide reveal-item" style={{ ["--reveal-i" as any]: 6 }}>
               <div className="homeExploreCard__icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10" />
                   <line x1="12" y1="16" x2="12" y2="12" />
                   <line x1="12" y1="8" x2="12.01" y2="8" />
                 </svg>
               </div>
-              <div>
+              <div className="homeExploreCard__content">
                 <h3 className="homeExploreCard__title">About &amp; Methodology</h3>
                 <p className="homeExploreCard__description">
-                  Inspect our primary data sources, Redis caching pipeline, and actual production code excerpts.
+                  Inspect our Space-Track data pipelines, Redis caching architecture, and open methodology.
                 </p>
               </div>
               <Link to="/about" className="btn btn--secondary homeExploreCard__btn">

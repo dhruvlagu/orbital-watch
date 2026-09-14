@@ -74,6 +74,7 @@ export default async function handler(req, res) {
     const firstName = bio.first_name || "";
     const lastName = bio.last_name || "";
     const representativeName = `${firstName} ${lastName}`.trim() || "Representative";
+    const repLastName = lastName.trim() || representativeName;
     const districtNumber = typeof bestDistrict.district_number === "number"
       ? bestDistrict.district_number
       : parseInt(bestDistrict.district_number || "0", 10);
@@ -83,6 +84,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       representativeName,
+      lastName: repLastName,
       district: districtNumber,
       matchProportion,
       isAmbiguousMatch,

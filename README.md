@@ -43,7 +43,7 @@ Upcoming predicted close-approach events between tracked objects, including miss
 User-adjustable mass and velocity sliders compute KE = ½mv² in real time, outputting energy in joules, TNT equivalent, and hand grenade equivalents. Danger classification updates live.
 
 **Kessler Cascade Simulator**
-Animated simulation showing debris multiplication. Each click represents one uncontrolled collision event — fragments spawn and orbit outward, visualizing how a cascade becomes self-sustaining above a critical density threshold.
+Interactive 3D simulation with adjustable parameters (initial object count, orbital altitude, inclination spread) demonstrating how collision frequency increases with debris density. Features realistic orbital mechanics using Kepler's third law, 3D perspective rendering, and real-time collision detection to visualize cascade dynamics and the critical density threshold.
 
 **Treaty Reform Simulator**
 Four policy toggles (binding IADC guidelines, ASAT ban, international ADR authority, global 5-year rule) with live recalculation of projected LEO object count by 2050. Baseline: 50,000. Best case with all reforms: 12,000. Modeled on Liou et al. (2021) and ESA Space Environment Report, Issue 9.1 (2025).

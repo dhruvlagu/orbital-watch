@@ -405,6 +405,91 @@
   margin-top: 0;
 }
 
+/* ── Step Progress Indicator ── */
+.civicStepProgress {
+  margin-bottom: 48px;
+}
+
+.civicStepProgress__track {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.civicStepProgress__bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-blue), var(--accent-amber));
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+
+.civicStepProgress__steps {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.civicStepProgress__step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  opacity: 0.4;
+  transition: opacity 0.3s ease;
+}
+
+.civicStepProgress__step.is-active {
+  opacity: 1;
+}
+
+.civicStepProgress__step.is-complete {
+  opacity: 0.7;
+}
+
+.civicStepProgress__number {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  transition: all 0.3s ease;
+}
+
+.civicStepProgress__step.is-active .civicStepProgress__number {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+  color: var(--bg-primary);
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+}
+
+.civicStepProgress__step.is-complete .civicStepProgress__number {
+  background: var(--accent-green);
+  border-color: var(--accent-green);
+  color: var(--bg-primary);
+}
+
+.civicStepProgress__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: center;
+}
+
+.civicStepProgress__step.is-active .civicStepProgress__label {
+  color: var(--accent-blue);
+}
+
 .civicActionHeader {
   text-align: center;
   margin-bottom: 56px;
@@ -426,20 +511,45 @@
   line-height: 1.65;
 }
 
-.civicExplainer,
+.civicExplainer {
+  max-width: 760px;
+  margin: 32px auto 48px;
+  padding: 20px 24px;
+  border-left: 3px solid var(--accent-blue);
+  background: linear-gradient(90deg, rgba(0, 212, 255, 0.03) 0%, transparent 100%);
+  border-radius: 0 8px 8px 0;
+}
+
+.civicExplainer h3 {
+  margin: 0 0 8px;
+  color: var(--accent-blue);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.civicExplainer p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
 .whyMattersCallout {
   border: 1px solid rgba(0, 212, 255, 0.18);
   border-radius: 10px;
   background: rgba(0, 212, 255, 0.04);
+  backdrop-filter: blur(8px);
+  transition: all 0.3s ease;
 }
 
-.civicExplainer {
-  max-width: 760px;
-  margin: -28px auto 46px;
-  padding: 16px 18px;
+.whyMattersCallout:hover {
+  border-color: rgba(0, 212, 255, 0.25);
+  background: rgba(0, 212, 255, 0.06);
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.08);
 }
 
-.civicExplainer h3,
 .whyMattersCallout h4 {
   margin: 0 0 6px;
   color: var(--accent-blue);
@@ -447,16 +557,17 @@
   font-weight: 600;
 }
 
-.civicExplainer p {
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: 0.88rem;
-  line-height: 1.6;
-}
-
 /* ── Step blocks ── */
 .civicStepBlock {
   margin-bottom: 48px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.civicStepBlock.is-visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .civicStepTitle {
@@ -488,6 +599,13 @@
   text-transform: uppercase;
   white-space: nowrap;
   flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.stepBadge:hover {
+  background: rgba(0, 212, 255, 0.18);
+  border-color: rgba(0, 212, 255, 0.4);
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
 }
 
 .civicStepDesc {
@@ -516,7 +634,7 @@
 
 .policyAskCard {
   cursor: pointer;
-  padding: 16px 18px;
+  padding: 18px 20px;
   border-radius: 12px;
   border: 1.5px solid var(--border-subtle);
   background: var(--bg-card);
@@ -528,12 +646,29 @@
   user-select: none;
   outline: none;
   position: relative;
+  backdrop-filter: blur(12px);
+}
+
+.policyAskCard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(0, 212, 255, 0.06), transparent 50%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.policyAskCard:hover::before {
+  opacity: 1;
 }
 
 .policyAskCard:hover {
   border-color: rgba(0, 212, 255, 0.4);
   background: rgba(0, 212, 255, 0.04);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .policyAskCard:focus-visible {
@@ -542,8 +677,13 @@
 
 .policyAskCard.is-selected {
   border-color: var(--accent-blue);
-  background: rgba(0, 212, 255, 0.07);
-  box-shadow: 0 0 20px rgba(0, 212, 255, 0.12), inset 0 0 16px rgba(0, 212, 255, 0.04);
+  background: rgba(0, 212, 255, 0.08);
+  box-shadow: 0 0 25px rgba(0, 212, 255, 0.15), inset 0 0 20px rgba(0, 212, 255, 0.05);
+  transform: translateY(-1px);
+}
+
+.policyAskCard.is-selected::before {
+  opacity: 0;
 }
 
 .policyAskCard__header {
@@ -619,6 +759,20 @@
 }
 
 /* ── Zip Lookup Form ── */
+.zipLookupCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 24px;
+  backdrop-filter: blur(12px);
+  transition: all 0.3s ease;
+}
+
+.zipLookupCard:hover {
+  border-color: rgba(0, 212, 255, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
 .zipLookupForm {
   display: flex;
   flex-wrap: wrap;
@@ -667,6 +821,19 @@
   height: 42px;
   align-self: flex-end;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.zipSubmitBtn__spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* ── Error Banner ── */
@@ -690,6 +857,66 @@
   border: 1px solid rgba(0, 212, 255, 0.12);
   border-radius: 16px;
   padding: 28px 28px 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.repDashboardBlock::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(0, 212, 255, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* ── Representative Info Card ── */
+.repInfoCard {
+  background: rgba(0, 212, 255, 0.06);
+  border: 1px solid rgba(0, 212, 255, 0.15);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+  backdrop-filter: blur(8px);
+}
+
+.repInfoCard__header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.repInfoCard__avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(0, 212, 255, 0.1);
+  border: 2px solid rgba(0, 212, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-blue);
+  flex-shrink: 0;
+}
+
+.repInfoCard__details {
+  flex: 1;
+}
+
+.repInfoCard__name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  font-family: var(--font-display);
+}
+
+.repInfoCard__district {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 500;
 }
 
 /* ── District Disclaimer ── */
@@ -722,12 +949,23 @@
   border-radius: 10px;
   background: rgba(255, 176, 0, 0.07);
   border: 1px solid rgba(255, 176, 0, 0.28);
-  animation: nudgeSlideIn 0.3s ease;
+  animation: nudgeSlideIn 0.4s ease, nudgePulse 2s ease-in-out infinite;
 }
 
 @keyframes nudgeSlideIn {
   from { opacity: 0; transform: translateY(-6px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes nudgePulse {
+  0%, 100% {
+    border-color: rgba(255, 176, 0, 0.28);
+    box-shadow: 0 0 0 rgba(255, 176, 0, 0);
+  }
+  50% {
+    border-color: rgba(255, 176, 0, 0.4);
+    box-shadow: 0 0 10px rgba(255, 176, 0, 0.1);
+  }
 }
 
 .nudgeIcon {
@@ -771,19 +1009,24 @@
 .messageTextareaWrapper {
   margin-bottom: 20px;
 }
- 
+
 .messagePreviewCard {
   display: none;
+  background: rgba(0, 212, 255, 0.03);
+  border: 1px solid rgba(0, 212, 255, 0.1);
+  border-radius: 12px;
+  padding: 20px;
+  backdrop-filter: blur(8px);
 }
- 
+
 .messageEditorBlock.is-expanded .messagePreviewCard {
   display: none;
 }
- 
+
 .messageEditorBlock.is-expanded .messageTextareaWrapper {
   display: block;
 }
- 
+
 .whyMattersCallout {
   margin: 0 0 18px;
   padding: 14px 16px;
@@ -815,23 +1058,29 @@
 
 .messageTextarea {
   width: 100%;
-  padding: 14px 16px;
-  border-radius: 10px;
+  padding: 16px 18px;
+  border-radius: 12px;
   border: 1.5px solid var(--border-subtle);
-  background: rgba(255, 255, 255, 0.03);
-  color: rgba(255, 255, 255, 0.88);
-  font-size: 0.88rem;
+  background: rgba(0, 0, 0, 0.3);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9rem;
   font-family: "Courier New", monospace;
   line-height: 1.65;
   resize: vertical;
   outline: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
   box-sizing: border-box;
+  backdrop-filter: blur(4px);
 }
 
 .messageTextarea:focus {
   border-color: rgba(0, 212, 255, 0.5);
   box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.messageTextarea::placeholder {
+  color: rgba(255, 255, 255, 0.2);
 }
 
 /* ── Action Buttons Row ── */
@@ -845,17 +1094,34 @@
 
 .copyMsgBtn {
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 140px;
+  transition: all 0.2s ease;
+}
+
+.copyMsgBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+}
+
+.copyMsgBtn:active {
+  transform: translateY(0);
 }
 
 .copyMsgBtn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+  transform: none;
 }
 
 .contextualBtnWrapper {
   display: flex;
   flex-direction: column;
   gap: 7px;
+  width: 100%;
 }
 
 .contextualBtn.is-disabled {
@@ -868,7 +1134,7 @@
   font-size: 0.78rem;
   color: var(--text-secondary);
   line-height: 1.4;
-  max-width: 340px;
+  max-width: none;
 }
 
 /* ── Supplementary Contact ── */
@@ -878,17 +1144,33 @@
   gap: 10px 24px;
   padding-top: 16px;
   border-top: 1px solid var(--border-subtle);
+  background: rgba(0, 212, 255, 0.02);
+  border-radius: 8px;
+  padding: 16px;
 }
 
 .contactDetailItem {
   font-size: 0.83rem;
   color: var(--text-secondary);
   line-height: 1.5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .contactDetailItem strong {
-  color: rgba(255, 255, 255, 0.65);
-  margin-right: 4px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-right: 0;
+}
+
+.contactDetailItem::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-blue);
+  box-shadow: 0 0 8px var(--accent-blue);
+  flex-shrink: 0;
 }
 
 /* ── Policy Ask Link (on PolicyPage Reform Simulator) ── */
@@ -919,6 +1201,20 @@
 @media (max-width: 600px) {
   .actionsGrid {
     grid-template-columns: 1fr;
+  }
+
+  .civicStepProgress__steps {
+    gap: 8px;
+  }
+
+  .civicStepProgress__number {
+    width: 28px;
+    height: 28px;
+    font-size: 0.75rem;
+  }
+
+  .civicStepProgress__label {
+    font-size: 0.65rem;
   }
 
   .repDashboardBlock {
@@ -967,9 +1263,9 @@
     display: block;
     margin-bottom: 20px;
     padding: 18px;
-    border-radius: 14px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    background: rgba(0, 212, 255, 0.03);
+    border: 1px solid rgba(0, 212, 255, 0.1);
   }
  
   .messagePreviewLabel {

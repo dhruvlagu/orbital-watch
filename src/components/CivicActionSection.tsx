@@ -10,7 +10,7 @@ export interface CivicActionSectionProps {
   preSelectedAskId?: PolicyAskId | null;
 }
 
-const PERSONALIZATION_PLACEHOLDER_SUBSTRING = "[Add a sentence";
+const PERSONALIZATION_PLACEHOLDER_SUBSTRING = "[Add one sentence";
 
 function trackGA4Event(eventName: string, params?: Record<string, unknown>) {
   if (typeof window === "undefined") return;
@@ -68,10 +68,10 @@ export default function CivicActionSection({
     const ask = policyAsks[selectedAskId];
     if (!ask) return;
 
-    const repName = repResult.representativeName;
+    const repSalutationName = repResult.lastName || repResult.representativeName;
     const nameFormatted = userName.trim() ? userName.trim() : "[Your name]";
 
-    const generated = `Dear Representative ${repName},
+    const generated = `Dear Representative ${repSalutationName},
 
 ${ask.opening}
 
@@ -79,15 +79,13 @@ ${ask.issueParagraph}
 
 ${ask.supportingStat || ""}
 
-I hope you'll ${ask.repCanDo}.
-${ask.closingSentence}
+I hope you'll ${ask.repCanDo}. ${ask.closingSentence}
 
-As someone who cares about the long-term sustainability of space, I hope Congress continues treating orbital debris as an issue worthy of bipartisan attention.
-[Add one sentence about why this matters to you personally — messages with a personal note are far more likely to be read as genuine by congressional staff than a form letter.]
+[Add one sentence about why this matters to you personally. Personalized messages are read as more genuine by congressional staff than form letters.]
 
 Thank you,
 ${nameFormatted}
-${zip.trim()}`;
+ZIP Code: ${zip.trim()}`;
 
     setMessageText(generated);
 
@@ -188,6 +186,33 @@ ${zip.trim()}`;
         </p>
       </div>
 
+      {/* Step Progress Indicator */}
+      <div className="civicStepProgress">
+        <div className="civicStepProgress__track">
+          <div 
+            className="civicStepProgress__bar"
+            style={{ 
+              width: repResult ? '100%' : selectedAskId ? '50%' : '0%',
+              transition: 'width 0.5s ease'
+            }}
+          />
+        </div>
+        <div className="civicStepProgress__steps">
+          <div className={`civicStepProgress__step ${selectedAskId ? 'is-active' : ''} ${repResult ? 'is-complete' : ''}`}>
+            <span className="civicStepProgress__number">1</span>
+            <span className="civicStepProgress__label">Choose Policy</span>
+          </div>
+          <div className={`civicStepProgress__step ${selectedAskId ? 'is-active' : ''} ${repResult ? 'is-complete' : ''}`}>
+            <span className="civicStepProgress__number">2</span>
+            <span className="civicStepProgress__label">Find Rep</span>
+          </div>
+          <div className={`civicStepProgress__step ${repResult ? 'is-active' : ''}`}>
+            <span className="civicStepProgress__number">3</span>
+            <span className="civicStepProgress__label">Send Message</span>
+          </div>
+        </div>
+      </div>
+
       <aside className="civicExplainer" aria-labelledby="civic-explainer-title">
         <h3 id="civic-explainer-title">Why contact your representative?</h3>
         <p>
@@ -196,7 +221,7 @@ ${zip.trim()}`;
       </aside>
 
       {/* STEP 1: Select Policy Ask */}
-      <div className="civicStepBlock">
+      <div className="civicStepBlock is-visible">
         <div className="civicStepTitle">
           <span className="stepBadge">Step 1</span>
           <h3>Choose a Policy Reform to Champion</h3>
@@ -221,56 +246,65 @@ ${zip.trim()}`;
             Enter your 5-digit US zip code to resolve your district and House representative.
           </p>
 
-          <form onSubmit={handleLookupSubmit} className="zipLookupForm">
-            <div className="zipFormGroup">
-              <label htmlFor={zipInputId} className="zipLabel">
-                Zip Code:
-              </label>
-              <input
-                id={zipInputId}
-                type="text"
-                className="zipInput"
-                placeholder="e.g. 90210"
-                value={zip}
-                onChange={(e) => setZip(e.target.value)}
-                maxLength={10}
-                required
-              />
-            </div>
+          <div className="zipLookupCard">
+            <form onSubmit={handleLookupSubmit} className="zipLookupForm">
+              <div className="zipFormGroup">
+                <label htmlFor={zipInputId} className="zipLabel">
+                  Zip Code:
+                </label>
+                <input
+                  id={zipInputId}
+                  type="text"
+                  className="zipInput"
+                  placeholder="e.g. 90210"
+                  value={zip}
+                  onChange={(e) => setZip(e.target.value)}
+                  maxLength={10}
+                  required
+                />
+              </div>
 
-            <div className="zipFormGroup">
-              <label htmlFor={userNameInputId} className="zipLabel">
-                Your Name (optional):
-              </label>
-              <input
-                id={userNameInputId}
-                type="text"
-                className="zipInput"
-                placeholder="e.g. Jane Smith"
-                value={userName}
-                onChange={(e) => setUserName(e.target.value)}
-              />
-            </div>
+              <div className="zipFormGroup">
+                <label htmlFor={userNameInputId} className="zipLabel">
+                  Your Name (optional):
+                </label>
+                <input
+                  id={userNameInputId}
+                  type="text"
+                  className="zipInput"
+                  placeholder="e.g. Jane Smith"
+                  value={userName}
+                  onChange={(e) => setUserName(e.target.value)}
+                />
+              </div>
 
-            <button
-              type="submit"
-              className="btn btn--primary zipSubmitBtn"
-              disabled={loading}
-            >
-              {loading ? "Searching..." : "Find Representative →"}
-            </button>
-          </form>
+              <button
+                type="submit"
+                className="btn btn--primary zipSubmitBtn"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <svg className="zipSubmitBtn__spinner" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                    </svg>
+                    Searching...
+                  </>
+                ) : "Find Representative →"}
+              </button>
+            </form>
 
-          {lookupError ? (
-            <div className="civicErrorBanner" role="alert">
-              <svg className="civicBannerIcon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                <line x1="12" y1="9" x2="12" y2="13"/>
-                <line x1="12" y1="17" x2="12.01" y2="17"/>
-              </svg>
-              {lookupError}
-            </div>
-          ) : null}
+            {lookupError ? (
+              <div className="civicErrorBanner" role="alert">
+                <svg className="civicBannerIcon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                  <line x1="12" y1="9" x2="12" y2="13"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                {lookupError}
+              </div>
+            ) : null}
+          </div>
         </div>
       ) : null}
 
@@ -283,6 +317,24 @@ ${zip.trim()}`;
               Your Personalized Message to Rep. {repResult.representativeName}
               {repResult.district !== undefined ? ` (District ${repResult.district})` : ""}
             </h3>
+          </div>
+
+          {/* Representative Info Card */}
+          <div className="repInfoCard">
+            <div className="repInfoCard__header">
+              <div className="repInfoCard__avatar">
+                <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </div>
+              <div className="repInfoCard__details">
+                <div className="repInfoCard__name">{repResult.representativeName}</div>
+                <div className="repInfoCard__district">
+                  {repResult.district !== undefined ? `District ${repResult.district}` : "US House of Representatives"}
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Ambiguous match disclaimer */}
@@ -329,7 +381,7 @@ ${zip.trim()}`;
               ))}
             </ul>
           </aside>
- 
+
           <div className={`messageEditorBlock${isMessageEditorExpanded ? " is-expanded" : ""}`}>
             <div className="messagePreviewCard" aria-hidden={isMessageEditorExpanded}>
               <div className="messagePreviewLabel">Message Preview</div>
@@ -343,7 +395,7 @@ ${zip.trim()}`;
                 Edit Message
               </button>
             </div>
- 
+
             <div className="messageTextareaWrapper">
               <label htmlFor={messageTextareaId} className="messageTextareaLabel">
                 Generated Message (Edit as needed):
@@ -357,7 +409,7 @@ ${zip.trim()}`;
               />
             </div>
           </div>
- 
+
           {/* Action Buttons */}
           <div className="civicActionsRow">
             <button

@@ -6,10 +6,10 @@ import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
 import { useCardSpotlight } from "../hooks/useCardSpotlight";
 
 const reflectionText =
-  "When I began this project, I thought the issue of space debris was mainly a technical one and that the technology needed for debris removal did not yet exist. Instead, I discovered that the technology for removing debris already exists. Technologies such as robotic capture arms, magnetic docking systems, and electrodynamic tethers have already been successfully demonstrated. The technology is already in place and continues to improve. The obstacle is not scientific in nature but instead lies in a clause of the 1967 Outer Space Treaty. That realization completely changed how I viewed the problem. Rather than waiting for better technology, the real challenge is determining whether international law can adapt quickly enough to address problems it was never designed to handle.";
+  "When I began this project, I thought the issue of space debris was mainly a technical one and that the technology needed for debris removal did not yet exist. Instead, I discovered that the technology for removing debris already exists. Technologies such as robotic capture arms, magnetic docking systems, and electrodynamic tethers have been demonstrated in controlled environments. The technology is already in place and continues to improve. A major obstacle lies in Article VIII of the 1967 Outer Space Treaty, which grants launching nations permanent jurisdiction over their space objects. That realization completely changed how I viewed the problem. Rather than waiting for better technology, the real challenge is determining whether international law can adapt quickly enough to address problems it was never designed to handle.";
 
 const questionsText =
-  "What I would most like to know is whether growing public awareness of orbital debris has any meaningful impact on shaping space policy. While public opinion may play a role, industry lobbying, bilateral agreements, and regulatory pressure may influence policy independently of what the public knows or cares about. For example, the FCC’s Five-Year Rule was adopted with little public attention, and the 1967 Outer Space Treaty was negotiated exclusively between governments. If that pattern continues, awareness campaigns alone may not be enough to drive legal reform. Instead, it may be more important to understand which institutional levers shape space legislation and who has access to them. To answer that question, I would like to study the history of the FCC’s decision in greater detail, including who advocated for the rule, which arguments proved most persuasive, and whether a similar approach could be applied at the international level.";
+  "A key question is whether growing public awareness of orbital debris meaningfully shapes space policy. While public opinion may play a role, industry lobbying, bilateral agreements, and regulatory pressure may influence policy independently of what the public knows or cares about. For example, the FCC’s Five-Year Rule was adopted with little public attention, and the 1967 Outer Space Treaty was negotiated exclusively between governments. If that pattern continues, awareness campaigns alone may not be enough to drive legal reform. Instead, it may be more important to understand which institutional levers shape space legislation and who has access to them. To answer that question, I would like to study the history of the FCC’s decision in greater detail, including who advocated for the rule, which arguments proved most persuasive, and whether a similar approach could be applied at the international level.";
 
 export default function AboutPage() {
   useDocumentMetadata(
@@ -59,9 +59,7 @@ export default function AboutPage() {
             <div className="originText">
               <p className="lead">
                 This site began as a history research project exploring how Cold War &quot;Frontier Mentality&quot;
-                created today&apos;s orbital debris crisis. What started as a classroom question — can
-                international policy evolve faster than debris multiplies? — became an independent research
-                project connecting historical decision-making, orbital physics, and international law.
+                created today&apos;s orbital debris crisis. A classroom question—whether international policy can evolve faster than debris multiplies—expanded into an independent research project spanning historical decision-making, orbital physics, and international law.
               </p>
               <div className="originCredits">
                 <div className="creditsItem">
@@ -99,7 +97,7 @@ export default function AboutPage() {
             <div className="hero__label">Section 02</div>
             <h2>Research Methodology</h2>
             <p className="aboutSection__subtitle">
-              How data was collected, cross-checked, and integrated across orbital disciplines.
+              How data across orbital disciplines was collected, cross-checked, and integrated.
             </p>
           </div>
 
@@ -150,7 +148,7 @@ export default function AboutPage() {
                 ),
               },
             ].map((card, i) => (
-              <div key={card.title} className="card methodCard reveal-item" style={{ animationDelay: `${i * 0.1}s` }}>
+              <div key={card.title} className="card methodCard reveal-item" style={{ ["--reveal-i" as any]: i }}>
                 <span className="methodCard__icon" aria-hidden="true">{card.icon}</span>
                 <h3 className="methodCard__title">{card.title}</h3>
                 <p className="methodCard__body">{card.body}</p>
@@ -171,17 +169,23 @@ export default function AboutPage() {
             <div className="hero__label">Section 03</div>
             <h2>The Code Behind It</h2>
             <p className="aboutSection__subtitle">
-              For anyone who wants to verify the logic itself, not just the results.
+              For those who want to verify the underlying logic, not just review the results.
             </p>
           </div>
 
           {/* BLOCK 1: Scheduled Data Refresh */}
           {/* SOURCE: api/cron/_spacetrackAuth.mjs + api/conjunctions.mjs
                UPDATE THIS BLOCK if either file changes */}
-          <div className="codeBlock reveal-item">
+          <div className="codeBlock reveal-item" style={{ ["--reveal-i" as any]: 0 }}>
             <button
               className="codeBlock__header"
               onClick={() => toggleBlock('block1')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  toggleBlock('block1');
+                }
+              }}
               aria-expanded={expandedBlocks.block1}
               aria-controls="block1-content"
             >
@@ -273,10 +277,16 @@ export default async function handler(req, res) {
           {/* BLOCK 2: Kessler Cascade Simulation */}
           {/* SOURCE: src/components/KesslerSimulation.tsx (generateDebris + triggerCascade functions + altitude center logic)
                UPDATE THIS BLOCK if those functions change */}
-          <div className="codeBlock reveal-item">
+          <div className="codeBlock reveal-item" style={{ ["--reveal-i" as any]: 1 }}>
             <button
               className="codeBlock__header"
               onClick={() => toggleBlock('block2')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  toggleBlock('block2');
+                }
+              }}
               aria-expanded={expandedBlocks.block2}
               aria-controls="block2-content"
             >
@@ -489,7 +499,7 @@ const triggerCascade = () => {
   animationRef.current = requestAnimationFrame(animate);
 };`}</pre>
                 <p className="codeBlock__caption">
-                  The simulation uses Keplerian orbital mechanics where angular speed scales with radius (ω ∝ r^(-1.5)), so objects at higher altitude move more slowly. When debris collides, new fragments are spawned with altered radius and inclination, creating the runaway chain reaction characteristic of Kessler syndrome. The model preserves the core orbital relationship implied by Kepler's third law rather than focusing on interface controls or presentation details.
+                  The simulation uses Keplerian orbital mechanics where angular speed scales with radius (ω ∝ r^(-1.5)), so objects at higher altitude move more slowly. When debris collides, new fragments are spawned with altered radius and inclination, creating the runaway chain reaction characteristic of Kessler syndrome. The model preserves the core orbital relationship implied by Kepler's third law rather than focusing on interface controls or presentation details. Altitude and inclination are user-adjustable via sliders on the Physics page, letting you test how each parameter changes collision likelihood in real time.
                 </p>
               </>
             )}
@@ -499,10 +509,16 @@ const triggerCascade = () => {
           {/* CIVIC ACTION: Contact Your Representative */}
           {/* SOURCES: src/components/CivicActionSection.tsx + api/representative.mjs
                UPDATE THIS BLOCK if either implementation changes */}
-          <div className="codeBlock reveal-item">
+          <div className="codeBlock reveal-item" style={{ ["--reveal-i" as any]: 2 }}>
             <button
               className="codeBlock__header"
               onClick={() => toggleBlock('civicAction')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  toggleBlock('civicAction');
+                }
+              }}
               aria-expanded={expandedBlocks.civicAction}
               aria-controls="civicAction-content"
             >
@@ -581,10 +597,16 @@ return res.status(200).json({
           {/* BLOCK 3: Kinetic Energy Calculator */}
           {/* SOURCE: src/pages/PhysicsPage.tsx (KE calculation + getDangerLevel function)
                UPDATE THIS BLOCK if that code changes */}
-          <div className="codeBlock reveal-item">
+          <div className="codeBlock reveal-item" style={{ ["--reveal-i" as any]: 3 }}>
             <button
               className="codeBlock__header"
               onClick={() => toggleBlock('block3')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  toggleBlock('block3');
+                }
+              }}
               aria-expanded={expandedBlocks.block3}
               aria-controls="block3-content"
             >
@@ -624,7 +646,7 @@ const getDangerLevel = () => {
 
           {/* Final paragraph */}
           <p className="codeBehindSection__footer">
-            Every snippet below comes from the production version of Orbital Watch. They’re excerpts from the real implementation, not example code written just for this page.
+            Each code snippet below is extracted directly from Orbital Watch's production codebase. These’re actual implementation excerpts, not example code written just for this page.
           </p>
 
         </div>
@@ -635,7 +657,7 @@ const getDangerLevel = () => {
         <div className="container">
           <div className="reflectionGrid" ref={reflectionGridRef}>
             {/* Section 4: What I Found Surprising */}
-            <div className="card reflectPanel reflectPanel--amber reveal-item">
+            <div className="card reflectPanel reflectPanel--amber reveal-item" style={{ ["--reveal-i" as any]: 0 }}>
               <div className="reflectPanel__header">
                 <div className="reflectPanel__meta">
                   <span className="reflectPanel__num">04</span>
@@ -651,7 +673,7 @@ const getDangerLevel = () => {
             </div>
 
             {/* Section 5: Open Questions */}
-            <div className="card reflectPanel reflectPanel--amber reveal-item">
+            <div className="card reflectPanel reflectPanel--amber reveal-item" style={{ ["--reveal-i" as any]: 1 }}>
               <div className="reflectPanel__header">
                 <div className="reflectPanel__meta">
                   <span className="reflectPanel__num">05</span>
@@ -694,7 +716,7 @@ const getDangerLevel = () => {
                 <li className="sourceItem">
                   <span className="sourceItem__title">European Space Agency (ESA)</span>
                   <span className="sourceItem__details">
-                    <em>DISCOSweb Environment Statistics.</em> Space Debris Office, ESOC. Updated 31 July 2025.
+                    <em>DISCOSweb Environment Statistics.</em> Space Debris Office, ESOC. Updated 31 July 2026.
                   </span>
                 </li>
                 <li className="sourceItem">
@@ -815,15 +837,15 @@ const getDangerLevel = () => {
       </div>
 
       {/* Page Navigation CTA */}
-      <div className="container crisisCTA" style={{ marginBottom: "60px" }}>
+      <div className="container crisisCTA crisisCTA--about">
         <h3>Explore the Space Commons</h3>
         <p>
           Re-examine the live low Earth orbit environment and active debris trackers.
           Return to the home dashboard to analyze other pillars.
         </p>
         <div className="crisisCTA__actions">
-          <Link 
-            className="btn btn--primary" 
+          <Link
+            className="btn btn--primary"
             to="/#"
             onClick={(e) => {
               e.preventDefault();

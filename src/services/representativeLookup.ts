@@ -7,6 +7,7 @@ export interface RepresentativeContact {
 
 export interface RepresentativeResult {
   representativeName?: string;
+  lastName?: string;
   district?: number;
   matchProportion?: number;
   isAmbiguousMatch?: boolean;

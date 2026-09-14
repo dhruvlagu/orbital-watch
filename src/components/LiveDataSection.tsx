@@ -103,8 +103,8 @@ export default function LiveDataSection({ variant = "standalone" }: LiveDataSect
         value: payload ? animatedAddedLast30Days : "—",
       },
       {
-        label: "Current debris-to-active-satellite ratio",
-        value: payload ? payload.data.debrisToActiveRatio : "—",
+        label: "Debris-to-payload ratio (includes defunct satellites)",
+        value: payload ? payload.data.debrisToPayloadRatio : "—",
       },
     ],
     [animatedTotalTracked, animatedAddedLast30Days, payload],

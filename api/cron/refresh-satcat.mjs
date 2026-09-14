@@ -63,13 +63,13 @@ function buildMetrics(records) {
     (r) => (r?.OBJECT_TYPE || "").toUpperCase() === "DEBRIS",
   ).length;
 
-  const activeSatellites = inOrbit.filter(
+  const payloadCount = inOrbit.filter(
     (r) => (r?.OBJECT_TYPE || "").toUpperCase() === "PAYLOAD",
   ).length;
 
-  const debrisToActiveRatio =
-    activeSatellites > 0
-      ? `${Math.max(1, Math.round(debrisCount / activeSatellites))}:1`
+  const debrisToPayloadRatio =
+    payloadCount > 0
+      ? `${(debrisCount / payloadCount).toFixed(1)}:1`
       : "N/A";
 
   let maxFileNumber = null;
@@ -86,7 +86,7 @@ function buildMetrics(records) {
     metrics: {
       totalTracked,
       addedLast30Days,
-      debrisToActiveRatio,
+      debrisToPayloadRatio,
     },
     maxFileNumber,
   };

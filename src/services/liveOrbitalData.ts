@@ -16,7 +16,7 @@ type CachedEnvelope = {
 export type LiveOrbitalData = {
   totalTracked: number;
   addedLast30Days: number;
-  debrisToActiveRatio: string;
+  debrisToPayloadRatio: string;
 };
 
 export type LiveOrbitalResponse = {
@@ -65,7 +65,7 @@ async function fetchLiveMetrics(): Promise<{ data: LiveOrbitalData; lastUpdatedA
   const metrics = {
     totalTracked: body.totalTracked,
     addedLast30Days: body.addedLast30Days,
-    debrisToActiveRatio: body.debrisToActiveRatio,
+    debrisToPayloadRatio: body.debrisToPayloadRatio,
   } as LiveOrbitalData;
   
   if (!metrics || typeof metrics.totalTracked !== "number") {
