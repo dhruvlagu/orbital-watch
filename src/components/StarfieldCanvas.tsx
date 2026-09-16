@@ -175,6 +175,11 @@ export default function StarfieldCanvas() {
           color: { r: 255, g: 255, b: 255 },
           isShooting: true,
           trail: [],
+          orbitCenterX: 0,
+          orbitCenterY: 0,
+          orbitRadius: 0,
+          orbitAngle: 0,
+          orbitSpeed: 0,
         };
         stars.push(shootingStar);
       }

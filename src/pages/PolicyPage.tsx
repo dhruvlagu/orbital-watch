@@ -20,7 +20,7 @@ const policyOptions: Policy[] = [
     name: "Make IADC Guidelines Legally Binding",
     description: "Transform voluntary international debris mitigation standards into enforceable international law with compliance monitoring.",
     impact: 13400,
-    tooltip: "Based on ESA's 2026 Space Environment Report (Issue 10.1): between 60-90% of rocket body mass reaching end-of-life during the last decade complies with the 25-year disposal standard, while 40-90% of payload mass (excluding human spaceflight) meets the same standard. ESA adopted a stricter 5-year standard in 2023, but compliance data is still evolving. ESA Space Environment Report 2026 (Issue 10.1), esa.int",
+    tooltip: "Based on ESA's 2026 Space Environment Report (Issue 10.1): rocket bodies successfully comply with the 25-year disposal standard 45-90% of the time, and with the stricter 5-year standard 30-80% of the time. Payload compliance is far weaker, only 5-50% for the 25-year standard and 5-35% for the 5-year standard, a gap the report specifically flags as 'remaining far from targets.' ESA Space Environment Report 2026 (Issue 10.1), esa.int",
   },
   {
     id: "asat",

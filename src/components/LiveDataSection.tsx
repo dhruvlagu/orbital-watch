@@ -95,14 +95,17 @@ export default function LiveDataSection({ variant = "standalone" }: LiveDataSect
   const metricCards = useMemo(
     () => [
       {
+        id: "total-tracked",
         label: "Total tracked objects across all orbital regimes",
         value: payload ? animatedTotalTracked : "—",
       },
       {
+        id: "added-30-days",
         label: "Objects added in last 30 days",
         value: payload ? animatedAddedLast30Days : "—",
       },
       {
+        id: "debris-ratio",
         label: (
           <>
             DEBRIS-TO-PAYLOAD RATIO <span style={{ fontSize: "0.75em", opacity: 0.7 }}>(including defunct)</span>
@@ -147,7 +150,7 @@ export default function LiveDataSection({ variant = "standalone" }: LiveDataSect
                 </div>
               ))
             : metricCards.map((metric) => (
-                <div className="card liveDataCard" key={metric.label}>
+                <div className="card liveDataCard" key={metric.id}>
                   <div className="liveDataCard__value">{metric.value}</div>
                   <div className="liveDataCard__label">{metric.label}</div>
                 </div>

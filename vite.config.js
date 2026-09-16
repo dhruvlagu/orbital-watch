@@ -62,26 +62,15 @@ export default defineConfig(({ mode }) => {
                                     const launchTime = Date.parse(launch);
                                     return Number.isFinite(launchTime) && launchTime >= thirtyDaysAgo;
                                 }).length;
-                                const debrisCount = Array.isArray(records)
-                                    ? records.filter((record) => record?.OBJECT_TYPE?.toUpperCase() === "DEBRIS").length
-                                    : 0;
-                                const activeSatellites = Array.isArray(records)
-                                    ? records.filter((record) => {
-                                        const objectType = record?.OBJECT_TYPE?.toUpperCase();
-                                        if (objectType !== "PAYLOAD")
-                                            return false;
-                                        const isCurrent = record?.CURRENT?.toUpperCase() === "Y";
-                                        const notDecayed = !record?.DECAY || String(record.DECAY).trim() === "";
-                                        return isCurrent || notDecayed;
-                                    }).length
-                                    : 0;
-                                const debrisToActiveRatio = activeSatellites > 0
-                                    ? `${Math.max(1, Math.round(debrisCount / activeSatellites))}:1`
+                                const debrisCount = inOrbit.filter((r) => r?.OBJECT_TYPE?.toUpperCase() === "DEBRIS").length;
+                                const payloadCount = inOrbit.filter((r) => r?.OBJECT_TYPE?.toUpperCase() === "PAYLOAD").length;
+                                const debrisToPayloadRatio = payloadCount > 0
+                                    ? `${(debrisCount / payloadCount).toFixed(1)}:1`
                                     : "N/A";
                                 return {
                                     totalTracked,
                                     addedLast30Days,
-                                    debrisToActiveRatio,
+                                    debrisToPayloadRatio,
                                 };
                             };
                             const fetchSatcatData = async () => {
