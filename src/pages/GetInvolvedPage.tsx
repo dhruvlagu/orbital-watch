@@ -337,7 +337,7 @@ export default function GetInvolvedPage() {
                   <span>"Active Debris Removal: Stabilization of the LEO Environment" (NASA Space Debris Research)</span>
                 </li>
                 <li>
-                  <strong>ESA Space Environment Report 2025 (Issue 9.1)</strong>
+                  <strong>ESA Space Environment Report 2026 (Issue 10.1)</strong>
                   <span>Annual statistical analysis of all objects registered in Earth orbit</span>
                 </li>
                 <li>

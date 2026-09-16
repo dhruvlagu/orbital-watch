@@ -1242,7 +1242,7 @@ export default function CrisisPage() {
         ) : (
           <div className="crisisChart__skeleton" />
         )}
-        <div className="crisisChart__source">Source: ESA Space Environment Report 2025 (data through end of 2024); earlier years illustrative, based on published ESA/NASA ODPO historical trend data; ESA DISCOSweb Environment Statistics, updated 31 July 2026.</div>
+        <div className="crisisChart__source">Source: ESA Space Environment Report 2026, Issue 10.1 (data through end of 2025); earlier years illustrative, based on published ESA/NASA ODPO historical trend data; ESA DISCOSweb Environment Statistics, updated 31 July 2026.</div>
       </div>
 
       <div className="container timeline" ref={timelineRef}>

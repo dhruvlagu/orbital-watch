@@ -105,7 +105,7 @@ export default function AboutPage() {
             {[
               {
                 title: "Primary Data Sources",
-                body: "Orbital debris statistics drawn from ESA Annual Space Environment Report and the Space-Track.org satellite catalog. Data cached via Space-Track.org API.",
+                body: "Orbital debris statistics drawn from ESA Annual Space Environment Report (Issue 10.1, 2026) and the Space-Track.org satellite catalog. Data cached via Space-Track.org API.",
                 icon: (
                   <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" />
@@ -533,8 +533,10 @@ const triggerCascade = () => {
             {expandedBlocks.civicAction && (
               <>
                 <pre className="technicalCode">{`// src/components/CivicActionSection.tsx
-const ask = policyAsks[selectedAskId];
-const generated = \`Dear Representative \${repName},
+const repSalutationName = repResult.lastName || repResult.representativeName;
+const nameFormatted = userName.trim() ? userName.trim() : "[Your name]";
+
+const generated = \`Dear Representative \${repSalutationName},
 
 \${ask.opening}
 
@@ -542,18 +544,16 @@ const generated = \`Dear Representative \${repName},
 
 \${ask.supportingStat || ""}
 
-I hope you'll \${ask.repCanDo}.
-\${ask.closingSentence}
+I hope you'll \${ask.repCanDo}. \${ask.closingSentence}
 
-As someone who cares about the long-term sustainability of space, I hope Congress continues treating orbital debris as an issue worthy of bipartisan attention.
-[Add one sentence about why this matters to you personally — messages with a personal note are far more likely to be read as genuine by congressional staff than a form letter.]
+[Add one sentence about why this matters to you personally. Personalized messages are read as more genuine by congressional staff than form letters.]
 
 Thank you,
 \${nameFormatted}
-\${zip.trim()}\`;
+ZIP Code: \${zip.trim()}\`;
 
 const hasPlaceholder = messageText.includes(
-  "[Add a sentence"
+  "[Add one sentence"
 );
 
 const handleCopyMessage = () => {
@@ -576,6 +576,7 @@ const rep = legislators.find((l) => l.type === "representative");
 
 return res.status(200).json({
   representativeName,
+  lastName: repLastName,
   district: districtNumber,
   matchProportion,
   isAmbiguousMatch,

@@ -299,7 +299,7 @@ export default function HomePage() {
               </div>
               <h3 className="homeExploreCard__title">Get Involved</h3>
               <div className="homeExploreCard__liveValue">
-                1 ZIP Code <span className="homeExploreCard__liveUnit">Direct Action</span>
+                Direct Action
               </div>
               <p className="homeExploreCard__description">
                 Find your U.S. House representative and generate an evidence-backed orbital safety policy letter.

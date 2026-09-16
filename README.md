@@ -46,7 +46,7 @@ User-adjustable mass and velocity sliders compute KE = ½mv² in real time, outp
 Interactive 3D simulation with adjustable parameters (initial object count, orbital altitude, inclination spread) demonstrating how collision frequency increases with debris density. Features realistic orbital mechanics using Kepler's third law, 3D perspective rendering, and real-time collision detection to visualize cascade dynamics and the critical density threshold.
 
 **Treaty Reform Simulator**
-Four policy toggles (binding IADC guidelines, ASAT ban, international ADR authority, global 5-year rule) with live recalculation of projected LEO object count by 2050. Baseline: 50,000. Best case with all reforms: 12,000. Modeled on Liou et al. (2021) and ESA Space Environment Report, Issue 9.1 (2025).
+Four policy toggles (binding IADC guidelines, ASAT ban, international ADR authority, global 5-year rule) with live recalculation of projected LEO object count by 2050. Baseline: 84,000. Best case with all reforms: 20,200. Modeled on Liou et al. (2021) and ESA Space Environment Report, Issue 10.1 (2026).
 
 **Country Scorecard**
 Sortable table rating USA, Russia, China, ESA, and India on debris mitigation compliance, ASAT test history, and ADR investment. Based on public records from ESA, NASA ODPO, and Secure World Foundation.
@@ -96,7 +96,7 @@ This guarantees a fixed, compliant Space-Track request volume (4 requests/day to
 ## Data Sources
 
 **Primary Data**
-- ESA Annual Space Environment Report, Issue 9.1 (October 2025) — Space Debris Office, ESOC
+- ESA Annual Space Environment Report, Issue 10.1 (8 September 2026) — Space Debris Office, ESOC
 - ESA DISCOSweb Environment Statistics (updated 31 July 2026) — Space Debris Office, ESOC
 - Space-Track.org Satellite Catalog (SATCAT) API — US Space Force / 18th Space Defense Squadron
 - Space-Track.org Public Conjunction Data Message (CDM) feed — US Space Force / 18th Space Defense Squadron

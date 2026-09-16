@@ -103,7 +103,11 @@ export default function LiveDataSection({ variant = "standalone" }: LiveDataSect
         value: payload ? animatedAddedLast30Days : "—",
       },
       {
-        label: "Debris-to-payload ratio (includes defunct satellites)",
+        label: (
+          <>
+            DEBRIS-TO-PAYLOAD RATIO <span style={{ fontSize: "0.75em", opacity: 0.7 }}>(including defunct)</span>
+          </>
+        ),
         value: payload ? payload.data.debrisToPayloadRatio : "—",
       },
     ],

@@ -28,7 +28,7 @@ export const policyAsks: Record<PolicyAskId, PolicyAsk> = {
     repCanDo:
       "support bipartisan legislation, oversight, and appropriations that advance stronger international debris-prevention commitments",
     supportingStat:
-      "Stronger international adherence to debris mitigation standards could reduce the projected number of tracked objects in low Earth orbit by roughly 8,000 by 2050, based on ESA's 2025 Space Environment Report.",
+      "Stronger international adherence to debris mitigation standards could reduce the projected number of tracked objects in low Earth orbit by roughly 13,400 by 2050, based on ESA's 2026 Space Environment Report.",
     closingSentence:
       "Please let me know whether you will support this effort.",
     whyItMatters: [
@@ -68,7 +68,7 @@ export const policyAsks: Record<PolicyAskId, PolicyAsk> = {
     repCanDo:
       "support appropriations, research, and international cooperation for responsible active debris removal",
     supportingStat:
-      "A sustained active debris removal effort could lower the projected number of tracked objects by roughly 15,000 by 2050, based on Liou & Johnson's (2009) finding that removing 5 large objects per year stabilizes LEO debris density.",
+      "A sustained active debris removal effort could lower the projected number of tracked objects by roughly 25,200 by 2050, based on Liou & Johnson's (2009) finding that removing 5 large objects per year stabilizes LEO debris density.",
     closingSentence:
       "Please let me know whether you will support U.S. leadership on this issue.",
     whyItMatters: [
@@ -88,7 +88,7 @@ export const policyAsks: Record<PolicyAskId, PolicyAsk> = {
     repCanDo:
       "support legislation, oversight, and funding that encourage responsible satellite end-of-life disposal practices",
     supportingStat:
-      "More consistent end-of-life disposal practices, closing the gap left by the FCC's 5-Year Rule only covering US-licensed operators, could reduce the projected number of tracked objects in low Earth orbit by roughly 10,000 by 2050.",
+      "More consistent end-of-life disposal practices, closing the gap left by the FCC's 5-Year Rule only covering US-licensed operators, could reduce the projected number of tracked objects in low Earth orbit by roughly 16,800 by 2050.",
     closingSentence:
       "Please let me know whether you will support stronger end-of-life disposal practices.",
     whyItMatters: [
@@ -108,7 +108,7 @@ export const policyAsks: Record<PolicyAskId, PolicyAsk> = {
     repCanDo:
       "support legislation, oversight, and appropriations that keep orbital debris mitigation on the national agenda",
     supportingStat:
-      "Debris mitigation policy can prevent thousands of new tracked objects by 2050, based on ESA's 2025 Space Environment Report.",
+      "Debris mitigation policy can prevent tens of thousands of new tracked objects by 2050, based on ESA's 2026 Space Environment Report.",
     closingSentence:
       "Please let me know whether you support keeping debris mitigation a continuing priority.",
     whyItMatters: [

@@ -19,28 +19,28 @@ const policyOptions: Policy[] = [
     id: "iadc",
     name: "Make IADC Guidelines Legally Binding",
     description: "Transform voluntary international debris mitigation standards into enforceable international law with compliance monitoring.",
-    impact: 8000,
-    tooltip: "Based on ESA's 2025 Space Environment Report: about 90% of rocket bodies in LEO now comply with the 25-year disposal standard, but only about 80% comply with ESA's stricter 5-year standard adopted in 2023 — and payload compliance in LEO remains well below the 90% target used across the industry. ESA Space Environment Report 2025, esa.int",
+    impact: 13400,
+    tooltip: "Based on ESA's 2026 Space Environment Report (Issue 10.1): between 60-90% of rocket body mass reaching end-of-life during the last decade complies with the 25-year disposal standard, while 40-90% of payload mass (excluding human spaceflight) meets the same standard. ESA adopted a stricter 5-year standard in 2023, but compliance data is still evolving. ESA Space Environment Report 2026 (Issue 10.1), esa.int",
   },
   {
     id: "asat",
     name: "Global Ban on ASAT Missile Tests",
     description: "International treaty prohibiting all destructive anti-satellite weapons tests that generate trackable debris.",
-    impact: 5000,
+    impact: 8400,
     tooltip: "Prevents recurrence of events like China 2007 (3,000+ trackable fragments, ~150,000 total estimated pieces) and Russia 2021 (+1,500 fragments)",
   },
   {
     id: "adr",
     name: "Create International Debris Removal Authority",
     description: "A UN-backed body with legal authority and dedicated funding to conduct active debris removal missions on high-risk objects.",
-    impact: 15000,
+    impact: 25200,
     tooltip: "Modeled on Liou & Johnson (2009) finding that removing 5 large objects per year stabilizes LEO debris density",
   },
   {
     id: "fiveyear",
     name: "Extend 5-Year De-orbit Rule Globally",
     description: "Apply the FCC's 5-Year Rule to all spacefaring nations through an international agreement — not just US-licensed operators.",
-    impact: 10000,
+    impact: 16800,
     tooltip: "FCC jurisdiction covers US-licensed and US-market-access satellites, leaving many foreign-licensed operators outside its reach",
   },
 ];
@@ -311,7 +311,7 @@ export default function PolicyPage() {
     return sum + (policy ? policy.impact : 0);
   }, 0);
 
-  const resultValue = 50000 - totalReduction;
+  const resultValue = 84000 - totalReduction;
   const animatedValue = useCountUp(resultValue, {
     startFromZero: false,
     durationMs: 1000,
@@ -322,15 +322,15 @@ export default function PolicyPage() {
   let statusBadgeColor = "";
   let displayColor = "";
 
-  if (resultValue > 40000) {
+  if (resultValue > 67200) {
     statusBadgeText = "⚠ CRITICAL — Kessler Cascade Risk";
     statusBadgeColor = "red";
     displayColor = "var(--accent-red)";
-  } else if (resultValue >= 25000) {
+  } else if (resultValue >= 42000) {
     statusBadgeText = "⚡ DANGEROUS";
     statusBadgeColor = "amber";
     displayColor = "var(--accent-amber)";
-  } else if (resultValue >= 15000) {
+  } else if (resultValue >= 25200) {
     statusBadgeText = "↓ MANAGEABLE";
     statusBadgeColor = "blue";
     displayColor = "var(--accent-blue)";
@@ -340,7 +340,7 @@ export default function PolicyPage() {
     displayColor = "var(--accent-green)";
   }
 
-  const needlePos = Math.max(5, Math.min(95, (resultValue / 50000) * 90));
+  const needlePos = Math.max(5, Math.min(95, (resultValue / 84000) * 90));
   const allTogglesOn = activeToggles.length === policyOptions.length;
 
   const displaySubtitle = activeToggles.length === 0
@@ -488,7 +488,9 @@ export default function PolicyPage() {
           <p>
             Toggle the policy reforms below to see their projected impact on LEO debris density by 2050.
             Projections are illustrative, modeled on debris growth research from Liou et al. (2021) and
-            ESA Space Environment Report 2023.
+            ESA Space Environment Report 2026 (Issue 10.1, Fig. 12). ESA's own sustainability index shows
+            how fast this is moving: the current trajectory is now projected at 50 times the acceptable
+            long-term threshold, up from 4 times just one year earlier.
           </p>
         </div>
 
