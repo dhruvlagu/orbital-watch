@@ -46,7 +46,7 @@ User-adjustable mass and velocity sliders compute KE = ½mv² in real time, outp
 Interactive 3D simulation with adjustable parameters (initial object count, orbital altitude, inclination spread) demonstrating how collision frequency increases with debris density. Features realistic orbital mechanics using Kepler's third law, 3D perspective rendering, and real-time collision detection to visualize cascade dynamics and the critical density threshold.
 
 **Treaty Reform Simulator**
-Four policy toggles (binding IADC guidelines, ASAT ban, international ADR authority, global 5-year rule) with live recalculation of projected LEO object count by 2050. Baseline: 84,000. Best case with all reforms: 20,200. Modeled on Liou et al. (2021) and ESA Space Environment Report, Issue 10.1 (2026).
+Four policy toggles (binding IADC guidelines, ASAT ban, international ADR authority, global 5-year rule) with live recalculation of projected LEO object count by 2050. Baseline: 84,000. Best case with all reforms: 20,200 (achieved by enabling all four policy options: binding IADC guidelines, ASAT ban, international ADR authority, and global 5-year rule). Modeled on Liou et al. (2021) and ESA Space Environment Report, Issue 10.1 (2026).
 
 **Country Scorecard**
 Sortable table rating USA, Russia, China, ESA, and India on debris mitigation compliance, ASAT test history, and ADR investment. Based on public records from ESA, NASA ODPO, and Secure World Foundation.
@@ -64,7 +64,7 @@ Instead:
 - A **Vercel Cron Job** queries SATCAT once daily (18:12 UTC, offset from the hour per Space-Track's traffic guidance) and stores the result in Redis.
 - A **Cloudflare Worker**, running independently on its own schedule (13:14 / 21:14 / 05:14 UTC), triggers the CDM refresh — this works around Vercel's free-tier limit of one cron job per project while still respecting Space-Track's 3x/day cap.
 - Both scheduled jobs use delta queries (fetching only records changed since the last run) rather than re-downloading full datasets.
-- User-facing endpoints (`/api/spacetrack/satcat`, `/api/spacetrack/conjunctions`) only ever read from this cached store — they never call Space-Track directly, regardless of how much traffic the site gets.
+- User-facing endpoints (`/api/spacetrack/satcat`, `/api/spacetrack/conjunctions`) only ever read from this cached store — they never call Space-Track directly, regardless of how much traffic the site gets. Production endpoints use a 5-minute edge cache (s-maxage=300) to balance freshness with performance, while the development proxy uses longer caching for convenience.
 
 The Contact Your Representative workflow uses a separate server-side lookup endpoint. It sends the entered ZIP code to Geocodio only from the server, identifies the House representative for the most likely congressional district, and returns the representative name, district number, and official contact options. It does not use or expose a legislator email address.
 

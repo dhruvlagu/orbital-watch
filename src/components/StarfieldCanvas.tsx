@@ -52,10 +52,10 @@ function createStar(width: number, height: number, fromEdge?: "top" | "bottom" |
   
   const baseOpacity = 0.1 + depth * 0.3; // Much dimmer for text focus
 
-  // Orbital parameters
-  const orbitCenterX = width / 2;
-  const orbitCenterY = height / 2;
-  const orbitRadius = 100 + Math.random() * Math.min(width, height) * 0.4;
+  // Orbital parameters - centers spread across the full canvas
+  const orbitCenterX = Math.random() * width;
+  const orbitCenterY = Math.random() * height;
+  const orbitRadius = 20 + Math.random() * 80; // small local orbits around each center
   const orbitAngle = Math.random() * Math.PI * 2;
   const orbitSpeed = (0.0005 + Math.random() * 0.001) * (depth > 0.5 ? 1 : -1); // Random direction
 

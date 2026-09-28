@@ -7,17 +7,22 @@ export default function ScrollToTop() {
   useEffect(() => {
     if (hash) {
       const id = hash.replace("#", "");
-      // Try to find the target element; if not present yet, delay slightly
+      let attempts = 0;
+      const maxAttempts = 20;
+
       const scrollToHash = () => {
         const el = document.getElementById(id);
         if (el) {
           el.scrollIntoView({ behavior: "smooth" });
+        } else if (attempts < maxAttempts) {
+          attempts++;
+          setTimeout(scrollToHash, 50);
         } else {
           window.scrollTo(0, 0);
         }
       };
-      // Allow the DOM to settle before attempting to scroll
-      setTimeout(scrollToHash, 0);
+
+      scrollToHash();
     } else {
       window.scrollTo(0, 0);
     }

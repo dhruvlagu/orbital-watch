@@ -109,7 +109,14 @@ ZIP Code: ${zip.trim()}`;
 
     const cleanZip = zip.trim();
     if (!/^\d{5}(-\d{4})?$/.test(cleanZip)) {
-      setLookupError("Please enter a valid 5-digit US zip code.");
+      setLookupError("Please enter a valid 5-digit US zip code (e.g., 90210).");
+      return;
+    }
+    
+    // Additional validation: ensure it's a reasonable US ZIP range
+    const zipNum = parseInt(cleanZip.substring(0, 5));
+    if (zipNum < 501 || zipNum > 99950) {
+      setLookupError("Please enter a valid US zip code (501-99950).");
       return;
     }
 

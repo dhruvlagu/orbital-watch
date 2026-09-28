@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import Footer from "./Footer";
 import Navbar from "./Navbar";
 import RouteProgressBar from "./RouteProgressBar";
@@ -15,6 +15,8 @@ function PageLoader() {
 }
 
 export default function Layout() {
+  const { pathname } = useLocation();
+
   return (
     <>
       <RouteProgressBar />
@@ -24,7 +26,9 @@ export default function Layout() {
       <Navbar />
       <main id="main" className="appMain" role="main">
         <Suspense fallback={<PageLoader />}>
-          <Outlet />
+          <div key={pathname} className="pageTransition">
+            <Outlet />
+          </div>
         </Suspense>
       </main>
       <Footer />

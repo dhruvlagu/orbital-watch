@@ -282,18 +282,19 @@
 }
 
 .cw__countdown {
-  font-family: "Courier New", Courier, monospace, var(--font-display);
-  font-size: clamp(28px, 5vw, 36px);
+  font-family: var(--font-mono);
+  font-size: clamp(26px, 4.5vw, 34px);
   font-weight: 700;
   color: var(--accent-blue);
-  text-shadow: 0 0 10px rgba(0, 212, 255, 0.4);
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
   line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
 }
 
 @media (max-width: 375px) {
   .cw__countdown {
-    font-size: 26px;
+    font-size: 24px;
   }
 }
 
@@ -319,15 +320,17 @@
 }
 
 .cw__metaValue {
-  font-family: var(--font-display);
-  font-size: 18px;
+  font-family: var(--font-mono);
+  font-size: 17px;
   font-weight: 600;
   color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
 }
 
 .cw__pc {
-  font-size: 15px;
-  letter-spacing: 0.01em;
+  font-size: 14px;
+  letter-spacing: 0.02em;
 }
 
 /* Plain-English odds */

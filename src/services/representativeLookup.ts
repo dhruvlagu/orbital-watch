@@ -23,12 +23,28 @@ export async function lookupRepresentative(zip: string): Promise<RepresentativeR
     throw new Error("Please enter a valid zip code.");
   }
 
-  const res = await fetch(`/api/spacetrack/representative?zip=${encodeURIComponent(cleanZip)}`);
-  
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.error || `Lookup failed with status ${res.status}`);
-  }
+  // Add timeout to prevent indefinite hanging on slow/unavailable API
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
-  return res.json();
+  try {
+    const res = await fetch(`/api/spacetrack/representative?zip=${encodeURIComponent(cleanZip)}`, {
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeoutId);
+    
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.error || `Lookup failed with status ${res.status}`);
+    }
+
+    return res.json();
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new Error("Lookup timed out. Please try again.");
+    }
+    throw err;
+  }
 }

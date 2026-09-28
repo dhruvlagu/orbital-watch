@@ -99,7 +99,27 @@ export default function KesslerSimulation() {
     }
   }, [objectCount, radiusMin, radiusMax, inclinationMin, inclinationMax, generateDebris]);
 
+  // Handle tab visibility change to pause/resume animation gracefully
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden && isAnimatingRef.current && animationRef.current) {
+        // Tab lost focus during animation - cancel to prevent buildup
+        cancelAnimationFrame(animationRef.current);
+        // Redraw final state to ensure clean visual state
+        drawCanvas(currentDebrisRef.current, rippleRef.current);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
+
   const triggerCascade = () => {
+    // Guard against multiple simultaneous cascade animations
+    if (isAnimatingRef.current) {
+      return;
+    }
+    
     setIsRunning(true);
     setCascadeStatus("Cascade initiated — collision chain reaction starting");
     rippleRef.current = { radius: 0, opacity: 0.6, active: true };
@@ -268,7 +288,10 @@ export default function KesslerSimulation() {
   };
 
   const reset = () => {
+    // Cancel any pending animation frame
     if (animationRef.current) cancelAnimationFrame(animationRef.current);
+    
+    // Reset all animation and state flags
     setIsRunning(false);
     isAnimatingRef.current = false;
     setCascadeStatus("");
@@ -437,168 +460,264 @@ export default function KesslerSimulation() {
   };
 
   return (
-    <div className="kesslerSimulation">
-      <h3 className="simulationLabel simulationLabel--title">Kessler Cascade Simulation</h3>
-      
-      {/* Explanatory Panel */}
-      <div className="explanationPanel">
-        <button 
-          className="explanationToggle" 
+    <div className="card kesslerSimInstrument">
+      {/* Instrument Header */}
+      <div className="kesslerSimHeader">
+        <div className="kesslerSimHeader__left">
+          <span className="kesslerSimHeader__tag">LABORATORY SIMULATOR</span>
+          <h3 className="kesslerSimHeader__title">Kessler Syndrome Collision Chain Simulator</h3>
+          <p className="kesslerSimHeader__desc">
+            Model runaway collision cascades in Low Earth Orbit using Keplerian orbital mechanics (ω ∝ r⁻¹˙⁵).
+          </p>
+        </div>
+        <div className="kesslerSimHeader__status">
+          <span className={`kesslerSimBadge ${isRunning ? "kesslerSimBadge--active" : cascadeStatus.includes("complete") ? "kesslerSimBadge--complete" : "kesslerSimBadge--ready"}`}>
+            <span className="kesslerSimBadge__dot" />
+            {isRunning ? "CASCADE RUNNING" : cascadeStatus.includes("complete") ? "CASCADE CONCLUDED" : "READY"}
+          </span>
+        </div>
+      </div>
+
+      {/* Physics / Educational Notes Drawer */}
+      <div className="kesslerSimNotes">
+        <button
+          type="button"
+          className="kesslerSimNotes__toggle"
           onClick={() => setExplanationExpanded(!explanationExpanded)}
+          aria-expanded={explanationExpanded}
         >
-          {explanationExpanded ? "▼ What's happening" : "▶ What's happening"}
+          <span>{explanationExpanded ? "▾ Hide Mechanics & Orbital Physics Notes" : "▸ View Mechanics & Orbital Physics Notes"}</span>
         </button>
         {explanationExpanded && (
-          <div className="explanationContent">
-            <p><strong>Orbital Speed & Altitude:</strong> Gravity is what keeps debris in orbit, and it gets weaker with distance — so at higher altitude, less centripetal force is needed to stay in orbit, meaning objects move slower (v = √(GM/r)). This is Kepler's third law in action: orbital period grows with altitude, so farther-out objects take longer to complete one trip around Earth.</p>
-            <p><strong>Inclination & Collisions:</strong> Wider orbital tilt spread means more path crossings, often at higher relative speeds — both raise collision risk.</p>
-            <p><strong>Kessler Syndrome:</strong> One collision creates debris that raises the odds of further collisions — potentially triggering exponential growth.</p>
+          <div className="kesslerSimNotes__body">
+            <div className="kesslerSimNotes__grid">
+              <div className="kesslerSimNotes__col">
+                <strong>Orbital Speed &amp; Altitude (Kepler&apos;s 3rd Law):</strong>
+                <p>
+                  Objects at higher altitudes move at lower angular speeds (v = √(GM/r)). Longer orbital paths reduce instantaneous crossing density, while lower orbits move rapidly and intersect frequently.
+                </p>
+              </div>
+              <div className="kesslerSimNotes__col">
+                <strong>Inclination Dispersion:</strong>
+                <p>
+                  Orbital tilt variation creates non-coplanar crossing planes. High inclination spreads cause cross-track intersections at closing speeds up to 15 km/s.
+                </p>
+              </div>
+              <div className="kesslerSimNotes__col">
+                <strong>Exponential Fragmentation:</strong>
+                <p>
+                  Each hypervelocity strike creates multiple tracked shards, raising subsequent collision probabilities until fragment formation outpaces natural atmospheric drag decay.
+                </p>
+              </div>
+            </div>
           </div>
         )}
       </div>
 
-      {/* Parameter Controls */}
-      <div className={`parameterControls ${isRunning ? 'parameterControls--disabled' : ''}`}>
+      {/* Parameter Control Deck */}
+      <div className={`kesslerControlDeck ${isRunning ? "kesslerControlDeck--disabled" : ""}`}>
+        <div className="kesslerControlGrid">
+          {/* Slider 1: Object Density */}
+          <div className="kesslerParam">
+            <div className="kesslerParam__header">
+              <span className="kesslerParam__label">
+                Initial Objects
+                <span className="controlHelp">
+                  <button
+                    type="button"
+                    className="controlTooltip"
+                    aria-label="Explain initial object count"
+                    aria-expanded={activeTooltip === "objects"}
+                    onMouseEnter={() => setActiveTooltip("objects")}
+                    onMouseLeave={() => setActiveTooltip(null)}
+                    onFocus={() => setActiveTooltip("objects")}
+                    onBlur={() => setActiveTooltip(null)}
+                    onClick={() => setActiveTooltip((cur) => (cur === "objects" ? null : "objects"))}
+                  >
+                    ?
+                  </button>
+                  {activeTooltip === "objects" && (
+                    <div className="tooltipContent">
+                      Starting number of debris objects in stable orbit. Higher initial density drastically raises collision odds before a cascade even begins.
+                    </div>
+                  )}
+                </span>
+              </span>
+              <div className="kesslerParam__readout">
+                <span className="kesslerParam__value">{objectCount}</span>
+                <span className="kesslerParam__sub">{objectCount <= 15 ? "LOW" : objectCount <= 25 ? "MODERATE" : "HIGH"}</span>
+              </div>
+            </div>
+            <input
+              type="range"
+              min="5"
+              max="40"
+              value={objectCount}
+              onChange={(e) => {
+                if (isRunning) return;
+                setObjectCount(parseInt(e.target.value));
+              }}
+              disabled={isRunning}
+              className="kesslerSlider"
+              aria-label="Initial debris object count"
+            />
+          </div>
+
+          {/* Slider 2: Orbital Altitude */}
+          <div className="kesslerParam">
+            <div className="kesslerParam__header">
+              <span className="kesslerParam__label">
+                Orbital Altitude
+                <span className="controlHelp">
+                  <button
+                    type="button"
+                    className="controlTooltip"
+                    aria-label="Explain orbital altitude"
+                    aria-expanded={activeTooltip === "altitude"}
+                    onMouseEnter={() => setActiveTooltip("altitude")}
+                    onMouseLeave={() => setActiveTooltip(null)}
+                    onFocus={() => setActiveTooltip("altitude")}
+                    onBlur={() => setActiveTooltip(null)}
+                    onClick={() => setActiveTooltip((cur) => (cur === "altitude" ? null : "altitude"))}
+                  >
+                    ?
+                  </button>
+                  {activeTooltip === "altitude" && (
+                    <div className="tooltipContent">
+                      Sets the altitude band for debris. Objects at higher altitudes travel with slower angular speeds and longer periods (Kepler&apos;s 3rd Law: v = √(GM/r)).
+                    </div>
+                  )}
+                </span>
+              </span>
+              <div className="kesslerParam__readout">
+                <span className="kesslerParam__value">{altitudeCenter.toFixed(2)}</span>
+                <span className="kesslerParam__sub">{altitudeCenter < 0.3 ? "LOW-LEO" : altitudeCenter < 0.4 ? "MID-LEO" : "HIGH-LEO"}</span>
+              </div>
+            </div>
+            <input
+              type="range"
+              min="0.2"
+              max="0.55"
+              step="0.05"
+              value={altitudeCenter}
+              onChange={(e) => {
+                if (isRunning) return;
+                const center = parseFloat(e.target.value);
+                const spread = 0.075;
+                setRadiusMin(center - spread);
+                setRadiusMax(center + spread);
+              }}
+              disabled={isRunning}
+              className="kesslerSlider"
+              aria-label="Orbital altitude center"
+            />
+          </div>
+
+          {/* Slider 3: Inclination Spread */}
+          <div className="kesslerParam">
+            <div className="kesslerParam__header">
+              <span className="kesslerParam__label">
+                Inclination Spread
+                <span className="controlHelp">
+                  <button
+                    type="button"
+                    className="controlTooltip"
+                    aria-label="Explain inclination spread"
+                    aria-expanded={activeTooltip === "inclination"}
+                    onMouseEnter={() => setActiveTooltip("inclination")}
+                    onMouseLeave={() => setActiveTooltip(null)}
+                    onFocus={() => setActiveTooltip("inclination")}
+                    onBlur={() => setActiveTooltip(null)}
+                    onClick={() => setActiveTooltip((cur) => (cur === "inclination" ? null : "inclination"))}
+                  >
+                    ?
+                  </button>
+                  {activeTooltip === "inclination" && (
+                    <div className="tooltipContent tooltipContent--wide">
+                      Sets orbital plane tilt variation. Wider spread creates cross-track orbital intersections at closing speeds up to 15 km/s.
+                    </div>
+                  )}
+                </span>
+              </span>
+              <div className="kesslerParam__readout">
+                <span className="kesslerParam__value">±{((inclinationMax - inclinationMin) / 2).toFixed(2)} rad</span>
+                <span className="kesslerParam__sub">{((inclinationMax - inclinationMin) / 2) < 0.3 ? "CO-PLANAR" : ((inclinationMax - inclinationMin) / 2) < 0.6 ? "MODERATE" : "CROSS-TRACK"}</span>
+              </div>
+            </div>
+            <input
+              type="range"
+              min="0.1"
+              max="1.0"
+              step="0.1"
+              value={(inclinationMax - inclinationMin) / 2}
+              onChange={(e) => {
+                if (isRunning) return;
+                const spread = parseFloat(e.target.value);
+                setInclinationMin(-spread);
+                setInclinationMax(spread);
+              }}
+              disabled={isRunning}
+              className="kesslerSlider"
+              aria-label="Inclination spread"
+            />
+          </div>
+        </div>
+
         {isRunning && (
-          <div className="disabledNotice">
-            Parameters locked during cascade — press Reset to adjust
+          <div className="kesslerLockNotice">
+            <span>Parameters locked during cascade execution. Use Reset to reconfigure orbital state.</span>
           </div>
         )}
-        <div className="controlGroup">
-          <label className="controlLabel">
-            <span className="controlValue">Initial Objects: {objectCount} — {objectCount <= 15 ? "low density" : objectCount <= 25 ? "moderate density" : "high density"}</span>
-            <span className="controlHelp">
-              <button
-                type="button"
-                className="controlTooltip"
-                aria-label="Explain initial object count"
-                aria-expanded={activeTooltip === "objects"}
-                onMouseEnter={() => setActiveTooltip("objects")}
-                onMouseLeave={() => setActiveTooltip(null)}
-                onFocus={() => setActiveTooltip("objects")}
-                onBlur={() => setActiveTooltip(null)}
-                onClick={() => setActiveTooltip((current) => (current === "objects" ? null : "objects"))}
-              >
-                ?
-              </button>
-              {activeTooltip === "objects" && (
-                <div className="tooltipContent">
-                  Starting number of debris objects in stable orbit. More objects raise collision probability even before a cascade begins.
-                </div>
-              )}
-            </span>
-          </label>
-          <input
-            type="range"
-            min="5"
-            max="40"
-            value={objectCount}
-            onChange={(e) => setObjectCount(parseInt(e.target.value))}
-            disabled={isRunning}
-            className="controlSlider"
-          />
+      </div>
+
+      {/* Primary Simulation Canvas & Telemetry Overlay */}
+      <div className="kesslerViewport">
+        <canvas ref={canvasRef} className="kesslerCanvas" />
+        
+        {/* HUD Instrument Metrics */}
+        <div className="kesslerHUD">
+          <div className="kesslerHUD__item">
+            <span className="kesslerHUD__key">LEO OBJECTS</span>
+            <span className="kesslerHUD__val">{currentDebrisRef.current.length}</span>
+          </div>
+          <div className="kesslerHUD__item">
+            <span className="kesslerHUD__key">ORBITAL REGIME</span>
+            <span className="kesslerHUD__val">{altitudeCenter < 0.3 ? "400–600 km" : altitudeCenter < 0.4 ? "600–900 km" : "900–1200 km"}</span>
+          </div>
         </div>
 
-        <div className="controlGroup">
-          <label className="controlLabel">
-            <span className="controlValue">Orbital Altitude: {altitudeCenter.toFixed(2)} — {altitudeCenter < 0.3 ? "low-LEO band" : altitudeCenter < 0.4 ? "mid-LEO band" : "high-LEO band"}</span>
-            <span className="controlHelp">
-              <button
-                type="button"
-                className="controlTooltip"
-                aria-label="Explain orbital altitude"
-                aria-expanded={activeTooltip === "altitude"}
-                onMouseEnter={() => setActiveTooltip("altitude")}
-                onMouseLeave={() => setActiveTooltip(null)}
-                onFocus={() => setActiveTooltip("altitude")}
-                onBlur={() => setActiveTooltip(null)}
-                onClick={() => setActiveTooltip((current) => (current === "altitude" ? null : "altitude"))}
-              >
-                ?
-              </button>
-              {activeTooltip === "altitude" && (
-                <div className="tooltipContent">
-                  Sets the starting altitude band for debris. Higher altitude means slower orbital speed and a longer period — see "What's happening" above for why.
-                </div>
-              )}
-            </span>
-          </label>
-          <input
-            type="range"
-            min="0.2"
-            max="0.55"
-            step="0.05"
-            value={altitudeCenter}
-            onChange={(e) => {
-              const center = parseFloat(e.target.value);
-              const spread = 0.075; // Fixed spread for simplicity
-              setRadiusMin(center - spread);
-              setRadiusMax(center + spread);
-            }}
-            disabled={isRunning}
-            className="controlSlider"
-          />
-        </div>
-
-        <div className="controlGroup">
-          <label className="controlLabel">
-            <span className="controlValue">Inclination Spread: {((inclinationMax - inclinationMin) / 2).toFixed(2)} — {((inclinationMax - inclinationMin) / 2) < 0.3 ? "tight" : ((inclinationMax - inclinationMin) / 2) < 0.6 ? "moderate" : "wide"}</span>
-            <span className="controlHelp">
-              <button
-                type="button"
-                className="controlTooltip"
-                aria-label="Explain inclination spread"
-                aria-expanded={activeTooltip === "inclination"}
-                onMouseEnter={() => setActiveTooltip("inclination")}
-                onMouseLeave={() => setActiveTooltip(null)}
-                onFocus={() => setActiveTooltip("inclination")}
-                onBlur={() => setActiveTooltip(null)}
-                onClick={() => setActiveTooltip((current) => (current === "inclination" ? null : "inclination"))}
-              >
-                ?
-              </button>
-              {activeTooltip === "inclination" && (
-                <div className="tooltipContent tooltipContent--wide">
-                  Sets how much orbital tilt varies across debris. Wider spread means more crossing points between orbits — see "What's happening" above for why that raises collision risk.
-                </div>
-              )}
-            </span>
-          </label>
-          <input
-            type="range"
-            min="0.1"
-            max="1.0"
-            step="0.1"
-            value={(inclinationMax - inclinationMin) / 2}
-            onChange={(e) => {
-              const spread = parseFloat(e.target.value);
-              setInclinationMin(-spread);
-              setInclinationMax(spread);
-            }}
-            disabled={isRunning}
-            className="controlSlider"
-          />
+        <div className="kesslerFooterDisclaimer">
+          <span>Illustrative orbital-mechanics simulation (ω ∝ r⁻¹˙⁵); calibrated for educational visualization.</span>
         </div>
       </div>
 
-      {cascadeStatus && (
-        <div className="cascadeStatus">
-          {cascadeStatus}
+      {/* Control & Live Telemetry Action Bar */}
+      <div className="kesslerControlBar">
+        <div className="kesslerControlBar__status">
+          <span className="kesslerStatusPrefix">TELEMETRY FEED:</span>
+          <span className="kesslerStatusMessage">
+            {cascadeStatus || "Nominal stable orbit. Press \"Initiate Collision Cascade\" to model catastrophic fragmentation."}
+          </span>
         </div>
-      )}
 
-      <div className="simulationCanvasWrapper">
-        <canvas ref={canvasRef} className="simulationCanvas" />
-        <p className="simulationDisclaimer">Illustrative educational visualization; not an orbital-mechanics model.</p>
-      </div>
-      <div className="simulationLabel simulationLabel--bottom">Debris collisions create fragments, triggering exponential chain reactions</div>
-      <div className="simulationControls">
-        <button ref={triggerButtonRef} className="btn btn--primary" onClick={triggerCascade} disabled={isRunning}>
-          {isRunning ? "Cascade Running..." : "Trigger Cascade"}
-        </button>
-        <button className="btn btn--secondary" onClick={reset}>
-          Reset
-        </button>
+        <div className="kesslerControlBar__actions">
+          <button
+            ref={triggerButtonRef}
+            type="button"
+            className="btn btn--primary kesslerActionBtn"
+            onClick={triggerCascade}
+            disabled={isRunning}
+          >
+            {isRunning ? "Simulating Cascade..." : "Initiate Collision Cascade →"}
+          </button>
+          <button
+            type="button"
+            className="btn btn--secondary kesslerActionBtn"
+            onClick={reset}
+          >
+            Reset Orbit
+          </button>
+        </div>
       </div>
     </div>
   );

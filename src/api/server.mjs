@@ -61,8 +61,7 @@ function buildMetrics(records) {
         if (!record?.LAUNCH) return false;
         const launchTime = Date.parse(record.LAUNCH);
         return Number.isFinite(launchTime) && launchTime >= thirtyDaysAgo;
-      }).length
-    : 0;
+      }).length;
 
   const debrisCount = inOrbit.filter(
     (r) => (r?.OBJECT_TYPE || "").toUpperCase() === "DEBRIS",

@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { NAV_LINKS } from "../services/navLinks";
 
 export default function Footer() {
@@ -51,7 +51,7 @@ export default function Footer() {
       </div>
 
       <div className="container footer__bottom">
-        Data sources: <a href="/about#sources" className="footer__sourcesLink">ESA, Space-Track.org, NASA ODPO, UNOOSA, IADC, and more →</a>
+        Data sources: <Link to="/about#sources" className="footer__sourcesLink">ESA, Space-Track.org, NASA ODPO, UNOOSA, IADC, and more →</Link>
       </div>
     </footer>
   );
