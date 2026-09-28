@@ -797,7 +797,7 @@
 .kesslerParam .tooltipContent {
   position: absolute;
   bottom: calc(100% + 8px);
-  left: 0;
+  right: 0;
   width: 260px;
   padding: 10px 12px;
   background: rgba(10, 14, 26, 0.98);
@@ -1032,14 +1032,30 @@
   line-height: 1.8;
   margin: 0;
   word-wrap: break-word;
-  white-space: pre-wrap;
-  background: rgba(0, 0, 0, 0.22);
-  border: 1px solid rgba(0, 212, 255, 0.14);
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.3);
   border-radius: 8px;
-  padding: 18px 20px;
+  border: 1px solid rgba(0, 212, 255, 0.1);
   height: 100%;
   box-sizing: border-box;
-  letter-spacing: 0.01em;
+}
+
+.technicalCode p {
+  margin: 4px 0;
+}
+
+.technicalCode strong {
+  color: #fff;
+}
+
+/* KaTeX styling for math equations */
+.technicalCode .katex {
+  font-size: 14px;
+  color: rgba(146, 220, 255, 0.96);
+}
+
+.technicalCode .katex-display {
+  margin: 8px 0;
 }
 
 @media (max-width: 768px) {

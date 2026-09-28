@@ -1,5 +1,15 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useMagneticButton } from "../hooks/useMagneticButton";
+import katex from "katex";
+
+// Helper to render LaTeX with KaTeX
+const renderMath = (latex: string) => {
+  try {
+    return katex.renderToString(latex, { displayMode: false });
+  } catch (e) {
+    return latex; // Fallback to plain text if rendering fails
+  }
+};
 
 interface Debris {
   id: string;
@@ -15,7 +25,7 @@ interface Debris {
   size: number;
 }
 
-// MAGNETIC BUTTON AUDIT: "Trigger Cascade" button uses magnetic effect
+// MAGNETIC BUTTON AUDIT: "Initiate Collision Cascade" button uses magnetic effect
 export default function KesslerSimulation() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [, setDebris] = useState<Debris[]>([]);
@@ -30,16 +40,26 @@ export default function KesslerSimulation() {
 
   // Simulation parameters
   const [objectCount, setObjectCount] = useState(15);
-  const [radiusMin, setRadiusMin] = useState(0.25);
-  const [radiusMax, setRadiusMax] = useState(0.4);
-  const [inclinationMin, setInclinationMin] = useState(-0.4);
-  const [inclinationMax, setInclinationMax] = useState(0.4);
+  const [altitudeMin, setAltitudeMin] = useState(400);
+  const [altitudeMax, setAltitudeMax] = useState(800);
+  const [inclinationMinDeg, setInclinationMinDeg] = useState(-23);
+  const [inclinationMaxDeg, setInclinationMaxDeg] = useState(23);
   const [explanationExpanded, setExplanationExpanded] = useState(false);
   const [cascadeStatus, setCascadeStatus] = useState("");
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
 
+  // Convert km to internal radius units (km / 2000)
+  const kmToRadius = (km: number) => km / 2000;
+  const radiusMin = kmToRadius(altitudeMin);
+  const radiusMax = kmToRadius(altitudeMax);
+
+  // Convert degrees to radians for internal calculations
+  const degToRad = (deg: number) => deg * (Math.PI / 180);
+  const inclinationMin = degToRad(inclinationMinDeg);
+  const inclinationMax = degToRad(inclinationMaxDeg);
+
   // Derived altitude center for the slider
-  const altitudeCenter = (radiusMin + radiusMax) / 2;
+  const altitudeCenter = (altitudeMin + altitudeMax) / 2;
 
 
 
@@ -97,7 +117,7 @@ export default function KesslerSimulation() {
       initialDebrisRef.current = newDebris;
       drawCanvas(newDebris, rippleRef.current);
     }
-  }, [objectCount, radiusMin, radiusMax, inclinationMin, inclinationMax, generateDebris]);
+  }, [objectCount, altitudeMin, altitudeMax, inclinationMinDeg, inclinationMaxDeg, generateDebris]);
 
   // Handle tab visibility change to pause/resume animation gracefully
   useEffect(() => {
@@ -278,7 +298,7 @@ export default function KesslerSimulation() {
       } else {
         setIsRunning(false);
         isAnimatingRef.current = false;
-        setCascadeStatus(`Cascade complete — ${collisionCount} collisions created ${currentDebrisRef.current.length} debris objects`);
+        setCascadeStatus(`Cascade complete — ${collisionCount} collisions, ${currentDebrisRef.current.length} objects now in field`);
         setDebris(currentDebrisRef.current); // Sync state only when animation ends
         drawCanvas(currentDebrisRef.current, rippleRef.current);
       }
@@ -298,13 +318,13 @@ export default function KesslerSimulation() {
     
     // Reset slider values to defaults
     setObjectCount(15);
-    setRadiusMin(0.25);
-    setRadiusMax(0.4);
-    setInclinationMin(-0.4);
-    setInclinationMax(0.4);
-    
+    setAltitudeMin(400);
+    setAltitudeMax(800);
+    setInclinationMinDeg(-23);
+    setInclinationMaxDeg(23);
+
     // Generate debris with default values
-    const newDebris = generateDebris(15, 0.25, 0.4, -0.4, 0.4);
+    const newDebris = generateDebris(15, kmToRadius(400), kmToRadius(800), degToRad(-23), degToRad(23));
     setDebris(newDebris);
     currentDebrisRef.current = newDebris;
     initialDebrisRef.current = newDebris;
@@ -452,11 +472,7 @@ export default function KesslerSimulation() {
       ctx.stroke();
     }
 
-    // Draw text
-    ctx.fillStyle = "#8b9ab0";
-    ctx.font = "12px Inter, sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText(`Debris objects: ${debrisToDraw.length}`, width * 0.5, 30);
+
   };
 
   return (
@@ -464,10 +480,9 @@ export default function KesslerSimulation() {
       {/* Instrument Header */}
       <div className="kesslerSimHeader">
         <div className="kesslerSimHeader__left">
-          <span className="kesslerSimHeader__tag">LABORATORY SIMULATOR</span>
-          <h3 className="kesslerSimHeader__title">Kessler Syndrome Collision Chain Simulator</h3>
+          <h3 className="kesslerSimHeader__title">Kessler Cascade Simulator</h3>
           <p className="kesslerSimHeader__desc">
-            Model runaway collision cascades in Low Earth Orbit using Keplerian orbital mechanics (ω ∝ r⁻¹˙⁵).
+            Interactive simulation of how debris collisions create cascading chain reactions in Low Earth Orbit.
           </p>
         </div>
         <div className="kesslerSimHeader__status">
@@ -492,21 +507,21 @@ export default function KesslerSimulation() {
           <div className="kesslerSimNotes__body">
             <div className="kesslerSimNotes__grid">
               <div className="kesslerSimNotes__col">
-                <strong>Orbital Speed &amp; Altitude (Kepler&apos;s 3rd Law):</strong>
+                <strong>Orbital Speed &amp; Altitude:</strong>
                 <p>
-                  Objects at higher altitudes move at lower angular speeds (v = √(GM/r)). Longer orbital paths reduce instantaneous crossing density, while lower orbits move rapidly and intersect frequently.
+                  Higher orbits move slower (<span dangerouslySetInnerHTML={{ __html: renderMath('v = \\sqrt{\\frac{GM}{r}}') }} />), so objects up there take longer to complete a lap and encounter each other less often. Down in low LEO, objects are moving faster and finishing orbits quickly, so they pass each other more often, which means more chances to collide.
                 </p>
               </div>
               <div className="kesslerSimNotes__col">
                 <strong>Inclination Dispersion:</strong>
                 <p>
-                  Orbital tilt variation creates non-coplanar crossing planes. High inclination spreads cause cross-track intersections at closing speeds up to 15 km/s.
+                  Debris doesn't all orbit on the same plane. When two objects cross at different inclinations, especially near-opposite directions, their closing speed can hit close to 15 km/s. That's fast enough that even a small fragment does real damage.
                 </p>
               </div>
               <div className="kesslerSimNotes__col">
                 <strong>Exponential Fragmentation:</strong>
                 <p>
-                  Each hypervelocity strike creates multiple tracked shards, raising subsequent collision probabilities until fragment formation outpaces natural atmospheric drag decay.
+                  Every collision creates more debris than it destroys. Each hit multiplies into fragments, and those fragments raise the odds of the next collision. Once that keeps happening faster than drag can pull old debris down, the cascade feeds itself.
                 </p>
               </div>
             </div>
@@ -584,28 +599,28 @@ export default function KesslerSimulation() {
                   </button>
                   {activeTooltip === "altitude" && (
                     <div className="tooltipContent">
-                      Sets the altitude band for debris. Objects at higher altitudes travel with slower angular speeds and longer periods (Kepler&apos;s 3rd Law: v = √(GM/r)).
+                      Sets the altitude band for debris in kilometers. Higher altitudes mean slower orbital speeds (<span dangerouslySetInnerHTML={{ __html: renderMath('v = \\sqrt{\\frac{GM}{r}}') }} />) and fewer collision opportunities.
                     </div>
                   )}
                 </span>
               </span>
               <div className="kesslerParam__readout">
-                <span className="kesslerParam__value">{altitudeCenter.toFixed(2)}</span>
-                <span className="kesslerParam__sub">{altitudeCenter < 0.3 ? "LOW-LEO" : altitudeCenter < 0.4 ? "MID-LEO" : "HIGH-LEO"}</span>
+                <span className="kesslerParam__value">{altitudeCenter.toFixed(0)} km</span>
+                <span className="kesslerParam__sub">{altitudeCenter < 500 ? "LOW-LEO" : altitudeCenter < 750 ? "MID-LEO" : "HIGH-LEO"}</span>
               </div>
             </div>
             <input
               type="range"
-              min="0.2"
-              max="0.55"
-              step="0.05"
+              min="300"
+              max="1000"
+              step="50"
               value={altitudeCenter}
               onChange={(e) => {
                 if (isRunning) return;
-                const center = parseFloat(e.target.value);
-                const spread = 0.075;
-                setRadiusMin(center - spread);
-                setRadiusMax(center + spread);
+                const center = parseInt(e.target.value);
+                const spread = 100;
+                setAltitudeMin(Math.max(300, center - spread));
+                setAltitudeMax(Math.min(1000, center + spread));
               }}
               disabled={isRunning}
               className="kesslerSlider"
@@ -640,21 +655,21 @@ export default function KesslerSimulation() {
                 </span>
               </span>
               <div className="kesslerParam__readout">
-                <span className="kesslerParam__value">±{((inclinationMax - inclinationMin) / 2).toFixed(2)} rad</span>
-                <span className="kesslerParam__sub">{((inclinationMax - inclinationMin) / 2) < 0.3 ? "CO-PLANAR" : ((inclinationMax - inclinationMin) / 2) < 0.6 ? "MODERATE" : "CROSS-TRACK"}</span>
+                <span className="kesslerParam__value">±{((inclinationMaxDeg - inclinationMinDeg) / 2).toFixed(0)}°</span>
+                <span className="kesslerParam__sub">{((inclinationMaxDeg - inclinationMinDeg) / 2) < 20 ? "CO-PLANAR" : ((inclinationMaxDeg - inclinationMinDeg) / 2) < 40 ? "MODERATE" : "CROSS-TRACK"}</span>
               </div>
             </div>
             <input
               type="range"
-              min="0.1"
-              max="1.0"
-              step="0.1"
-              value={(inclinationMax - inclinationMin) / 2}
+              min="5"
+              max="60"
+              step="5"
+              value={(inclinationMaxDeg - inclinationMinDeg) / 2}
               onChange={(e) => {
                 if (isRunning) return;
-                const spread = parseFloat(e.target.value);
-                setInclinationMin(-spread);
-                setInclinationMax(spread);
+                const spread = parseInt(e.target.value);
+                setInclinationMinDeg(-spread);
+                setInclinationMaxDeg(spread);
               }}
               disabled={isRunning}
               className="kesslerSlider"
@@ -665,7 +680,7 @@ export default function KesslerSimulation() {
 
         {isRunning && (
           <div className="kesslerLockNotice">
-            <span>Parameters locked during cascade execution. Use Reset to reconfigure orbital state.</span>
+            <span>Parameters locked while cascade runs. Use Reset Orbit to change settings.</span>
           </div>
         )}
       </div>
@@ -680,14 +695,10 @@ export default function KesslerSimulation() {
             <span className="kesslerHUD__key">LEO OBJECTS</span>
             <span className="kesslerHUD__val">{currentDebrisRef.current.length}</span>
           </div>
-          <div className="kesslerHUD__item">
-            <span className="kesslerHUD__key">ORBITAL REGIME</span>
-            <span className="kesslerHUD__val">{altitudeCenter < 0.3 ? "400–600 km" : altitudeCenter < 0.4 ? "600–900 km" : "900–1200 km"}</span>
-          </div>
         </div>
 
         <div className="kesslerFooterDisclaimer">
-          <span>Illustrative orbital-mechanics simulation (ω ∝ r⁻¹˙⁵); calibrated for educational visualization.</span>
+          <span>Educational visualization of collision cascades in orbit.</span>
         </div>
       </div>
 
@@ -696,7 +707,7 @@ export default function KesslerSimulation() {
         <div className="kesslerControlBar__status">
           <span className="kesslerStatusPrefix">TELEMETRY FEED:</span>
           <span className="kesslerStatusMessage">
-            {cascadeStatus || "Nominal stable orbit. Press \"Initiate Collision Cascade\" to model catastrophic fragmentation."}
+            {cascadeStatus || "Stable orbit. Click \"Initiate Collision Cascade\" to start the simulation."}
           </span>
         </div>
 

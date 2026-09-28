@@ -7,8 +7,18 @@ import { useMagneticButton } from "../hooks/useMagneticButton";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarController, BarElement, Tooltip, Legend } from "chart.js";
 import { Bar } from "react-chartjs-2";
 import KesslerSimulation from "../components/KesslerSimulation";
+import katex from "katex";
 
 ChartJS.register(CategoryScale, LinearScale, BarController, BarElement, Tooltip, Legend);
+
+// Helper to render LaTeX with KaTeX
+const renderMath = (latex: string) => {
+  try {
+    return katex.renderToString(latex, { displayMode: false });
+  } catch (e) {
+    return latex; // Fallback to plain text if rendering fails
+  }
+};
 
 // MAGNETIC BUTTON AUDIT: "Read Policy Pathways →" button uses magnetic effect
 export default function PhysicsPage() {
@@ -354,7 +364,7 @@ export default function PhysicsPage() {
             {/* Results Panel */}
             <div className="resultsPanel">
               <div className="technicalNote">
-                <strong>Formula:</strong> KE = 0.5 × m(kg) × v(m/s)²
+                <strong>Formula:</strong> <span dangerouslySetInnerHTML={{ __html: renderMath('KE = \\frac{1}{2}mv^2') }} />
               </div>
 
               <div className="resultsGrid">
@@ -460,37 +470,39 @@ export default function PhysicsPage() {
 
           <div ref={technicalCardRef} className="reveal-item">
             <div className="technicalCard card">
-              <pre className="technicalCode">{`Orbital Mechanics (Kepler's 3rd Law):
-ω ∝ r^(-3/2)
-angular speed decreases with orbital radius
-
-Visualization approximation used in the cascade sim:
-angularSpeed = k / r^(3/2)
-orbitalSpeed = angularSpeed × r
-
-Circular-orbit velocity relation:
-v = √(GM / r)
-Higher orbit radius r ⇒ lower orbital speed
-
-Fragmentation / cascade trigger:
-Each collision creates more debris,
-raising the probability of additional collisions
-until the density threshold is crossed.`}</pre>
-              <pre className="technicalCode">{`Kinetic Energy Formula:
-KE = ½mv²
-Where m = mass in kilograms, v = velocity in meters/second
-
-At orbital velocity (7,800 m/s):
-- 1g object: KE = 0.5 × 0.001 × 7,800² = 30,420 J
-- 10g object: KE = 0.5 × 0.01 × 7,800² = 304,200 J
-- 1kg object: KE = 0.5 × 1 × 7,800² = 30,420,000 J
-
-TNT Equivalent Conversion:
-1 gram TNT = 4,184 Joules
-KE_TNT = KE(J) / 4,184
-
-Sources: Kessler & Cour-Palais (1978), NASA ODPO,
-ESA Space Debris User's Handbook`}</pre>
+              <div className="technicalCode">
+                <p><strong>Orbital Mechanics (Kepler's 3rd Law):</strong></p>
+                <p><span dangerouslySetInnerHTML={{ __html: renderMath('\\omega \\propto r^{-3/2}') }} /></p>
+                <p>angular speed (ω) decreases with orbital radius</p>
+                <br />
+                <p><strong>Visualization approximation used in the cascade sim:</strong></p>
+                <p><span dangerouslySetInnerHTML={{ __html: renderMath('\\omega = k \\cdot r^{-1.5}') }} /></p>
+                <p><span dangerouslySetInnerHTML={{ __html: renderMath('v = \\omega \\times r') }} /></p>
+                <br />
+                <p><strong>Circular-orbit velocity relation:</strong></p>
+                <p><span dangerouslySetInnerHTML={{ __html: renderMath('v = \\sqrt{\\dfrac{GM}{r}}') }} /></p>
+                <p>Higher orbit radius r ⇒ lower orbital speed (v)</p>
+                <br />
+                <p><strong>Fragmentation / cascade trigger:</strong></p>
+                <p>Each collision creates more debris, raising the probability of additional collisions until the density threshold is crossed.</p>
+              </div>
+              <div className="technicalCode">
+                <p><strong>Kinetic Energy Formula:</strong></p>
+                <p><span dangerouslySetInnerHTML={{ __html: renderMath('KE = \\frac{1}{2}mv^2') }} /></p>
+                <p>Where m = mass in kilograms, v = velocity in meters/second</p>
+                <br />
+                <p><strong>At orbital velocity (7,800 m/s):</strong></p>
+                <p>- 1g object: <span dangerouslySetInnerHTML={{ __html: renderMath('KE = 0.5 \\times 0.001 \\times 7,800^2 = 30,420 \\text{ J}') }} /></p>
+                <p>- 10g object: <span dangerouslySetInnerHTML={{ __html: renderMath('KE = 0.5 \\times 0.01 \\times 7,800^2 = 304,200 \\text{ J}') }} /></p>
+                <p>- 1kg object: <span dangerouslySetInnerHTML={{ __html: renderMath('KE = 0.5 \\times 1 \\times 7,800^2 = 30,420,000 \\text{ J}') }} /></p>
+                <br />
+                <p><strong>TNT Equivalent Conversion:</strong></p>
+                <p>1 gram TNT = 4,184 Joules</p>
+                <p><span dangerouslySetInnerHTML={{ __html: renderMath('KE_{\\text{TNT}} = \\dfrac{KE(\\text{J})}{4,184}') }} /></p>
+                <br />
+                <br />
+                <p><strong>Sources:</strong> Kessler & Cour-Palais (1978), NASA ODPO, ESA Space Debris User's Handbook</p>
+              </div>
             </div>
           </div>
 
