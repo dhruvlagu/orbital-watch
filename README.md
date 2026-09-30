@@ -8,7 +8,7 @@
 
 ## What This Is
 
-Orbital Watch is an independent research project exploring how decades of Cold War "Frontier Mentality" created today's orbital debris crisis — and why international policy has failed to address it.
+Orbital Watch is an independent research project exploring how decades of Cold War "Frontier Mentality" created today's orbital debris crisis and why international policy has failed to address it.
 
 The central argument: active debris removal technology exists today. The barrier isn't scientific. It's a 1967 treaty clause that nobody intended to become a debris removal prohibition, interpreted by nations that have every geopolitical incentive to keep it ambiguous.
 

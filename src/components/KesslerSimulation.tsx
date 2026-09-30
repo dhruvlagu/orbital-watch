@@ -678,11 +678,7 @@ export default function KesslerSimulation() {
           </div>
         </div>
 
-        {isRunning && (
-          <div className="kesslerLockNotice">
-            <span>Parameters locked while cascade runs. Use Reset Orbit to change settings.</span>
-          </div>
-        )}
+
       </div>
 
       {/* Primary Simulation Canvas & Telemetry Overlay */}
@@ -698,7 +694,7 @@ export default function KesslerSimulation() {
         </div>
 
         <div className="kesslerFooterDisclaimer">
-          <span>Educational visualization of collision cascades in orbit.</span>
+          <span>Illustrative simulation for educational purposes, not a calibrated orbital propagator.</span>
         </div>
       </div>
 

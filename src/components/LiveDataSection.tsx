@@ -127,12 +127,12 @@ export default function LiveDataSection({ variant = "standalone" }: LiveDataSect
           </p>
         </div>
         <div className="liveData__headerActions">
-          <div className="liveData__metaRow" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <div className="liveData__metaRow liveData__metaRow--compact">
             <span className="badge badge--blue">
               UPDATED DAILY
             </span>
             {payload?.lastUpdatedAt ? (
-              <div className="liveData__meta" style={{ margin: 0 }}>
+              <div className="liveData__meta liveData__meta--noMargin">
                 Last updated: {hoursAgo(payload.lastUpdatedAt)}
               </div>
             ) : null}
@@ -143,7 +143,7 @@ export default function LiveDataSection({ variant = "standalone" }: LiveDataSect
       {(loading || payload) && (
         <div className="liveData__grid" ref={gridRef}>
           {loading
-            ? Array.from({ length: 4 }).map((_, idx) => (
+            ? Array.from({ length: metricCards.length }).map((_, idx) => (
                 <div className="card liveDataCard liveDataCard--skeleton" key={idx}>
                   <div className="liveDataCard__skeletonValue" />
                   <div className="liveDataCard__skeletonLabel" />

@@ -159,10 +159,9 @@ export default function AboutPage() {
       </div>
 
       {/* SECTION 3 — The Code Behind It */}
-      {/* ⚠️ MAINTENANCE NOTE: Code blocks below are STATIC COPIES of actual source files.
-           When updating the actual source code, you MUST update the corresponding
-           code block here to keep them in sync. This section's value depends on
-           the code being verbatim matches to the live implementation. */}
+      {/* ⚠️ MAINTENANCE NOTE: Code blocks below are excerpted from the source files.
+           Logging, error handling, and UI code are omitted for readability.
+           Only the core algorithms and logic are shown. */}
       <div id="the-code" className="aboutSection aboutSection--code">
         <div className="container">
           <div className="aboutSection__header reveal-item">
@@ -175,7 +174,8 @@ export default function AboutPage() {
 
           {/* BLOCK 1: Scheduled Data Refresh */}
           {/* SOURCE: api/cron/_spacetrackAuth.mjs + api/conjunctions.mjs
-               UPDATE THIS BLOCK if either file changes */}
+               GitHub: https://github.com/[USERNAME]/orbital-watch/blob/main/api/cron/_spacetrackAuth.mjs
+                        https://github.com/[USERNAME]/orbital-watch/blob/main/api/conjunctions.mjs */}
           <div className="codeBlock reveal-item" style={{ ["--reveal-i" as any]: 0 }}>
             <button
               className="codeBlock__header"
@@ -258,7 +258,7 @@ export default async function handler(req, res) {
       });
     }
     const records = JSON.parse(cdmJson);
-    res.setHeader("Cache-Control", "s-maxage=3600, stale-while-revalidate");
+    res.setHeader("Cache-Control", "public, s-maxage=300, stale-while-revalidate=600");
     return res.status(200).json({ records, lastUpdatedAt: lastChecked });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error reading cached data";
@@ -275,8 +275,8 @@ export default async function handler(req, res) {
           </div>
 
           {/* BLOCK 2: Kessler Cascade Simulation */}
-          {/* SOURCE: src/components/KesslerSimulation.tsx (generateDebris + triggerCascade functions + altitude center logic)
-               UPDATE THIS BLOCK if those functions change */}
+          {/* SOURCE: src/components/KesslerSimulation.tsx (generateDebris + triggerCascade functions + unit conversions)
+               GitHub: https://github.com/[USERNAME]/orbital-watch/blob/main/src/components/KesslerSimulation.tsx */}
           <div className="codeBlock reveal-item" style={{ ["--reveal-i" as any]: 1 }}>
             <button
               className="codeBlock__header"
@@ -300,15 +300,23 @@ export default async function handler(req, res) {
             <div id="block2-content" role="region" aria-label="Kessler Cascade Simulation code">
             {expandedBlocks.block2 && (
               <>
-                <pre className="technicalCode">{`// Simulation parameters
+                <pre className="technicalCode">{`// Simulation parameters (UI layer)
 const [objectCount, setObjectCount] = useState(15);
-const [radiusMin, setRadiusMin] = useState(0.25);
-const [radiusMax, setRadiusMax] = useState(0.4);
-const [inclinationMin, setInclinationMin] = useState(-0.4);
-const [inclinationMax, setInclinationMax] = useState(0.4);
+const [altitudeMin, setAltitudeMin] = useState(400);
+const [altitudeMax, setAltitudeMax] = useState(800);
+const [inclinationMinDeg, setInclinationMinDeg] = useState(-23);
+const [inclinationMaxDeg, setInclinationMaxDeg] = useState(23);
+
+// Unit conversions for physics calculations
+const kmToRadius = (km: number) => km / 2000;
+const degToRad = (deg: number) => deg * (Math.PI / 180);
+const radiusMin = kmToRadius(altitudeMin);
+const radiusMax = kmToRadius(altitudeMax);
+const inclinationMin = degToRad(inclinationMinDeg);
+const inclinationMax = degToRad(inclinationMaxDeg);
 
 // Derived altitude center for the slider
-const altitudeCenter = (radiusMin + radiusMax) / 2;
+const altitudeCenter = (altitudeMin + altitudeMax) / 2;
 
 // Physics-accurate debris generation with Keplerian orbital mechanics
 const generateDebris = (count: number, rMin: number, rMax: number, iMin: number, iMax: number) => {
@@ -508,7 +516,8 @@ const triggerCascade = () => {
 
           {/* CIVIC ACTION: Contact Your Representative */}
           {/* SOURCES: src/components/CivicActionSection.tsx + api/representative.mjs
-               UPDATE THIS BLOCK if either implementation changes */}
+               GitHub: https://github.com/[USERNAME]/orbital-watch/blob/main/src/components/CivicActionSection.tsx
+                        https://github.com/[USERNAME]/orbital-watch/blob/main/api/representative.mjs */}
           <div className="codeBlock reveal-item" style={{ ["--reveal-i" as any]: 2 }}>
             <button
               className="codeBlock__header"
@@ -556,6 +565,18 @@ const hasPlaceholder = messageText.includes(
   "[Add one sentence"
 );
 
+// ZIP code validation logic
+const cleanZip = zip.trim();
+if (!/^\d{5}(-\d{4})?$/.test(cleanZip)) {
+  setLookupError("Please enter a valid 5-digit US zip code (e.g., 90210).");
+  return;
+}
+const zipNum = parseInt(cleanZip.substring(0, 5));
+if (zipNum < 501 || zipNum > 99950) {
+  setLookupError("Please enter a valid US zip code (501-99950).");
+  return;
+}
+
 const handleCopyMessage = () => {
   if (!selectedAskId) return;
 
@@ -597,7 +618,7 @@ return res.status(200).json({
 
           {/* BLOCK 3: Kinetic Energy Calculator */}
           {/* SOURCE: src/pages/PhysicsPage.tsx (KE calculation + getDangerLevel function)
-               UPDATE THIS BLOCK if that code changes */}
+               GitHub: https://github.com/[USERNAME]/orbital-watch/blob/main/src/pages/PhysicsPage.tsx */}
           <div className="codeBlock reveal-item" style={{ ["--reveal-i" as any]: 3 }}>
             <button
               className="codeBlock__header"

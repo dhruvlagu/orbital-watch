@@ -579,17 +579,6 @@
   min-width: 280px;
 }
 
-.kesslerSimHeader__tag {
-  display: inline-block;
-  font-family: var(--font-body);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  color: var(--accent-blue);
-  text-transform: uppercase;
-  margin-bottom: 6px;
-}
-
 .kesslerSimHeader__title {
   font-size: 22px;
   margin: 0 0 6px;
@@ -813,6 +802,11 @@
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
   z-index: 50;
   pointer-events: auto;
+}
+
+.kesslerControlGrid .kesslerParam:first-child .tooltipContent {
+  left: 0;
+  right: auto;
 }
 
 .kesslerParam .tooltipContent--wide {

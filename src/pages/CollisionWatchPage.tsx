@@ -523,6 +523,7 @@ export default function CollisionWatchPage() {
             onClick={handleScrollIndicatorClick}
             role="button"
             tabIndex={0}
+            aria-label="Scroll down to explore"
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
                 handleScrollIndicatorClick();

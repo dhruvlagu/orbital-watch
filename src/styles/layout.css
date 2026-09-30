@@ -348,6 +348,16 @@
   min-height: 32px;
 }
 
+.liveData__metaRow--compact {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.liveData__meta--noMargin {
+  margin: 0;
+}
+
 .liveData__meta {
   color: var(--text-secondary);
   font-size: 13px;
@@ -1412,6 +1422,8 @@ html {
   background: var(--bg-secondary);
   border-top: 1px solid var(--border-subtle);
   padding: 48px 0;
+  position: relative;
+  z-index: 1;
 }
 
 .footer__grid {
@@ -2548,7 +2560,6 @@ html {
   background: linear-gradient(90deg, var(--accent-blue), #7c3aed);
   box-shadow: 0 0 12px rgba(0, 212, 255, 0.7);
   z-index: 9999;
-  transition: width 0.15s ease, opacity 0.3s ease;
   border-radius: 0 2px 2px 0;
   pointer-events: none;
 }
