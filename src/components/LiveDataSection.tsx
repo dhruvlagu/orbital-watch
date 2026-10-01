@@ -98,20 +98,19 @@ export default function LiveDataSection({ variant = "standalone" }: LiveDataSect
         id: "total-tracked",
         label: "Total tracked objects across all orbital regimes",
         value: payload ? animatedTotalTracked : "—",
+        context: "SATCAT catalog · in-orbit objects only",
       },
       {
         id: "added-30-days",
         label: "Objects added in last 30 days",
         value: payload ? animatedAddedLast30Days : "—",
+        context: "SATCAT additions over 30 days",
       },
       {
         id: "debris-ratio",
-        label: (
-          <>
-            DEBRIS-TO-PAYLOAD RATIO <span style={{ fontSize: "0.75em", opacity: 0.7 }}>(including defunct)</span>
-          </>
-        ),
+        label: "Debris-to-payload ratio",
         value: payload ? payload.data.debrisToPayloadRatio : "—",
+        context: "Includes defunct objects",
       },
     ],
     [animatedTotalTracked, animatedAddedLast30Days, payload],
@@ -123,7 +122,7 @@ export default function LiveDataSection({ variant = "standalone" }: LiveDataSect
         <div>
           <h2 className="liveData__title">Live Orbital Environment</h2>
           <p className="liveData__subtitle">
-            Real data from Space-Track.org, updated daily.
+            Real data from Space-Track.org.
           </p>
         </div>
         <div className="liveData__headerActions">
@@ -144,15 +143,18 @@ export default function LiveDataSection({ variant = "standalone" }: LiveDataSect
         <div className="liveData__grid" ref={gridRef}>
           {loading
             ? Array.from({ length: metricCards.length }).map((_, idx) => (
-                <div className="card liveDataCard liveDataCard--skeleton" key={idx}>
+                <div className={`card liveDataCard liveDataCard--skeleton${variant === "hero" ? " liveDataCard--hero" : ""}`} key={idx}>
                   <div className="liveDataCard__skeletonValue" />
                   <div className="liveDataCard__skeletonLabel" />
                 </div>
               ))
             : metricCards.map((metric) => (
-                <div className="card liveDataCard" key={metric.id}>
+                <div className={`card liveDataCard${variant === "hero" ? " liveDataCard--hero" : ""}`} key={metric.id}>
                   <div className="liveDataCard__value">{metric.value}</div>
                   <div className="liveDataCard__label">{metric.label}</div>
+                  {variant === "hero" && metric.context ? (
+                    <div className="liveDataCard__context">{metric.context}</div>
+                  ) : null}
                 </div>
               ))}
         </div>

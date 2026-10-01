@@ -14,6 +14,29 @@
   overflow: hidden;
 }
 
+.hero--home::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url(/hero-orbit.webp);
+  background-position: center bottom;
+  background-size: cover;
+  background-repeat: no-repeat;
+  filter: brightness(0.75) saturate(0.5);
+  z-index: -3;
+}
+
+.hero--home::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(10, 14, 26, 0.86) 0%, rgba(10, 14, 26, 0.72) 48%, rgba(10, 14, 26, 0.22) 78%, rgba(10, 14, 26, 0.12) 100%),
+    linear-gradient(to bottom, rgba(10, 14, 26, 0.28) 0%, rgba(10, 14, 26, 0.08) 58%, rgba(10, 14, 26, 0.42) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
 .starfieldCanvas {
   position: fixed;
   inset: 0;
@@ -22,22 +45,29 @@
   z-index: -1;
 }
 
+.hero--home .starfieldCanvas {
+  position: absolute;
+  z-index: 1;
+}
+
 .hero__overlay {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 48px 0 64px;
+  position: relative;
+  z-index: 1;
 }
 
 .hero__inner {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .hero__content {
   max-width: 880px;
-  text-align: center;
+  text-align: left;
 }
 
 .hero__label {
@@ -67,7 +97,7 @@
   font-size: 20px;
   color: var(--text-secondary);
   max-width: 880px;
-  margin: 0 auto 28px;
+  margin: 0 0 28px;
   opacity: 0;
   animation: hero-subheadline-in 0.7s ease-out forwards;
   animation-delay: 0.4s;
@@ -122,8 +152,8 @@
   margin-bottom: 4px;
   width: 100%;
   max-width: 880px;
-  margin-left: auto;
-  margin-right: auto;
+  margin-left: 0;
+  margin-right: 0;
   border-top: 1px solid var(--border-subtle);
   padding-top: 24px;
 }
@@ -214,6 +244,66 @@
 
   .heroStat {
     text-align: left;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero--home::before {
+    background-image: url(/hero-orbit-mobile.webp);
+  }
+
+  .hero__overlay {
+    align-items: flex-start;
+    padding-top: 56px;
+  }
+
+  .hero--home::after {
+    background: linear-gradient(to bottom, rgba(10, 14, 26, 0.84) 0%, rgba(10, 14, 26, 0.68) 64%, rgba(10, 14, 26, 0.38) 100%);
+  }
+
+  .liveData--hero .liveData__header,
+  .liveData--hero .liveData__headerActions,
+  .liveData--hero .liveData__metaRow--compact {
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+
+  .liveData--hero .liveData__header {
+    flex-direction: column;
+  }
+
+  .liveData--hero .liveData__headerActions {
+    margin-left: 0;
+  }
+
+  .liveData--hero .liveData__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.hero--home .hero__caption {
+  position: absolute;
+  bottom: 80px;
+  right: 20px;
+  padding: 4px 6px;
+  background: rgba(10, 14, 26, 0.78);
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
+  text-shadow: none;
+  text-align: right;
+  max-width: 280px;
+  line-height: 1.4;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@media (max-width: 768px) {
+  .hero--home .hero__caption {
+    bottom: 70px;
+    right: 16px;
+    left: 16px;
+    text-align: right;
+    max-width: none;
   }
 }
 
@@ -457,11 +547,11 @@
   padding: 3px;
   background: conic-gradient(from var(--trail-angle),
       transparent 0deg,
-      transparent 250deg,
-      rgba(0, 212, 100, 0.04) 270deg,
-      rgba(0, 212, 100, 0.18) 300deg,
-      rgba(0, 212, 100, 0.04) 330deg,
-      transparent 350deg);
+      transparent 200deg,
+      rgba(0, 212, 100, 0.02) 220deg,
+      rgba(0, 212, 100, 0.06) 300deg,
+      rgba(0, 212, 100, 0.02) 380deg,
+      transparent 400deg);
   -webkit-mask:
     linear-gradient(#fff 0 0) content-box,
     linear-gradient(#fff 0 0);
@@ -577,6 +667,112 @@
   font-size: 13px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+}
+
+/* Home hero live-data recipe: one frosted surface for every metric card. */
+.liveData--hero .liveData__grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.liveData--hero .liveData__grid > *:first-child {
+  grid-column: auto;
+}
+
+.liveData--hero .liveDataCard--hero {
+  display: flex;
+  flex-direction: column;
+  background: rgba(10, 14, 26, 0.42);
+  border: 1px solid var(--border-subtle);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.liveData--hero .liveDataCard--hero::before {
+  display: none;
+}
+
+.liveData--hero .liveDataCard--hero:hover {
+  transform: none;
+  border-color: var(--border-subtle);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.liveData--hero .liveDataCard__value {
+  color: var(--text-primary);
+  text-shadow: none;
+}
+
+.liveData--hero .liveDataCard--hero:first-child .liveDataCard__value {
+  color: var(--accent-blue);
+}
+
+.liveData--hero .liveDataCard__label,
+.liveData--hero .liveDataCard__context {
+  color: var(--text-primary);
+  text-shadow: none;
+}
+
+.liveData--hero .liveDataCard__label {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.liveData--hero .liveData__grid > *:first-child .liveDataCard__label {
+  white-space: normal;
+}
+
+.liveDataCard__context {
+  position: relative;
+  z-index: 1;
+  margin: auto 0 0;
+  padding-top: 8px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.hero--home .hero__headline,
+.hero--home .hero__label,
+.hero--home .badge {
+  text-shadow: none;
+  box-shadow: none;
+}
+
+.liveData--hero .badge--blue {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+}
+
+.liveData--hero .liveData__meta {
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* The conjunction alert belongs to the hero's live-data glass system. */
+.hero--home .cw__teaserCard {
+  background: rgba(10, 14, 26, 0.42);
+  border-color: var(--border-subtle);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.hero--home .cw__teaserCard::before {
+  display: none;
+}
+
+.hero--home .cw__teaserCard:hover {
+  transform: none;
+  border-color: var(--border-subtle);
+  background: rgba(10, 14, 26, 0.42);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .liveDataCard--skeleton {
@@ -2788,7 +2984,12 @@ html {
 
 .homeExploreCard {
   padding: 20px;
-  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  background: rgba(10, 14, 26, 0.42);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 4px 12px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -2797,24 +2998,14 @@ html {
 }
 
 .homeExploreCard::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
+  display: none;
 }
 
-.homeExploreCard:hover {
-  transform: translateY(-5px);
-  border-color: rgba(0, 212, 255, 0.25);
-  background: rgba(255, 255, 255, 0.05);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45), var(--glow-blue);
+.homeExplore .homeExploreCard:hover {
+  transform: none;
+  border-color: var(--border-subtle);
+  background: rgba(10, 14, 26, 0.42);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .homeExploreCard__icon {

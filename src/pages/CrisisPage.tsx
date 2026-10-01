@@ -287,7 +287,7 @@ function SputnikVisual() {
         ctx.stroke();
       }
 
-      angle += 0.012;
+      angle += 0.006;
       animationId = requestAnimationFrame(draw);
     };
 
@@ -408,7 +408,7 @@ function WarningVisual() {
       });
 
       satellites.forEach((s) => {
-        s.angle += s.speed;
+        s.angle += s.speed * 0.5;
         const sx = cx + Math.cos(s.angle) * s.orbit;
         const sy = cy + Math.sin(s.angle) * s.orbit;
 
@@ -594,7 +594,7 @@ function ScatterVisual() {
       const satY = cy + Math.sin(satAngle) * 75;
 
       if (state === "orbiting") {
-        satAngle += 0.016;
+        satAngle += 0.008;
         satTrail.push({ x: satX, y: satY });
         if (satTrail.length > 18) satTrail.shift();
 
@@ -621,7 +621,7 @@ function ScatterVisual() {
           missileY = missileStartY;
         }
       } else if (state === "launching") {
-        satAngle += 0.016;
+        satAngle += 0.008;
         satTrail.push({ x: satX, y: satY });
         if (satTrail.length > 18) satTrail.shift();
 
@@ -641,7 +641,7 @@ function ScatterVisual() {
         ctx.fill();
         ctx.shadowBlur = 0;
 
-        missileY -= 2.2;
+        missileY -= 1.1;
 
         // Exhaust trail
         ctx.beginPath();
@@ -820,7 +820,7 @@ function ImpactVisual() {
       ctx.setLineDash([]);
 
       if (state === "approach") {
-        const progress = time / 100;
+        const progress = time / 200;
 
         // Interpolate positions toward collision point (center)
         sat1.x = (cx - arm) + progress * arm;
@@ -864,7 +864,7 @@ function ImpactVisual() {
         ctx.fill();
         ctx.shadowBlur = 0;
 
-        if (time >= 100) {
+        if (time >= 200) {
           state = "impact";
           flashOpacity = 1.2;
           ringRadius = 2;
@@ -938,7 +938,7 @@ function ImpactVisual() {
       }
 
       time += 1;
-      if (time > 400) reset(w, h);
+      if (time > 800) reset(w, h);
       animationId = requestAnimationFrame(draw);
     };
 
@@ -1060,7 +1060,7 @@ function ConstellationVisual() {
         ctx.restore();
       });
 
-      angleOffset += 0.005;
+      angleOffset += 0.0025;
       animationId = requestAnimationFrame(draw);
     };
 

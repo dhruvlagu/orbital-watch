@@ -44,8 +44,10 @@ export default function HomePage() {
   const [liveOrbitalData, setLiveOrbitalData] = useState<LiveOrbitalResponse | null>(null);
   const [timeTick, setTimeTick] = useState(() => Date.now());
   const exploreGridRef = useRef<HTMLDivElement>(null);
+  const heroLiveDataRef = useRef<HTMLDivElement>(null);
 
   useCardSpotlight(exploreGridRef);
+  useCardSpotlight(heroLiveDataRef);
 
   useEffect(() => {
     const onScroll = () => {
@@ -107,7 +109,7 @@ export default function HomePage() {
 
   return (
     <>
-      <section className="hero">
+      <section className="hero hero--home">
         <StarfieldCanvas />
         <div className="hero__overlay">
           <div className="container hero__inner">
@@ -121,11 +123,11 @@ export default function HomePage() {
                 cascade could render low Earth orbit unusable for generations.
               </p>
 
-              <div className="hero__liveData">
+              <div className="hero__liveData" ref={heroLiveDataRef}>
                 <LiveDataSection variant="hero" />
 
                 {/* Conjunction teaser */}
-                <Link to="/collision-watch" className="cw__teaserCard" aria-label="View conjunction alerts on Collision Watch">
+                <Link to="/collision-watch" className="card cw__teaserCard" aria-label="View conjunction alerts on Collision Watch">
                   <div className="cw__teaserCard__left">
                     <span className="badge badge--red cw__teaserCard__badge--small">FEED</span>
                     <span className="cw__teaserCard__text cw__teaserCard__text--primary">
@@ -160,6 +162,10 @@ export default function HomePage() {
             }}
           >
             <div className="heroScrollIndicator__chevron" />
+          </div>
+
+          <div className="hero__caption">
+            Illustrative image. Not to scale.
           </div>
         </div>
       </section>
