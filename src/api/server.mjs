@@ -5,7 +5,6 @@ import { fileURLToPath } from "node:url";
 import { config } from "dotenv";
 
 config({ path: ".env" });
-config({ path: "./spacetrack.env" });
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -32,167 +31,38 @@ function safePath(requestPath) {
   return normalized === "/" ? "/index.html" : normalized;
 }
 
-let cachedCookieHeader = null;
-let cachedCookieIssuedAt = 0;
-const COOKIE_TTL_MS = 90 * 60 * 1000;
-const AUTH_URL = "https://www.space-track.org/ajaxauth/login";
-const SATCAT_QUERY_URL =
-  "https://www.space-track.org/basicspacedata/query/class/satcat/predicates/OBJECT_TYPE,LAUNCH,CURRENT,DECAY/format/json";
-
-function getCookieHeaderValue(headers) {
-  const rawCookies =
-    typeof headers.getSetCookie === "function" ? headers.getSetCookie() : null;
-
-  return rawCookies
-    ? rawCookies.map((cookie) => cookie.split(";")[0]).join("; ")
-    : headers.get("set-cookie")?.split(";")[0] ?? null;
-}
-
-function buildMetrics(records) {
-  const now = Date.now();
-  const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
-
-  const inOrbit = Array.isArray(records)
-    ? records.filter((r) => !r?.DECAY || String(r.DECAY).trim() === "")
-    : [];
-
-  const totalTracked = inOrbit.length;
-  const addedLast30Days = inOrbit.filter((record) => {
-        if (!record?.LAUNCH) return false;
-        const launchTime = Date.parse(record.LAUNCH);
-        return Number.isFinite(launchTime) && launchTime >= thirtyDaysAgo;
-      }).length;
-
-  const debrisCount = inOrbit.filter(
-    (r) => (r?.OBJECT_TYPE || "").toUpperCase() === "DEBRIS",
-  ).length;
-
-  const payloadCount = inOrbit.filter(
-    (r) => (r?.OBJECT_TYPE || "").toUpperCase() === "PAYLOAD",
-  ).length;
-
-  const debrisToPayloadRatio =
-    payloadCount > 0
-      ? `${(debrisCount / payloadCount).toFixed(1)}:1`
-      : "N/A";
-
-  return {
-    totalTracked,
-    addedLast30Days,
-    debrisToPayloadRatio,
-  };
-}
-
-async function authenticateWithSpaceTrack(user, pass) {
-  const authResponse = await fetch(AUTH_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: new URLSearchParams({ identity: user, password: pass }).toString(),
-  });
-
-  const cookieHeader = getCookieHeaderValue(authResponse.headers);
-
-  if (!authResponse.ok || !cookieHeader) {
-    throw new Error("Space-Track authentication failed.");
-  }
-
-  cachedCookieHeader = cookieHeader;
-  cachedCookieIssuedAt = Date.now();
-  return cookieHeader;
-}
-
-async function fetchSatcatData(user, pass) {
-  const hasFreshCookie = Boolean(
-    cachedCookieHeader && Date.now() - cachedCookieIssuedAt < COOKIE_TTL_MS,
-  );
-
-  let cookieHeader = hasFreshCookie ? cachedCookieHeader : null;
-
-  if (!cookieHeader) {
-    cookieHeader = await authenticateWithSpaceTrack(user, pass);
-  }
-
+async function proxyProductionEndpoint(req, res) {
   try {
-    const dataResponse = await fetch(SATCAT_QUERY_URL, {
-      headers: {
-        Cookie: cookieHeader,
-      },
+    const targetUrl = new URL(req.url || "/", "https://orbitalwatch.app");
+    const upstream = await fetch(targetUrl, {
+      method: req.method,
+      headers: { Accept: req.headers.accept || "application/json" },
     });
-
-    if (dataResponse.status === 401 || dataResponse.status === 403) {
-      throw new Error("Space-Track session expired.");
+    const body = Buffer.from(await upstream.arrayBuffer());
+    const headers = {};
+    for (const name of ["content-type", "cache-control"]) {
+      const value = upstream.headers.get(name);
+      if (value) headers[name] = value;
     }
-
-    if (!dataResponse.ok) {
-      throw new Error(`SATCAT query failed with status ${dataResponse.status}`);
-    }
-
-    return dataResponse;
+    res.writeHead(upstream.status, headers);
+    res.end(body);
   } catch (error) {
-    const shouldRetryWithFreshAuth =
-      cookieHeader === cachedCookieHeader &&
-      error instanceof Error &&
-      error.message === "Space-Track session expired.";
-
-    if (!shouldRetryWithFreshAuth) {
-      throw error;
-    }
-
-    cachedCookieHeader = null;
-    cachedCookieIssuedAt = 0;
-
-    const freshCookieHeader = await authenticateWithSpaceTrack(user, pass);
-    const retryResponse = await fetch(SATCAT_QUERY_URL, {
-      headers: {
-        Cookie: freshCookieHeader,
-      },
-    });
-
-    if (!retryResponse.ok) {
-      throw new Error(`SATCAT query failed with status ${retryResponse.status}`);
-    }
-
-    return retryResponse;
-  }
-}
-
-async function handleSpaceTrackProxy(req, res) {
-  try {
-    const user = process.env.SPACE_TRACK_USER;
-    const pass = process.env.SPACE_TRACK_PASS;
-
-    if (!user || !pass) {
-      res.writeHead(500, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({
-        error: "Missing SPACE_TRACK_USER or SPACE_TRACK_PASS environment variables.",
-      }));
-      return;
-    }
-
-    const dataResponse = await fetchSatcatData(user, pass);
-    const payload = await dataResponse.json();
-    const metrics = buildMetrics(payload);
-
-    res.writeHead(200, {
-      "Content-Type": "application/json",
-      "Cache-Control": "s-maxage=86400, stale-while-revalidate",
-    });
-    res.end(JSON.stringify(metrics));
-  } catch (error) {
-    res.writeHead(500, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({
-      error: error instanceof Error ? error.message : "Unknown Space-Track proxy error",
-    }));
+    console.error(
+      "[local-api] Production API proxy failed:",
+      error instanceof Error ? error.message : String(error),
+    );
+    res.writeHead(502, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "Unable to reach the production API." }));
   }
 }
 
 const server = http.createServer(async (req, res) => {
   try {
-    // Handle Space-Track API endpoint
-    if (req.url?.startsWith("/api/spacetrack/satcat")) {
-      return await handleSpaceTrackProxy(req, res);
+    if (
+      req.url?.startsWith("/api/spacetrack/satcat") ||
+      req.url?.startsWith("/api/spacetrack/conjunctions")
+    ) {
+      return await proxyProductionEndpoint(req, res);
     }
 
     const urlPath = safePath(req.url || "/");

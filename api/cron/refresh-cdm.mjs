@@ -9,10 +9,7 @@
 // auth headers will NOT be present since this is triggered externally.
 
 import { withRedis } from "../_redisClient.mjs";
-import {
-  getValidSessionCookie,
-  invalidateSessionCookie,
-} from "./_spacetrackAuth.mjs";
+import { getValidSessionCookie, logoutFromSpaceTrack } from "./_spacetrackAuth.mjs";
 
 // NOTE: We import dedupeRawCdmRecords as plain JS — the .ts source is only
 // available in the browser build. The logic is duplicated here intentionally
@@ -123,10 +120,6 @@ async function fetchCdmRecords(cookieHeader) {
     headers: { Cookie: cookieHeader },
   });
 
-  if (dataResponse.status === 401 || dataResponse.status === 403) {
-    throw new Error("Space-Track session expired.");
-  }
-
   if (!dataResponse.ok) {
     throw new Error(`Space-Track CDM query failed: HTTP ${dataResponse.status}`);
   }
@@ -141,6 +134,7 @@ export default async function handler(req, res) {
   let error = null;
   let fetched = null;
   let stored = null;
+  let ownsAttemptSlot = false;
   try {
     if (!isAuthorized(req)) {
       error = "Unauthorized — invalid or missing CRON_SECRET.";
@@ -148,13 +142,14 @@ export default async function handler(req, res) {
     }
 
     const attemptClaimed = await withRedis((c) =>
-      c.set("cdm:attempt:slot", "1", { NX: true, EX: 27_000 }),
+      c.set("cdm:attempt:slot", "1", { NX: true, EX: 7 * 60 * 60 }),
     );
     if (attemptClaimed !== "OK") {
       success = true;
       return res.status(200).json({ ok: true, skipped: true });
     }
 
+    ownsAttemptSlot = true;
     const todayUtc = new Date().toISOString().slice(0, 10);
     const dailyCount = await withRedis(async (c) => {
       const count = await c.incr(`cdm:count:${todayUtc}`);
@@ -172,22 +167,10 @@ export default async function handler(req, res) {
     const startedAt = Date.now();
 
     // 1. Get a fresh (or cached) session cookie
-    let cookieHeader = await getValidSessionCookie();
+    const cookieHeader = await getValidSessionCookie();
 
-    // 2. Query Space-Track for records created in the last 24h (with one retry on expiry)
-    let newRecords;
-    try {
-      newRecords = await fetchCdmRecords(cookieHeader);
-    } catch (err) {
-      if (err instanceof Error && err.message === "Space-Track session expired.") {
-        console.warn("[refresh-cdm] Session expired, re-authenticating...");
-        invalidateSessionCookie();
-        cookieHeader = await getValidSessionCookie();
-        newRecords = await fetchCdmRecords(cookieHeader);
-      } else {
-        throw err;
-      }
-    }
+    // 2. Query Space-Track once; failures consume the current slot.
+    const newRecords = await fetchCdmRecords(cookieHeader);
 
     if (!Array.isArray(newRecords)) {
       throw new Error("Space-Track CDM returned an unexpected non-array payload.");
@@ -240,6 +223,9 @@ export default async function handler(req, res) {
         "[refresh-cdm] Failed to write execution log:",
         logError instanceof Error ? logError.message : String(logError),
       );
+    }
+    if (ownsAttemptSlot) {
+      await logoutFromSpaceTrack();
     }
   }
 }

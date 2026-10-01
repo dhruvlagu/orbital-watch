@@ -1,372 +1,140 @@
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 
+function representativeLookupPlugin(apiKey: string | undefined) {
+  return {
+    name: "representative-lookup",
+    configureServer(server: any) {
+      const handleRepresentativeRoute = async (req: any, res: any) => {
+        try {
+          const url = new URL(req.url || "", `http://${req.headers.host || "localhost"}`);
+          const zip = url.searchParams.get("zip") || url.searchParams.get("q");
+          if (!zip) {
+            res.statusCode = 400;
+            res.setHeader("Content-Type", "application/json");
+            res.end(JSON.stringify({ error: "Missing or invalid zip code parameter." }));
+            return;
+          }
+
+          if (!apiKey) {
+            res.statusCode = 500;
+            res.setHeader("Content-Type", "application/json");
+            res.end(JSON.stringify({ error: "Missing GEOCODIO_API_KEY environment variable." }));
+            return;
+          }
+
+          const geocodioUrl =
+            `https://api.geocod.io/v1.9/geocode?q=${encodeURIComponent(zip.trim())}` +
+            `&fields=cd&api_key=${apiKey}`;
+          const apiResponse = await fetch(geocodioUrl);
+          if (!apiResponse.ok) {
+            res.statusCode = 502;
+            res.setHeader("Content-Type", "application/json");
+            res.end(JSON.stringify({ error: "Unable to reach address lookup service." }));
+            return;
+          }
+
+          const data: any = await apiResponse.json();
+          const results = data.results;
+          if (!Array.isArray(results) || results.length === 0) {
+            res.statusCode = 200;
+            res.setHeader("Content-Type", "application/json");
+            res.end(JSON.stringify({ noMatch: true, message: "No match found for this zip code." }));
+            return;
+          }
+
+          let bestDistrict: any = null;
+          let maxProportion = -1;
+          for (const result of results) {
+            const districts = result.fields?.congressional_districts;
+            if (Array.isArray(districts)) {
+              for (const district of districts) {
+                const proportion = typeof district.proportion === "number" ? district.proportion : 1;
+                if (proportion > maxProportion) {
+                  maxProportion = proportion;
+                  bestDistrict = district;
+                }
+              }
+            }
+          }
+
+          const noMatch = (message: string) => {
+            res.statusCode = 200;
+            res.setHeader("Content-Type", "application/json");
+            res.end(JSON.stringify({ noMatch: true, message }));
+          };
+          if (!bestDistrict) {
+            noMatch("No congressional district found for this zip code.");
+            return;
+          }
+
+          const legislators = bestDistrict.current_legislators;
+          if (!Array.isArray(legislators) || legislators.length === 0) {
+            noMatch("No legislators found for this district.");
+            return;
+          }
+
+          const representative = legislators.find((legislator: any) => legislator.type === "representative");
+          if (!representative) {
+            noMatch("No House representative found for this district.");
+            return;
+          }
+
+          const bio = representative.bio || {};
+          const contact = representative.contact || {};
+          const representativeName =
+            `${bio.first_name || ""} ${bio.last_name || ""}`.trim() || "Representative";
+          const districtNumber = typeof bestDistrict.district_number === "number"
+            ? bestDistrict.district_number
+            : parseInt(bestDistrict.district_number || "0", 10);
+          const matchProportion = maxProportion > 0 ? maxProportion : 1;
+
+          res.statusCode = 200;
+          res.setHeader("Content-Type", "application/json");
+          res.end(JSON.stringify({
+            representativeName,
+            district: districtNumber,
+            matchProportion,
+            isAmbiguousMatch: matchProportion < 0.9,
+            contact: {
+              contactForm: contact.contact_form || null,
+              officialSite: contact.url || null,
+              phone: contact.phone || null,
+              mailingAddress: contact.address || null,
+            },
+          }));
+        } catch (error) {
+          res.statusCode = 500;
+          res.setHeader("Content-Type", "application/json");
+          res.end(JSON.stringify({
+            error: error instanceof Error ? error.message : "Failed to perform representative lookup.",
+          }));
+        }
+      };
+
+      server.middlewares.use("/api/spacetrack/representative", handleRepresentativeRoute);
+      server.middlewares.use("/api/representative", handleRepresentativeRoute);
+    },
+  };
+}
+
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), "");
+  const env = loadEnv(mode, process.cwd(), "GEOCODIO_");
 
   return {
-    plugins: [
-      react(),
-      {
-        name: "space-track-proxy",
-        configureServer(server) {
-          let cachedCookieHeader: string | null = null;
-          let cachedCookieIssuedAt = 0;
-          const COOKIE_TTL_MS = 90 * 60 * 1000;
-          const AUTH_URL = "https://www.space-track.org/ajaxauth/login";
-
-          const getCookieHeaderValue = (headers: Headers) => {
-            const rawCookies = (headers as Headers & { getSetCookie?: () => string[] }).getSetCookie?.();
-            return rawCookies
-              ? rawCookies.map((cookie) => cookie.split(";")[0]).join("; ")
-              : headers.get("set-cookie")?.split(";")[0] ?? null;
-          };
-
-          const authenticateWithSpaceTrack = async (user: string, pass: string) => {
-            const authResponse = await fetch(AUTH_URL, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-              },
-              body: new URLSearchParams({ identity: user, password: pass }).toString(),
-            });
-
-            const cookieHeader = getCookieHeaderValue(authResponse.headers);
-            if (!authResponse.ok || !cookieHeader) {
-              throw new Error("Space-Track authentication failed.");
-            }
-
-            cachedCookieHeader = cookieHeader;
-            cachedCookieIssuedAt = Date.now();
-            return cookieHeader;
-          };
-
-          // ─── Spacetrack Satcat Endpoint ──────────────────────────────────
-          server.middlewares.use("/api/spacetrack/satcat", async (_req, res) => {
-            try {
-              const user = env.SPACE_TRACK_USER || process.env.SPACE_TRACK_USER;
-              const pass = env.SPACE_TRACK_PASS || process.env.SPACE_TRACK_PASS;
-
-              if (!user || !pass) {
-                res.statusCode = 500;
-                res.setHeader("Content-Type", "application/json");
-                res.end(
-                  JSON.stringify({
-                    error:
-                      "Missing SPACE_TRACK_USER or SPACE_TRACK_PASS environment variables.",
-                  }),
-                );
-                return;
-              }
-
-              const SATCAT_QUERY_URL =
-                "https://www.space-track.org/basicspacedata/query/class/satcat/predicates/OBJECT_TYPE,LAUNCH,CURRENT,DECAY/format/json";
-
-              const buildMetrics = (records: Array<Record<string, unknown>>) => {
-                const now = Date.now();
-                const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
-                const inOrbit = Array.isArray(records)
-                  ? records.filter((r) => !r?.DECAY || String(r.DECAY).trim() === "")
-                  : [];
-                const totalTracked = inOrbit.length;
-                const addedLast30Days = inOrbit.filter((record) => {
-                  const launch = record?.LAUNCH as string | undefined;
-                  if (!launch) return false;
-                  const launchTime = Date.parse(launch);
-                  return Number.isFinite(launchTime) && launchTime >= thirtyDaysAgo;
-                }).length;
-                const debrisCount = inOrbit.filter(
-                  (r) => (r?.OBJECT_TYPE as string | undefined)?.toUpperCase() === "DEBRIS",
-                ).length;
-
-                const payloadCount = inOrbit.filter(
-                  (r) => (r?.OBJECT_TYPE as string | undefined)?.toUpperCase() === "PAYLOAD",
-                ).length;
-
-                const debrisToPayloadRatio =
-                  payloadCount > 0
-                    ? `${(debrisCount / payloadCount).toFixed(1)}:1`
-                    : "N/A";
-
-                return {
-                  totalTracked,
-                  addedLast30Days,
-                  debrisToPayloadRatio,
-                };
-              };
-
-              const fetchSatcatData = async () => {
-                const hasFreshCookie = Boolean(
-                  cachedCookieHeader && Date.now() - cachedCookieIssuedAt < COOKIE_TTL_MS,
-                );
-
-                let cookieHeader = hasFreshCookie ? cachedCookieHeader : null;
-                if (!cookieHeader) {
-                  cookieHeader = await authenticateWithSpaceTrack(user, pass);
-                }
-
-                try {
-                  const dataResponse = await fetch(SATCAT_QUERY_URL, {
-                    headers: {
-                      Cookie: cookieHeader,
-                    },
-                  });
-
-                  if (dataResponse.status === 401 || dataResponse.status === 403) {
-                    throw new Error("Space-Track session expired.");
-                  }
-
-                  if (!dataResponse.ok) {
-                    throw new Error(`SATCAT query failed with status ${dataResponse.status}`);
-                  }
-
-                  return dataResponse;
-                } catch (error) {
-                  if (!(error instanceof Error) || error.message !== "Space-Track session expired.") {
-                    throw error;
-                  }
-
-                  cachedCookieHeader = null;
-                  cachedCookieIssuedAt = 0;
-                  const freshCookieHeader = await authenticateWithSpaceTrack(user, pass);
-                  const retryResponse = await fetch(SATCAT_QUERY_URL, {
-                    headers: {
-                      Cookie: freshCookieHeader,
-                    },
-                  });
-
-                  if (!retryResponse.ok) {
-                    throw new Error(`SATCAT query failed with status ${retryResponse.status}`);
-                  }
-
-                  return retryResponse;
-                }
-              };
-
-              const dataResponse = await fetchSatcatData();
-              const payload = await dataResponse.json();
-              const metrics = buildMetrics(payload as Array<Record<string, unknown>>);
-              res.statusCode = 200;
-              res.setHeader("Content-Type", "application/json");
-              res.setHeader("Cache-Control", "s-maxage=86400, stale-while-revalidate");
-              res.end(JSON.stringify(metrics));
-            } catch (error) {
-              res.statusCode = 500;
-              res.setHeader("Content-Type", "application/json");
-              res.end(
-                JSON.stringify({
-                  error:
-                    error instanceof Error ? error.message : "Unknown Space-Track proxy error",
-                }),
-              );
-            }
-          });
-
-          // ─── Conjunctions Endpoint ───────────────────────────────────────
-          const handleConjunctionsRoute = async (_req: unknown, res: any) => {
-            try {
-              const user = env.SPACE_TRACK_USER || process.env.SPACE_TRACK_USER;
-              const pass = env.SPACE_TRACK_PASS || process.env.SPACE_TRACK_PASS;
-
-              if (!user || !pass) {
-                res.statusCode = 500;
-                res.setHeader("Content-Type", "application/json");
-                res.end(
-                  JSON.stringify({
-                    error:
-                      "Missing SPACE_TRACK_USER or SPACE_TRACK_PASS environment variables.",
-                  }),
-                );
-                return;
-              }
-
-              const CDM_QUERY_URL =
-                "https://www.space-track.org/basicspacedata/query/class/cdm_public/TCA/>now/orderby/TCA asc/limit/25/format/json";
-
-              const fetchCdmData = async () => {
-                const hasFreshCookie = Boolean(
-                  cachedCookieHeader && Date.now() - cachedCookieIssuedAt < COOKIE_TTL_MS,
-                );
-
-                let cookieHeader = hasFreshCookie ? cachedCookieHeader : null;
-                if (!cookieHeader) {
-                  cookieHeader = await authenticateWithSpaceTrack(user, pass);
-                }
-
-                try {
-                  const dataResponse = await fetch(CDM_QUERY_URL, {
-                    headers: {
-                      Cookie: cookieHeader,
-                    },
-                  });
-
-                  if (dataResponse.status === 401 || dataResponse.status === 403) {
-                    throw new Error("Space-Track session expired.");
-                  }
-
-                  if (!dataResponse.ok) {
-                    throw new Error(`CDM query failed with status ${dataResponse.status}`);
-                  }
-
-                  return dataResponse;
-                } catch (error) {
-                  if (!(error instanceof Error) || error.message !== "Space-Track session expired.") {
-                    throw error;
-                  }
-
-                  cachedCookieHeader = null;
-                  cachedCookieIssuedAt = 0;
-                  const freshCookieHeader = await authenticateWithSpaceTrack(user, pass);
-                  const retryResponse = await fetch(CDM_QUERY_URL, {
-                    headers: {
-                      Cookie: freshCookieHeader,
-                    },
-                  });
-
-                  if (!retryResponse.ok) {
-                    throw new Error(`CDM query failed with status ${retryResponse.status}`);
-                  }
-
-                  return retryResponse;
-                }
-              };
-
-              const dataResponse = await fetchCdmData();
-              const payload = await dataResponse.json();
-              res.statusCode = 200;
-              res.setHeader("Content-Type", "application/json");
-              res.setHeader("Cache-Control", "s-maxage=3600, stale-while-revalidate");
-              res.end(JSON.stringify({ records: payload, lastUpdatedAt: new Date().toISOString() }));
-            } catch (error) {
-              res.statusCode = 500;
-              res.setHeader("Content-Type", "application/json");
-              res.end(
-                JSON.stringify({
-                  error:
-                    error instanceof Error ? error.message : "Unknown Space-Track proxy error",
-                  details: error instanceof Error ? error.stack : undefined,
-                }),
-              );
-            }
-          };
-
-          const handleRepresentativeRoute = async (req: any, res: any) => {
-            try {
-              const urlObj = new URL(req.url || "", `http://${req.headers.host || "localhost"}`);
-              const zip = urlObj.searchParams.get("zip") || urlObj.searchParams.get("q");
-              if (!zip) {
-                res.statusCode = 400;
-                res.setHeader("Content-Type", "application/json");
-                res.end(JSON.stringify({ error: "Missing or invalid zip code parameter." }));
-                return;
-              }
-
-              const apiKey = env.GEOCODIO_API_KEY || process.env.GEOCODIO_API_KEY;
-              if (!apiKey) {
-                res.statusCode = 500;
-                res.setHeader("Content-Type", "application/json");
-                res.end(JSON.stringify({ error: "Missing GEOCODIO_API_KEY environment variable." }));
-                return;
-              }
-
-              const geocodioUrl = `https://api.geocod.io/v1.9/geocode?q=${encodeURIComponent(zip.trim())}&fields=cd&api_key=${apiKey}`;
-              const apiRes = await fetch(geocodioUrl);
-              if (!apiRes.ok) {
-                res.statusCode = 502;
-                res.setHeader("Content-Type", "application/json");
-                res.end(JSON.stringify({ error: "Unable to reach address lookup service." }));
-                return;
-              }
-
-              const data: any = await apiRes.json();
-              const results = data.results;
-
-              if (!Array.isArray(results) || results.length === 0) {
-                res.statusCode = 200;
-                res.setHeader("Content-Type", "application/json");
-                res.end(JSON.stringify({ noMatch: true, message: "No match found for this zip code." }));
-                return;
-              }
-
-              let bestDistrict: any = null;
-              let maxProportion = -1;
-
-              for (const result of results) {
-                const districts = result.fields?.congressional_districts;
-                if (Array.isArray(districts) && districts.length > 0) {
-                  for (const dist of districts) {
-                    const prop = typeof dist.proportion === "number" ? dist.proportion : 1;
-                    if (prop > maxProportion) {
-                      maxProportion = prop;
-                      bestDistrict = dist;
-                    }
-                  }
-                }
-              }
-
-              if (!bestDistrict) {
-                res.statusCode = 200;
-                res.setHeader("Content-Type", "application/json");
-                res.end(JSON.stringify({ noMatch: true, message: "No congressional district found for this zip code." }));
-                return;
-              }
-
-              const legislators = bestDistrict.current_legislators;
-              if (!Array.isArray(legislators) || legislators.length === 0) {
-                res.statusCode = 200;
-                res.setHeader("Content-Type", "application/json");
-                res.end(JSON.stringify({ noMatch: true, message: "No legislators found for this district." }));
-                return;
-              }
-
-              const rep = legislators.find((l: any) => l.type === "representative");
-              if (!rep) {
-                res.statusCode = 200;
-                res.setHeader("Content-Type", "application/json");
-                res.end(JSON.stringify({ noMatch: true, message: "No House representative found for this district." }));
-                return;
-              }
-
-              const bio = rep.bio || {};
-              const contact = rep.contact || {};
-              const firstName = bio.first_name || "";
-              const lastName = bio.last_name || "";
-              const representativeName = `${firstName} ${lastName}`.trim() || "Representative";
-              const districtNumber = typeof bestDistrict.district_number === "number"
-                ? bestDistrict.district_number
-                : parseInt(bestDistrict.district_number || "0", 10);
-
-              const matchProportion = maxProportion > 0 ? maxProportion : 1;
-              const isAmbiguousMatch = matchProportion < 0.9;
-
-              res.statusCode = 200;
-              res.setHeader("Content-Type", "application/json");
-              res.end(JSON.stringify({
-                representativeName,
-                district: districtNumber,
-                matchProportion,
-                isAmbiguousMatch,
-                contact: {
-                  contactForm: contact.contact_form || null,
-                  officialSite: contact.url || null,
-                  phone: contact.phone || null,
-                  mailingAddress: contact.address || null,
-                },
-              }));
-            } catch (err: any) {
-              res.statusCode = 500;
-              res.setHeader("Content-Type", "application/json");
-              res.end(JSON.stringify({ error: err?.message || "Failed to perform representative lookup." }));
-            }
-          };
-
-          server.middlewares.use("/api/spacetrack/conjunctions", handleConjunctionsRoute);
-          server.middlewares.use("/api/conjunctions", handleConjunctionsRoute);
-          server.middlewares.use("/api/spacetrack/representative", handleRepresentativeRoute);
-          server.middlewares.use("/api/representative", handleRepresentativeRoute);
+    plugins: [react(), representativeLookupPlugin(env.GEOCODIO_API_KEY)],
+    server: {
+      proxy: {
+        "/api/spacetrack/satcat": {
+          target: "https://orbitalwatch.app",
+          changeOrigin: true,
+        },
+        "/api/spacetrack/conjunctions": {
+          target: "https://orbitalwatch.app",
+          changeOrigin: true,
         },
       },
-    ],
+    },
     build: {
       rollupOptions: {
         output: {
@@ -378,7 +146,7 @@ export default defineConfig(({ mode }) => {
               if (id.includes("chart.js") || id.includes("react-chartjs-2")) {
                 return "charts";
               }
-              return "deps"; // Other third party dependencies
+              return "deps";
             }
           },
         },

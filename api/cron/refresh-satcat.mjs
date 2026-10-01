@@ -1,16 +1,14 @@
 // api/cron/refresh-satcat.mjs
-// Vercel Cron Job handler — runs once daily at 18:12 UTC.
+// Vercel Cron Job handler — attempts one SATCAT refresh per UTC day at 18:12.
 // This is the ONLY place in the codebase that queries Space-Track's SATCAT endpoint.
 // User-facing /api/spacetrack reads the result from Redis; it never calls Space-Track.
+// Refreshes use the SATCAT file delta; full fetches require explicit bootstrap opt-in.
 //
 // Schedule: "12 18 * * *" (18:12 UTC, after 18th SDS ~17:00 daily SATCAT update)
 // Offset from top-of-hour per Space-Track's explicit request (avoid busy windows).
 
 import { withRedis } from "../_redisClient.mjs";
-import {
-  getValidSessionCookie,
-  invalidateSessionCookie,
-} from "./_spacetrackAuth.mjs";
+import { getValidSessionCookie, logoutFromSpaceTrack } from "./_spacetrackAuth.mjs";
 
 const SATCAT_BASE_URL =
   "https://www.space-track.org/basicspacedata/query/class/satcat";
@@ -107,62 +105,34 @@ function normalizeCatalogEntry(record) {
 // ─── Space-Track query ────────────────────────────────────────────────────────
 
 async function fetchSatcatRecords(cookieHeader, fileNumber) {
-  // Pagination is required because SATCAT contains tens of thousands of records (~34,000–40,000 objects).
-  // Single-request fetching is unsafe as it may timeout or return truncated results without error.
-  // Page size of 5000 balances request size with reliability; can be adjusted if Space-Track recommends otherwise.
-  const pageSize = 5000;
-  const orderBy = "NORAD_CAT_ID"; // Deterministic ordering to prevent page overlap/skip
+  const queryUrl = fileNumber === null
+    ? `${SATCAT_BASE_URL}/predicates/${PREDICATES}/format/json`
+    : `${SATCAT_BASE_URL}/file/>${fileNumber}/predicates/${PREDICATES}/format/json`;
 
-  let allRecords = [];
-  let offset = 0;
-  let page;
+  console.log(
+    fileNumber === null
+      ? "[refresh-satcat] Full bootstrap fetch."
+      : `[refresh-satcat] Incremental fetch — file > ${fileNumber}`,
+  );
 
-  do {
-    let queryUrl;
-    if (fileNumber) {
-      // Incremental: only objects updated since the last known file number
-      queryUrl = `${SATCAT_BASE_URL}/FILE/>${fileNumber}/predicates/${PREDICATES}/orderby/${orderBy}/limit/${pageSize},${offset}/format/json`;
-      if (offset === 0) {
-        console.log(`[refresh-satcat] Incremental fetch — file > ${fileNumber}`);
-      }
-    } else {
-      // First run: full snapshot
-      queryUrl = `${SATCAT_BASE_URL}/predicates/${PREDICATES}/orderby/${orderBy}/limit/${pageSize},${offset}/format/json`;
-      if (offset === 0) {
-        console.log("[refresh-satcat] Full fetch — first run (no stored file number).");
-      }
-    }
+  const dataResponse = await fetch(queryUrl, {
+    headers: { Cookie: cookieHeader },
+  });
 
-    const dataResponse = await fetch(queryUrl, {
-      headers: { Cookie: cookieHeader },
-    });
+  if (dataResponse.status === 401 || dataResponse.status === 403) {
+    throw new Error(`Space-Track SATCAT query failed: HTTP ${dataResponse.status}`);
+  }
 
-    if (dataResponse.status === 401 || dataResponse.status === 403) {
-      throw new Error("Space-Track session expired.");
-    }
+  if (!dataResponse.ok) {
+    throw new Error(`Space-Track SATCAT query failed: HTTP ${dataResponse.status}`);
+  }
 
-    if (!dataResponse.ok) {
-      throw new Error(`Space-Track SATCAT query failed: HTTP ${dataResponse.status}`);
-    }
+  const records = await dataResponse.json();
+  if (!Array.isArray(records)) {
+    throw new Error("Space-Track SATCAT query returned a non-array response.");
+  }
 
-    page = await dataResponse.json();
-
-    if (!Array.isArray(page)) {
-      throw new Error(`Space-Track SATCAT query returned non-array response`);
-    }
-
-    console.log(`[refresh-satcat] Fetched page: ${page.length} records at offset ${offset}`);
-    allRecords = allRecords.concat(page);
-
-    // Stop if we received fewer records than the page size (final page)
-    if (page.length < pageSize) {
-      break;
-    }
-
-    offset += pageSize;
-  } while (true);
-
-  return allRecords;
+  return records;
 }
 
 // ─── Handler ──────────────────────────────────────────────────────────────────
@@ -171,11 +141,22 @@ export default async function handler(req, res) {
   let success = false;
   let error = null;
   let metrics;
+  let ownsAttemptSlot = false;
   try {
     if (!isAuthorized(req)) {
       error = "Unauthorized — invalid or missing CRON_SECRET.";
       return res.status(401).json({ error: "Unauthorized — invalid or missing CRON_SECRET." });
     }
+
+    const todayUtc = new Date().toISOString().slice(0, 10);
+    const attemptClaimed = await withRedis((c) =>
+      c.set(`satcat:attempt:${todayUtc}`, "1", { NX: true, EX: 36 * 60 * 60 }),
+    );
+    if (attemptClaimed !== "OK") {
+      success = true;
+      return res.status(200).json({ ok: true, skipped: true });
+    }
+    ownsAttemptSlot = true;
 
     console.log("[refresh-satcat] Starting SATCAT refresh...");
     const startedAt = Date.now();
@@ -186,32 +167,20 @@ export default async function handler(req, res) {
     });
 
     const hadCatalog = Boolean(storedCatalogJson);
-    const fileNumber = storedFileNumber ? Number(storedFileNumber) : null;
-    const forceFullFetch = !hadCatalog && fileNumber !== null;
-    if (forceFullFetch) {
-      console.log(
-        "[refresh-satcat] Missing satcat:catalog with existing fileNumber — forcing full snapshot fetch to bootstrap the catalog.",
+    const needsBootstrap = !hadCatalog || storedFileNumber === null;
+    if (needsBootstrap && process.env.SATCAT_ALLOW_BOOTSTRAP !== "true") {
+      throw new Error(
+        "SATCAT catalog or file number is missing; a bootstrap is needed. " +
+          'Set SATCAT_ALLOW_BOOTSTRAP="true" to allow one full fetch.',
       );
     }
+    const fileNumber = needsBootstrap ? null : Number(storedFileNumber);
 
     // 2. Get a fresh (or cached) session cookie
-    let cookieHeader = await getValidSessionCookie();
+    const cookieHeader = await getValidSessionCookie();
 
-    // 3. Query Space-Track (with one retry on session expiry)
-    const queryFileNumber = forceFullFetch ? null : fileNumber;
-    let records;
-    try {
-      records = await fetchSatcatRecords(cookieHeader, queryFileNumber);
-    } catch (err) {
-      if (err instanceof Error && err.message === "Space-Track session expired.") {
-        console.warn("[refresh-satcat] Session expired, re-authenticating...");
-        invalidateSessionCookie();
-        cookieHeader = await getValidSessionCookie();
-        records = await fetchSatcatRecords(cookieHeader, queryFileNumber);
-      } else {
-        throw err;
-      }
-    }
+    // 3. Query Space-Track once; failures consume today's attempt.
+    const records = await fetchSatcatRecords(cookieHeader, fileNumber);
 
     console.log(`[refresh-satcat] Fetched ${records.length} records.`);
 
@@ -304,6 +273,9 @@ export default async function handler(req, res) {
         "[refresh-satcat] Failed to write execution log:",
         logError instanceof Error ? logError.message : String(logError),
       );
+    }
+    if (ownsAttemptSlot) {
+      await logoutFromSpaceTrack();
     }
   }
 }

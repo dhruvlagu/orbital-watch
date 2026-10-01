@@ -4,6 +4,7 @@
 // Never import this from user-facing endpoints — only from cron handlers.
 
 const AUTH_URL = "https://www.space-track.org/ajaxauth/login";
+const LOGOUT_URL = "https://www.space-track.org/ajaxauth/logout";
 const COOKIE_TTL_MS = 90 * 60 * 1000; // 90 minutes
 
 let cachedCookieHeader = null;
@@ -86,9 +87,27 @@ export async function getValidSessionCookie() {
 }
 
 /**
- * Invalidates the in-memory session cookie cache (used on auth failure before retry).
+ * Ends the current Space-Track session and clears its in-memory cookie.
+ * Logout is best effort so cleanup cannot fail a cron invocation.
  */
-export function invalidateSessionCookie() {
+export async function logoutFromSpaceTrack() {
+  const cookieHeader = cachedCookieHeader;
   cachedCookieHeader = null;
   cachedCookieIssuedAt = 0;
+
+  if (!cookieHeader) return;
+
+  try {
+    const response = await fetch(LOGOUT_URL, {
+      headers: { Cookie: cookieHeader },
+    });
+    if (!response.ok) {
+      console.warn(`[SpaceTrack Auth] Logout failed (HTTP ${response.status}).`);
+    }
+  } catch (error) {
+    console.warn(
+      "[SpaceTrack Auth] Logout request failed:",
+      error instanceof Error ? error.message : String(error),
+    );
+  }
 }
