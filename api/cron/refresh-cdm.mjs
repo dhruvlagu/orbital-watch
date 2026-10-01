@@ -147,6 +147,27 @@ export default async function handler(req, res) {
       return res.status(401).json({ error: "Unauthorized — invalid or missing CRON_SECRET." });
     }
 
+    const attemptClaimed = await withRedis((c) =>
+      c.set("cdm:attempt:slot", "1", { NX: true, EX: 27_000 }),
+    );
+    if (attemptClaimed !== "OK") {
+      success = true;
+      return res.status(200).json({ ok: true, skipped: true });
+    }
+
+    const todayUtc = new Date().toISOString().slice(0, 10);
+    const dailyCount = await withRedis(async (c) => {
+      const count = await c.incr(`cdm:count:${todayUtc}`);
+      if (count === 1) {
+        await c.expire(`cdm:count:${todayUtc}`, 36 * 60 * 60);
+      }
+      return count;
+    });
+    if (dailyCount > 3) {
+      success = true;
+      return res.status(200).json({ ok: true, skipped: true });
+    }
+
     console.log("[refresh-cdm] Starting CDM refresh...");
     const startedAt = Date.now();
 
