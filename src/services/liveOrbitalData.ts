@@ -54,7 +54,7 @@ async function fetchLiveMetrics(): Promise<{ data: LiveOrbitalData; lastUpdatedA
   if (response.status === 503) {
     // Data not yet available — cron hasn't run yet on this deployment.
     // Throw a typed error so the UI can show an appropriate message.
-    throw new Error("Orbital data not yet available — updated daily.");
+    throw new Error("Orbital data not yet available. Updated daily.");
   }
 
   if (!response.ok) {

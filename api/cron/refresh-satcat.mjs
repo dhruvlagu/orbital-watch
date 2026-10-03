@@ -1,5 +1,5 @@
 // api/cron/refresh-satcat.mjs
-// Vercel Cron Job handler — attempts one SATCAT refresh per UTC day at 18:12.
+// Vercel Cron Job handler: attempts one SATCAT refresh per UTC day at 18:12.
 // This is the ONLY place in the codebase that queries Space-Track's SATCAT endpoint.
 // User-facing /api/spacetrack reads the result from Redis; it never calls Space-Track.
 // Refreshes use the SATCAT file delta; full fetches require explicit bootstrap opt-in.

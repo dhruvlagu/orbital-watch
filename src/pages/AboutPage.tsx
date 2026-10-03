@@ -59,7 +59,7 @@ export default function AboutPage() {
             <div className="originText">
               <p className="lead">
                 This site began as a history research project exploring how Cold War &quot;Frontier Mentality&quot;
-                created today&apos;s orbital debris crisis. A classroom question—whether international policy can evolve faster than debris multiplies—expanded into an independent research project spanning historical decision-making, orbital physics, and international law.
+                created today&apos;s orbital debris crisis. A classroom question about whether international policy can evolve faster than debris multiplies expanded into an independent research project spanning historical decision-making, orbital physics, and international law.
               </p>
               <div className="originCredits">
                 <div className="creditsItem">
@@ -173,9 +173,10 @@ export default function AboutPage() {
           </div>
 
           {/* BLOCK 1: Scheduled Data Refresh */}
-          {/* SOURCE: api/cron/_spacetrackAuth.mjs + api/conjunctions.mjs
-               GitHub: https://github.com/[USERNAME]/orbital-watch/blob/main/api/cron/_spacetrackAuth.mjs
-                        https://github.com/[USERNAME]/orbital-watch/blob/main/api/conjunctions.mjs */}
+          {/* SOURCE: api/cron/refresh-satcat.mjs + api/cron/refresh-cdm.mjs + api/conjunctions.mjs
+               GitHub: https://github.com/dhruvlagu/orbital-watch/blob/main/api/cron/refresh-satcat.mjs
+                        https://github.com/dhruvlagu/orbital-watch/blob/main/api/cron/refresh-cdm.mjs
+                        https://github.com/dhruvlagu/orbital-watch/blob/main/api/conjunctions.mjs */}
           <div className="codeBlock reveal-item" style={{ ["--reveal-i" as any]: 0 }}>
             <button
               className="codeBlock__header"
@@ -199,47 +200,47 @@ export default function AboutPage() {
             <div id="block1-content" role="region" aria-label="Scheduled Data Refresh code">
             {expandedBlocks.block1 && (
               <>
-                <pre className="technicalCode">{`// api/cron/_spacetrackAuth.mjs — shared session cookie auth
-const AUTH_URL = "https://www.space-track.org/ajaxauth/login";
-const COOKIE_TTL_MS = 90 * 60 * 1000; // 90 minutes
-
-let cachedCookieHeader = null;
-let cachedCookieIssuedAt = 0;
-
-function getCookieHeaderValue(headers) {
-  const rawCookies = typeof headers.getSetCookie === "function" 
-    ? headers.getSetCookie() : null;
-  return rawCookies
-    ? rawCookies.map((cookie) => cookie.split(";")[0]).join("; ")
-    : headers.get("set-cookie")?.split(";")[0] ?? null;
+                <pre className="technicalCode">{`// api/cron/refresh-satcat.mjs: at most one attempt per UTC day
+const todayUtc = new Date().toISOString().slice(0, 10);
+const attemptClaimed = await withRedis((c) =>
+  c.set(\`satcat:attempt:\${todayUtc}\`, "1", { NX: true, EX: 36 * 60 * 60 }),
+);
+if (attemptClaimed !== "OK") {
+  success = true;
+  return res.status(200).json({ ok: true, skipped: true });
 }
 
-async function authenticateWithSpaceTrack(user, pass) {
-  const authResponse = await fetch(AUTH_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({ identity: user, password: pass }).toString(),
-  });
-  const cookieHeader = getCookieHeaderValue(authResponse.headers);
-  if (!authResponse.ok || !cookieHeader) {
-    throw new Error(\`Space-Track authentication failed (HTTP \${authResponse.status})\`);
-  }
-  cachedCookieHeader = cookieHeader;
-  cachedCookieIssuedAt = Date.now();
-  return cookieHeader;
-}
-
-export async function getValidSessionCookie() {
-  const user = process.env.SPACE_TRACK_USER;
-  const pass = process.env.SPACE_TRACK_PASS;
-  const hasFreshCookie = Boolean(
-    cachedCookieHeader && Date.now() - cachedCookieIssuedAt < COOKIE_TTL_MS,
+// A missing catalog requires explicit opt-in to a full bootstrap fetch.
+if (needsBootstrap && process.env.SATCAT_ALLOW_BOOTSTRAP !== "true") {
+  throw new Error(
+    "SATCAT catalog or file number is missing; a bootstrap is needed. " +
+      'Set SATCAT_ALLOW_BOOTSTRAP="true" to allow one full fetch.',
   );
-  if (hasFreshCookie) return cachedCookieHeader;
-  return authenticateWithSpaceTrack(user, pass);
+}
+const records = await fetchSatcatRecords(cookieHeader, fileNumber);
+
+// api/cron/refresh-cdm.mjs: seven-hour interval and three attempts per UTC day
+const attemptClaimed = await withRedis((c) =>
+  c.set("cdm:attempt:slot", "1", { NX: true, EX: 7 * 60 * 60 }),
+);
+if (attemptClaimed !== "OK") {
+  success = true;
+  return res.status(200).json({ ok: true, skipped: true });
+}
+const todayUtc = new Date().toISOString().slice(0, 10);
+const dailyCount = await withRedis(async (c) => {
+  const count = await c.incr(\`cdm:count:\${todayUtc}\`);
+  if (count === 1) {
+    await c.expire(\`cdm:count:\${todayUtc}\`, 36 * 60 * 60);
+  }
+  return count;
+});
+if (dailyCount > 3) {
+  success = true;
+  return res.status(200).json({ ok: true, skipped: true });
 }
 
-// api/conjunctions.mjs — user-facing endpoint (Redis read-only)
+// api/conjunctions.mjs: user-facing endpoint (Redis read-only)
 import { withRedis } from "./_redisClient.mjs";
 
 export default async function handler(req, res) {
@@ -267,7 +268,7 @@ export default async function handler(req, res) {
   }
 }`}</pre>
                 <p className="codeBlock__caption">
-                  This endpoint never calls Space-Track directly — Space-Track has strict API usage limits, and fetching per-visitor would scale request volume with site traffic rather than staying fixed. Instead, a separate scheduled job (triggered 3x daily by an external Cloudflare Worker, since Vercel's free tier only allows once-daily cron jobs) does the actual fetching and session management, storing results in Redis. This function only ever reads that cached result — guaranteeing a fixed, compliant request volume regardless of how much traffic the site gets.
+                  SATCAT is fetched by a daily Vercel cron using file-number deltas; a full bootstrap is disabled unless explicitly enabled. An external Cloudflare Worker triggers CDM refreshes three times daily, while Redis enforces a seven-hour gap and a three-attempt UTC-day cap. Failed attempts consume a slot. Both scheduled handlers write to Redis, and this user-facing endpoint only reads the cached CDM data, so visitor traffic does not trigger Space-Track queries.
                 </p>
               </>
             )}
@@ -276,7 +277,7 @@ export default async function handler(req, res) {
 
           {/* BLOCK 2: Kessler Cascade Simulation */}
           {/* SOURCE: src/components/KesslerSimulation.tsx (generateDebris + triggerCascade functions + unit conversions)
-               GitHub: https://github.com/[USERNAME]/orbital-watch/blob/main/src/components/KesslerSimulation.tsx */}
+               GitHub: https://github.com/dhruvlagu/orbital-watch/blob/main/src/components/KesslerSimulation.tsx */}
           <div className="codeBlock reveal-item" style={{ ["--reveal-i" as any]: 1 }}>
             <button
               className="codeBlock__header"
@@ -301,11 +302,11 @@ export default async function handler(req, res) {
             {expandedBlocks.block2 && (
               <>
                 <pre className="technicalCode">{`// Simulation parameters (UI layer)
-const [objectCount, setObjectCount] = useState(15);
+const [objectCount, setObjectCount] = useState(25);
 const [altitudeMin, setAltitudeMin] = useState(400);
 const [altitudeMax, setAltitudeMax] = useState(800);
-const [inclinationMinDeg, setInclinationMinDeg] = useState(-23);
-const [inclinationMaxDeg, setInclinationMaxDeg] = useState(23);
+const [inclinationMinDeg, setInclinationMinDeg] = useState(-45);
+const [inclinationMaxDeg, setInclinationMaxDeg] = useState(45);
 
 // Unit conversions for physics calculations
 const kmToRadius = (km: number) => km / 2000;
@@ -353,6 +354,7 @@ const generateDebris = (count: number, rMin: number, rMax: number, iMin: number,
       vx,
       vy,
       vz,
+      orbitalPhase: angle,
       size: 3,
     };
   });
@@ -360,13 +362,13 @@ const generateDebris = (count: number, rMin: number, rMax: number, iMin: number,
 
 const triggerCascade = () => {
   setIsRunning(true);
-  setCascadeStatus("Cascade initiated — collision chain reaction starting");
+  setCascadeStatus("Cascade initiated: collision chain reaction starting");
   rippleRef.current = { radius: 0, opacity: 0.6, active: true };
   currentDebrisRef.current = [...currentDebrisRef.current];
   isAnimatingRef.current = true;
   let time = 0;
   const duration = 2500; // 2.5 seconds
-  const maxDebrisCount = 150; // Cap per cascade
+  const maxDebrisCount = 200; // Cap per cascade
   let debrisAddedInCascade = 0;
   let collisionCount = 0;
 
@@ -377,7 +379,7 @@ const triggerCascade = () => {
     if (progress < 1) {
       // Add new debris randomly (respect per-cascade cap and current parameters)
       if (Math.random() < 0.4 && debrisAddedInCascade < maxDebrisCount) {
-        setCascadeStatus(\`Debris field expanding — \${currentDebrisRef.current.length} objects in orbit (cap: \${maxDebrisCount})\`);
+        setCascadeStatus(\`Debris field expanding: \${currentDebrisRef.current.length} objects in orbit (cap: \${maxDebrisCount})\`);
         const newRadius = radiusMin + Math.random() * (radiusMax - radiusMin);
         const newAngle = Math.random() * Math.PI * 2;
         const newInclination = inclinationMin + Math.random() * (inclinationMax - inclinationMin);
@@ -418,7 +420,7 @@ const triggerCascade = () => {
       }
 
       // Update positions with Keplerian orbital mechanics and detect collisions
-      const collisionThreshold = 0.04;
+      const collisionThreshold = 0.035;
       const newFragments: Debris[] = [];
       
       // Update positions using Keplerian angular motion (slower for better visualization)
@@ -468,7 +470,7 @@ const triggerCascade = () => {
               continue;
             }
 
-            setCascadeStatus(\`Collision! Creating fragments — \${collisionCount} collisions, \${currentDebrisRef.current.length + newFragments.length} objects\`);
+            setCascadeStatus(\`Collision! Creating fragments: \${collisionCount} collisions, \${currentDebrisRef.current.length + newFragments.length} objects\`);
 
             for (let f = 0; f < fragmentCount; f++) {
               newFragments.push({
@@ -498,7 +500,7 @@ const triggerCascade = () => {
     } else {
       setIsRunning(false);
       isAnimatingRef.current = false;
-      setCascadeStatus(\`Cascade complete — \${collisionCount} collisions created \${currentDebrisRef.current.length} debris objects\`);
+      setCascadeStatus(\`Cascade complete: \${collisionCount} collisions created \${currentDebrisRef.current.length} debris objects\`);
       setDebris(currentDebrisRef.current);
       drawCanvas(currentDebrisRef.current, rippleRef.current);
     }
@@ -516,8 +518,8 @@ const triggerCascade = () => {
 
           {/* CIVIC ACTION: Contact Your Representative */}
           {/* SOURCES: src/components/CivicActionSection.tsx + api/representative.mjs
-               GitHub: https://github.com/[USERNAME]/orbital-watch/blob/main/src/components/CivicActionSection.tsx
-                        https://github.com/[USERNAME]/orbital-watch/blob/main/api/representative.mjs */}
+               GitHub: https://github.com/dhruvlagu/orbital-watch/blob/main/src/components/CivicActionSection.tsx
+                        https://github.com/dhruvlagu/orbital-watch/blob/main/api/representative.mjs */}
           <div className="codeBlock reveal-item" style={{ ["--reveal-i" as any]: 2 }}>
             <button
               className="codeBlock__header"
@@ -618,7 +620,7 @@ return res.status(200).json({
 
           {/* BLOCK 3: Kinetic Energy Calculator */}
           {/* SOURCE: src/pages/PhysicsPage.tsx (KE calculation + getDangerLevel function)
-               GitHub: https://github.com/[USERNAME]/orbital-watch/blob/main/src/pages/PhysicsPage.tsx */}
+               GitHub: https://github.com/dhruvlagu/orbital-watch/blob/main/src/pages/PhysicsPage.tsx */}
           <div className="codeBlock reveal-item" style={{ ["--reveal-i" as any]: 3 }}>
             <button
               className="codeBlock__header"
@@ -659,7 +661,7 @@ const getDangerLevel = () => {
   return { level: "Catastrophic", label: "Cascade trigger risk", color: "#ff3b3b", badge: "red", pulsing: true };
 };`}</pre>
                 <p className="codeBlock__caption">
-                  Mass and velocity inputs are converted to SI units before applying KE = ½mv². The resulting energy maps directly to the danger tier and badge color shown in the calculator's results panel — the same object drives both the number and the styling.
+                  Mass and velocity inputs are converted to SI units before applying KE = ½mv². The resulting energy maps directly to the danger tier and badge color shown in the calculator's results panel. The same object drives both the number and the styling.
                 </p>
               </>
             )}
@@ -812,7 +814,7 @@ const getDangerLevel = () => {
                     &quot;Active Debris Removal: Stabilization of the LEO Environment.&quot; <em>NASA Orbital Debris Research and Science Reports</em> (2021).
                   </span>
                   <p className="sourceItem__annotation">
-                    Modeled minimum ADR rate required to stabilize LEO — key source for the Policy Simulator.
+                    Modeled minimum ADR rate required to stabilize LEO, a key source for the Policy Simulator.
                   </p>
                 </li>
                 <li className="sourceItem">

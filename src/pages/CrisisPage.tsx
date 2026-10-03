@@ -116,7 +116,7 @@ const crisisEvents = [
     year: "1957",
     title: "The Starting Gun",
     context:
-      "Sputnik's launch ignited the Space Race between the US and USSR. Speed was the only metric that mattered — no nation paused to consider what would happen to hardware once its mission ended. Rocket boosters, dead satellites, lens caps — all abandoned in orbit without a second thought.",
+      "Sputnik's launch ignited the Space Race between the US and USSR. Speed was the only metric that mattered. No nation paused to consider what would happen to hardware once its mission ended. Rocket boosters, dead satellites, lens caps, all abandoned in orbit without a second thought.",
     significance:
       "Fostered an early operational approach that treated low Earth orbit as an infinite, self-cleaning environment.",
     visualType: "orbit",
@@ -125,7 +125,7 @@ const crisisEvents = [
     year: "1967",
     title: "The Sovereignty Trap",
     context:
-      "The Outer Space Treaty was signed by the US, USSR, and UK, becoming the foundational document of space law. While it declared space the 'province of all mankind,' it also established that nations retain permanent jurisdiction over every object they launch — forever. This seemingly reasonable clause would become the legal barrier preventing international debris cleanup decades later.",
+      "The Outer Space Treaty was signed by the US, USSR, and UK, becoming the foundational document of space law. While it declared space the 'province of all mankind,' it also established that nations retain permanent jurisdiction over every object they launch, forever. This seemingly reasonable clause would become the legal barrier preventing international debris cleanup decades later.",
     significance: "Established foundational international space governance while omitting rules for orbital debris management.",
     visualType: "document",
   },
@@ -141,7 +141,7 @@ const crisisEvents = [
     year: "2007",
     title: "The ASAT Crisis",
     context:
-      "China's People's Liberation Army destroyed the defunct Fengyun-1C weather satellite with a direct-ascent anti-satellite missile at 865 km altitude. The single impact created 3,000+ trackable fragments and tens of thousands of smaller untrackable pieces — the largest debris-generating event in history. Much of this cloud remains in orbit today, spread across altitudes from 200 km to 3,800 km.",
+      "China's People's Liberation Army destroyed the defunct Fengyun-1C weather satellite with a direct-ascent anti-satellite missile at 865 km altitude. The single impact created 3,000+ trackable fragments and tens of thousands of smaller untrackable pieces, making it the largest debris-generating event in history. Much of this cloud remains in orbit today, spread across altitudes from 200 km to 3,800 km.",
     significance: "The most destructive deliberate act in orbital history.",
     visualType: "scatter",
   },
@@ -149,7 +149,7 @@ const crisisEvents = [
     year: "2009",
     title: "The Zombie Satellite Collision",
     context:
-      "On February 10, 2009, the active Iridium-33 communications satellite collided with the decommissioned Russian Cosmos-2251 at a closing speed of 11.7 km/s — roughly 26,000 mph. The first accidental hypervelocity impact between two intact satellites in history, it generated over 2,300 trackable fragments and an estimated 100,000+ smaller pieces. Both objects were tracked by the Space Surveillance Network — but the conjunction warning system failed to flag the collision risk in time for Iridium operators to maneuver.",
+      "On February 10, 2009, the active Iridium-33 communications satellite collided with the decommissioned Russian Cosmos-2251 at a closing speed of 11.7 km/s, roughly 26,000 mph. The first accidental hypervelocity impact between two intact satellites in history generated over 2,300 trackable fragments and an estimated 100,000+ smaller pieces. Both objects were tracked by the Space Surveillance Network, but the conjunction warning system failed to flag the collision risk in time for Iridium operators to maneuver.",
     significance: "The Kessler Syndrome stopped being theoretical.",
     visualType: "impact",
   },
@@ -157,7 +157,7 @@ const crisisEvents = [
     year: "2022",
     title: "Too Little, Too Late?",
     context:
-      "The FCC passed the 5-Year Rule, requiring US-licensed satellites to de-orbit within five years of mission end — replacing the previous 25-year standard. Progress, but only binding on US operators. Meanwhile, SpaceX's Starlink constellation was adding hundreds of satellites per year, and China was building its own megaconstellation.",
+      "The FCC passed the 5-Year Rule, requiring US-licensed satellites to de-orbit within five years of mission end, replacing the previous 25-year standard. Progress, but only binding on US operators. Meanwhile, SpaceX's Starlink constellation was adding hundreds of satellites per year, and China was building its own megaconstellation.",
     significance: "The first enforceable de-orbit rule, though limited to US-licensed operators.",
     visualType: "constellation",
     tone: "amber",
@@ -1283,7 +1283,7 @@ export default function CrisisPage() {
                   "The latest tracked-object count is currently unavailable."
                 ) : (
                   <>
-                    <strong style={{ color: "var(--accent-blue)" }}>{liveCount.toLocaleString()}</strong> tracked objects across all orbital regimes — and growing.
+                    <strong style={{ color: "var(--accent-blue)" }}>{liveCount.toLocaleString()}</strong> tracked objects across all orbital regimes, and the total is growing.
                   </>
                 )} In LEO alone, thousands of new objects are added each year, the large majority of them active megaconstellation payloads. Millions of additional fragments remain too small to track but large enough to destroy a satellite. Active debris removal technology exists but faces legal paralysis under the 1967 Treaty. The window to act may be closing.
               </p>

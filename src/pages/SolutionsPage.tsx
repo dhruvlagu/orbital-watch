@@ -31,7 +31,7 @@ const adrMissions = [
     method: "Four-armed robotic claw capture",
     target: "PROBA-1 satellite (~94 kg; Earth-observation operations ended December 2022)",
     description:
-      "The first ESA-contracted debris removal mission. ClearSpace-1 will rendezvous with, capture, and de-orbit ESA's own PROBA-1 Earth-observation satellite — sidestepping the sovereignty problem by targeting ESA property. The original target (the VESPA adapter) was struck by debris in 2023 and replaced. A precursor technology demo, PRELUDE, is planned for 2027.",
+      "The first ESA-contracted debris removal mission. ClearSpace-1 will rendezvous with, capture, and de-orbit ESA's own PROBA-1 Earth-observation satellite, sidestepping the sovereignty problem by targeting ESA property. The original target (the VESPA adapter) was struck by debris in 2023 and replaced. A precursor technology demo, PRELUDE, is planned for 2027.",
     challenge: "Scaling from one object to thousands remains unsolved.",
     source: "ESA",
     accentColor: "amber",
@@ -45,7 +45,7 @@ const adrMissions = [
     method: "Magnetic docking plate",
     target: null,
     description:
-      "Astroscale's End-of-Life Services mission successfully demonstrated magnetic docking and proximity operations in 2021, validating the core capture mechanism with a cooperative (non-tumbling) client. A planned tumbling-target phase was cut short by an on-orbit anomaly in 2022. The mission concluded with a controlled de-orbit in January 2024 — proving proximity navigation works, with caveats.",
+      "Astroscale's End-of-Life Services mission successfully demonstrated magnetic docking and proximity operations in 2021, validating the core capture mechanism with a cooperative (non-tumbling) client. A planned tumbling-target phase was cut short by an on-orbit anomaly in 2022. The mission concluded with a controlled de-orbit in January 2024, proving proximity navigation works, with caveats.",
     challenge: "Legacy debris has no docking plates, and tumbling capture remains unproven at scale.",
     source: "Astroscale",
     accentColor: "blue",
@@ -59,7 +59,7 @@ const adrMissions = [
     method: "Robotic arm capture",
     target: "H-IIA upper stage (launched 2009)",
     description:
-      "JAXA's current active debris-removal effort is the Commercial Removal of Debris Demonstration 2 (CRD2) program, with ADRAS-J2 contracted to Astroscale. The mission will use robotic-arm capture to de-orbit a large H-IIA rocket upper stage left in orbit since 2009. An earlier JAXA electrodynamic-tether experiment (KITE, 2016) failed to deploy its tether — a separate, earlier concept.",
+      "JAXA's current active debris-removal effort is the Commercial Removal of Debris Demonstration 2 (CRD2) program, with ADRAS-J2 contracted to Astroscale. The mission will use robotic-arm capture to de-orbit a large H-IIA rocket upper stage left in orbit since 2009. An earlier JAXA electrodynamic-tether experiment (KITE, 2016) failed to deploy its tether, a separate, earlier concept.",
     challenge: "Requires international legal framework that doesn't yet exist.",
     source: "JAXA / Astroscale",
     accentColor: "blue",
@@ -73,8 +73,8 @@ const adrMissions = [
     method: "Market incentive certification",
     target: null,
     description:
-      "The SSR rates satellite missions on sustainability practices — data sharing, collision avoidance, de-orbit planning — and awards a public rating. Operators with high ratings gain reputational and potentially commercial advantages.",
-    challenge: "Voluntary — no legal force.",
+      "The SSR rates satellite missions on sustainability practices, including data sharing, collision avoidance, and de-orbit planning, and awards a public rating. Operators with high ratings gain reputational and potentially commercial advantages.",
+    challenge: "Voluntary, with no legal force.",
     source: null,
     accentColor: "green",
   },
@@ -90,7 +90,7 @@ const economicsPanels = [
       </svg>
     ),
     title: "The Commons Problem",
-    body: "No nation or company owns orbital lanes. LEO is a global commons like the ocean or the atmosphere. Economic theory — first described by Garrett Hardin in 1968 — predicts that when a resource is shared, individuals acting in self-interest will deplete it, even when it's not in anyone's collective interest.",
+    body: "No nation or company owns orbital lanes. LEO is a global commons like the ocean or the atmosphere. Economic theory, first described by Garrett Hardin in 1968, predicts that when a resource is shared, individuals acting in self-interest will deplete it, even when it's not in anyone's collective interest.",
     accent: "blue",
   },
   {
@@ -104,7 +104,7 @@ const economicsPanels = [
       </svg>
     ),
     title: "The Cleanup Math",
-    body: "Removing a single large derelict object costs roughly $80\u2013$100M per mission at today\u2019s prices (e.g., ESA ClearSpace-1 ~\u20AC86M; JAXA ADRAS-J2 ~$82M). Even clearing only the largest, most dangerous objects \u2014 a few thousand rocket bodies and dead satellites by most estimates \u2014 would cost tens of billions. Removing every tracked catalog object would cost far more. The nation that pays gets no exclusive benefit \u2014 cleaner orbits help every spacefaring nation equally. So no single actor will volunteer to foot the bill.",
+    body: "Removing a single large derelict object costs roughly $80\u2013$100M per mission at today\u2019s prices (e.g., ESA ClearSpace-1 ~\u20AC86M; JAXA ADRAS-J2 ~$82M). Even clearing only the largest, most dangerous objects, a few thousand rocket bodies and dead satellites by most estimates, would cost tens of billions. Removing every tracked catalog object would cost far more. The nation that pays gets no exclusive benefit. Cleaner orbits help every spacefaring nation equally. So no single actor will volunteer to foot the bill.",
     accent: "amber",
   },
   {
@@ -118,9 +118,9 @@ const economicsPanels = [
     ),
     title: "The Solution Framework",
     listItems: [
-      "Liability expansion \u2014 make debris creators pay for future collision risk",
-      "Market incentives \u2014 SSR ratings and insurance premiums that reward cleanup",
-      "International cost-sharing \u2014 treaty-based funding pool (like the Montreal Protocol for ozone) for collective debris removal",
+      "Liability expansion: make debris creators pay for future collision risk",
+      "Market incentives: SSR ratings and insurance premiums that reward cleanup",
+      "International cost-sharing: treaty-based funding pool (like the Montreal Protocol for ozone) for collective debris removal",
     ],
     accent: "green",
   },
@@ -228,8 +228,8 @@ export default function SolutionsPage() {
           <span className="solHero__title--dim">Law Doesn't.</span>
         </h1>
         <p className="solHero__subtitle">
-          Active debris removal works in principle — and has been demonstrated in orbit.
-          The remaining barriers are legal, economic, and geopolitical — not a lack of basic engineering.
+          Active debris removal works in principle and has been demonstrated in orbit.
+          The remaining barriers are legal, economic, and geopolitical, not a lack of basic engineering.
         </p>
         <div className="solHero__pills">
           <span className="badge badge--amber">Legal Paralysis</span>
@@ -273,8 +273,8 @@ export default function SolutionsPage() {
               </p>
               <p>
                 This creates the <strong>'Sovereignty Trap'</strong>: the objects
-                most dangerous to other satellites — abandoned military hardware,
-                derelict spy satellites — are the exact objects whose owners are
+                most dangerous to other satellites, including abandoned military
+                hardware and derelict spy satellites, are the exact objects whose owners are
                 least likely to grant removal consent.
               </p>
               <div className="sovereigntyCard__treaty">
@@ -298,9 +298,9 @@ export default function SolutionsPage() {
                 No inspection regime currently exists that could credibly verify
                 a removal craft&apos;s intent before it approaches a target. The
                 Outer Space Treaty&apos;s Article XI requires only vague
-                &apos;due regard&apos; and general disclosure — not pre-approach
+                &apos;due regard&apos; and general disclosure, not pre-approach
                 verification of intent. That makes the dual-use concern hard to
-                dismiss — which has so far blocked agreement without a new
+                dismiss, which has so far blocked agreement without a new
                 verification framework.
               </p>
               <div className="adrCard__source">Source: Global Security Review (space-law analysis)</div>
@@ -391,7 +391,7 @@ export default function SolutionsPage() {
             <div className="hero__label">Section 03</div>
             <h2>The Tragedy of the Commons</h2>
             <p className="solSection__subtitle">
-              Space is the ultimate shared resource — and economics tells us
+              Space is the ultimate shared resource, and economics tells us
               shared resources get exploited without governance.
             </p>
           </div>
@@ -431,7 +431,7 @@ export default function SolutionsPage() {
             </p>
             <p className="auditContext">
               Hypothetical mid-size commercial satellite, scored on an illustrative
-              10-point checklist — not the official SSR scoring model. Real SSR uses
+              10-point checklist, not the official SSR scoring model. Real SSR uses
               six weighted modules and percentage-based tiers (Bronze 40–55%, Silver
               56–70%, Gold 71–80%, Platinum 81–100%). Criteria pre-selected to reflect
               common real-world compliance gaps.
@@ -519,7 +519,7 @@ export default function SolutionsPage() {
                 <p className="auditNote__text">
                   Per the SSR program&apos;s operators (EPFL / WEF), a favorable
                   score <em>might</em> result in lower insurance costs or improved
-                  funding conditions from financial backers — the incentive the
+                  funding conditions from financial backers, the incentive the
                   rating is designed to create, not a guaranteed benefit.
                 </p>
               </div>

@@ -187,18 +187,20 @@
   gap: 16px;
   padding: 24px;
   background: radial-gradient(120% 120% at 50% 10%, rgba(10, 25, 47, 0.7) 0%, rgba(2, 12, 27, 0.85) 100%);
-  border: 1px solid rgba(0, 212, 255, 0.12);
+  border: 1px solid rgba(0, 212, 255, 0.2);
   border-radius: 16px;
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 4px 12px rgba(0, 0, 0, 0.24);
   transition: border-color 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), 
               box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), 
               transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .cw__card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(0, 212, 255, 0.3);
-  box-shadow: var(--glow-blue), 0 8px 30px rgba(0, 0, 0, 0.5);
+  transform: translateY(-2px);
+  border-color: rgba(0, 212, 255, 0.34);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 8px 24px rgba(0, 0, 0, 0.34);
 }
 
 /* Object names row — 3-column symmetrical grid to prevent cross icon orphan wrapping on mobile */
@@ -240,10 +242,15 @@
   font-size: 13px;
   font-weight: 600;
   color: var(--text-primary);
-  background: color-mix(in srgb, var(--color-blue) 20%, transparent);
-  border: 1px solid color-mix(in srgb, var(--color-blue) 30%, transparent);
+  background: linear-gradient(145deg, rgba(45, 125, 200, 0.2), rgba(15, 38, 78, 0.48));
+  border: 1px solid rgba(110, 175, 235, 0.28);
   padding: 8px 14px;
   border-radius: 8px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 3px 10px rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(16px) saturate(125%);
+  -webkit-backdrop-filter: blur(16px) saturate(125%);
   letter-spacing: 0.03em;
   text-transform: uppercase;
   word-break: break-all;
@@ -300,15 +307,43 @@
 
 /* Miss distance + Pc row */
 .cw__metaRow {
-  display: flex;
-  gap: 28px;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    "distance-label pc-label"
+    "distance-value pc-value";
+  column-gap: 28px;
+  row-gap: 4px;
+  align-items: start;
 }
 
-.cw__metaItem {
+.cw__metaHeading {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 4px;
+  min-width: 0;
+  min-height: 18px;
+}
+
+.cw__metaHeading--distance {
+  grid-area: distance-label;
+}
+
+.cw__metaHeading--pc {
+  grid-area: pc-label;
+}
+
+.cw__metaHeading .tooltipContainer {
+  margin-left: 0;
+}
+
+.cw__metaValue--distance {
+  grid-area: distance-value;
+}
+
+.cw__metaValue--pc {
+  grid-area: pc-value;
 }
 
 .cw__metaLabel {

@@ -1,5 +1,5 @@
 // api/cron/refresh-cdm.mjs
-// CDM refresh handler — called 3x/day by an external Cloudflare Worker.
+// CDM refresh handler: called 3x/day by an external Cloudflare Worker.
 // This is the ONLY place in the codebase that queries Space-Track's cdm_public class.
 // User-facing /api/conjunctions reads from Redis; it never calls Space-Track.
 //

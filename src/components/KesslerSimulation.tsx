@@ -141,7 +141,7 @@ export default function KesslerSimulation() {
     }
     
     setIsRunning(true);
-    setCascadeStatus("Cascade initiated — collision chain reaction starting");
+    setCascadeStatus("Cascade initiated: collision chain reaction starting");
     rippleRef.current = { radius: 0, opacity: 0.6, active: true };
     currentDebrisRef.current = [...currentDebrisRef.current];
     isAnimatingRef.current = true;
@@ -169,7 +169,7 @@ export default function KesslerSimulation() {
         // Add new debris randomly every few frames (respect per-cascade cap)
         let spawnedThisFrame = 0;
         if (Math.random() < 0.4 && debrisAddedInCascade < maxDebrisCount) {
-          setCascadeStatus(`Debris field expanding — ${currentDebrisRef.current.length} objects in orbit (cap: ${maxDebrisCount})`);
+          setCascadeStatus(`Debris field expanding: ${currentDebrisRef.current.length} objects in orbit (cap: ${maxDebrisCount})`);
           const newRadius = radiusMin + Math.random() * (radiusMax - radiusMin);
           const newAngle = Math.random() * Math.PI * 2;
           const newInclination = inclinationMin + Math.random() * (inclinationMax - inclinationMin);
@@ -266,7 +266,7 @@ export default function KesslerSimulation() {
                 continue;
               }
 
-              setCascadeStatus(`Collision! Creating fragments — ${collisionCount} collisions, ${currentDebrisRef.current.length + newFragments.length} objects`);
+              setCascadeStatus(`Collision! Creating fragments: ${collisionCount} collisions, ${currentDebrisRef.current.length + newFragments.length} objects`);
 
               for (let f = 0; f < fragmentCount; f++) {
                 newFragments.push({
@@ -298,7 +298,7 @@ export default function KesslerSimulation() {
       } else {
         setIsRunning(false);
         isAnimatingRef.current = false;
-        setCascadeStatus(`Cascade complete — ${collisionCount} collisions, ${currentDebrisRef.current.length} objects now in field`);
+        setCascadeStatus(`Cascade complete: ${collisionCount} collisions, ${currentDebrisRef.current.length} objects now in field`);
         setDebris(currentDebrisRef.current); // Sync state only when animation ends
         drawCanvas(currentDebrisRef.current, rippleRef.current);
       }

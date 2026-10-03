@@ -39,7 +39,7 @@ const policyOptions: Policy[] = [
   {
     id: "fiveyear",
     name: "Extend 5-Year De-orbit Rule Globally",
-    description: "Apply the FCC's 5-Year Rule to all spacefaring nations through an international agreement — not just US-licensed operators.",
+    description: "Apply the FCC's 5-Year Rule to all spacefaring nations through an international agreement, not just US-licensed operators.",
     impact: 16800,
     tooltip: "FCC jurisdiction covers US-licensed and US-market-access satellites, leaving many foreign-licensed operators outside its reach",
   },
@@ -100,12 +100,12 @@ const treaties: Treaty[] = [
     name: "Liability Convention",
     jurisdiction: "International",
     description:
-      "Establishes that launching nations are liable for damage caused by their space objects on Earth's surface and, in cases of fault, in orbit. In 1978, Canada invoked the Convention after the nuclear-powered Cosmos 954 satellite crashed in Canadian territory. In 1981, the USSR paid Canada $3M CAD in a diplomatic settlement — notably without formally admitting liability. It remains the only time the Convention has been invoked between states, and no nation has ever faced consequences specifically for orbital debris damage.",
+      "Establishes that launching nations are liable for damage caused by their space objects on Earth's surface and, in cases of fault, in orbit. In 1978, Canada invoked the Convention after the nuclear-powered Cosmos 954 satellite crashed in Canadian territory. In 1981, the USSR paid Canada $3M CAD in a diplomatic settlement, notably without formally admitting liability. It remains the only time the Convention has been invoked between states, and no nation has ever faced consequences specifically for orbital debris damage.",
     enforcementTone: "amber",
     enforcementLabel: "Partially Binding / Rarely Enforced",
     enforcementLevel: 2,
     whyItMatters:
-      "The sole precedent under this treaty was resolved diplomatically, not legally — revealing the limits of its enforcement mechanism.",
+      "The sole precedent under this treaty was resolved diplomatically, not legally, revealing the limits of its enforcement mechanism.",
   },
   {
     year: "2002",
@@ -323,7 +323,7 @@ export default function PolicyPage() {
   let displayColor = "";
 
   if (resultValue > 67200) {
-    statusBadgeText = "⚠ CRITICAL — Kessler Cascade Risk";
+    statusBadgeText = "⚠ CRITICAL: Kessler Cascade Risk";
     statusBadgeColor = "red";
     displayColor = "var(--accent-red)";
   } else if (resultValue >= 42000) {

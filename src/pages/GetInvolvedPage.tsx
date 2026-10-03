@@ -58,7 +58,7 @@ export default function GetInvolvedPage() {
     setTimeout(() => setShowInstaTip(false), 4000);
   };
 
-  const shareText = "Check out Orbital Watch — Tracking the orbital debris crisis and active debris removal solutions.";
+  const shareText = "Check out Orbital Watch: Tracking the orbital debris crisis and active debris removal solutions.";
   const shareUrl = "https://orbitalwatch.app";
 
   return (
@@ -72,7 +72,7 @@ export default function GetInvolvedPage() {
           The Orbit <span className="involvedHero__title--highlight">Needs You</span>
         </h1>
         <p className="involvedHero__subtitle reveal-item">
-          What you can do — right now and long term.
+          What you can do, right now and long term.
         </p>
         <div className="involvedHero__pills reveal-item">
           <span className="badge badge--blue">Individual Actions</span>
@@ -128,7 +128,7 @@ export default function GetInvolvedPage() {
               <h3 className="actionCard__title">Contact Your Representatives</h3>
               <p className="actionCard__body">
                 The FCC's 5-Year Rule proved that regulatory action on debris is possible. But international
-                reform needs political attention too — a five-minute message to your representative about ASAT test bans can help put it on the agenda.
+                reform needs political attention too. A five-minute message to your representative about ASAT test bans can help put it on the agenda.
               </p>
               <a
                 href="#contact-rep"

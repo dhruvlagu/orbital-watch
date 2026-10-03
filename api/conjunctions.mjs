@@ -1,5 +1,5 @@
 // api/conjunctions.mjs
-// User-facing endpoint — reads CDM conjunction records from Redis only.
+// User-facing endpoint: reads CDM conjunction records from Redis only.
 // Space-Track is NEVER queried here. Data is populated by api/cron/refresh-cdm.mjs
 // which is triggered 3x/day by an external Cloudflare Worker.
 

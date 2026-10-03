@@ -84,14 +84,14 @@ function RiskBadge({ tier, emergency }: { tier: RiskTier; emergency: boolean }) 
   const { cls, label } = tierMap[tier];
   // Tooltip strings must reflect the thresholds in src/services/conjunctionData.ts
   const tierTooltip: Record<RiskTier, string> = {
-    ELEVATED: "Probability of collision at or above 1 in 1,000 — the higher end of publicly modeled conjunction risk.",
-    MONITORED: "Probability of collision between roughly 1 in 10,000 and 1 in 1,000 — being tracked, not currently high-risk.",
-    LOW: "Probability of collision below 1 in 10,000 — the lower end of modeled conjunction risk, though still tracked.",
+    ELEVATED: "Probability of collision at or above 1 in 1,000, placing it at the higher end of publicly modeled conjunction risk.",
+    MONITORED: "Probability of collision between roughly 1 in 10,000 and 1 in 1,000, with the event being tracked but not currently high-risk.",
+    LOW: "Probability of collision below 1 in 10,000, which is the lower end of modeled conjunction risk, though still tracked.",
     UNKNOWN: "Probability of collision not publicly disclosed for this event.",
   };
 
   const emergencyTooltip =
-    "Flagged by the 18th Space Defense Squadron as meeting emergency reporting criteria — notified directly to the satellite operators involved.";
+    "Flagged by the 18th Space Defense Squadron as meeting emergency reporting criteria, notified directly to the satellite operators involved.";
 
   return (
     <div className="cw__badgeRow">
@@ -221,35 +221,31 @@ function ConjunctionCard({ event }: { event: ConjunctionEvent }) {
 
       {/* Miss distance */}
       <div className="cw__metaRow">
-        <div className="cw__metaItem">
+        <div className="cw__metaHeading cw__metaHeading--distance">
           <span className="cw__metaLabel">Predicted Miss Distance</span>
-          <span
-            className="cw__metaValue"
-            style={{ color: dist.urgent ? "var(--accent-amber)" : undefined }}
-          >
-            {dist.text}
-          </span>
         </div>
-
-        {/* Probability */}
-        <div className="cw__metaItem">
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span className="cw__metaLabel">Pc</span>
-            <div
-              className="tooltipContainer"
-              onClick={(e) => {
-                e.stopPropagation();
-                (e.currentTarget as HTMLElement).classList.toggle("is-open");
-              }}
-            >
-              <span className="infoIcon" tabIndex={0} aria-label="Pc definition">ⓘ</span>
-              <div className="tooltipText">
-                <a href="#what-is-pc">Click to view the definition of Pc</a>
-              </div>
+        <div className="cw__metaHeading cw__metaHeading--pc">
+          <span className="cw__metaLabel">Pc</span>
+          <div
+            className="tooltipContainer"
+            onClick={(e) => {
+              e.stopPropagation();
+              (e.currentTarget as HTMLElement).classList.toggle("is-open");
+            }}
+          >
+            <span className="infoIcon infoIcon--inline" tabIndex={0} aria-label="Pc definition">ⓘ</span>
+            <div className="tooltipText">
+              <a href="#what-is-pc">Click to view the definition of Pc</a>
             </div>
           </div>
-          <span className="cw__metaValue cw__pc">{pcFormatted}</span>
         </div>
+        <span
+          className="cw__metaValue cw__metaValue--distance"
+          style={{ color: dist.urgent ? "var(--accent-amber)" : undefined }}
+        >
+          {dist.text}
+        </span>
+        <span className="cw__metaValue cw__metaValue--pc cw__pc">{pcFormatted}</span>
       </div>
 
       {/* Plain-English odds */}
@@ -497,11 +493,10 @@ export default function CollisionWatchPage() {
                   conjunction screenings. Because certain satellite operators opt out of public
                   release and sensitive defense assets may use rounded probability{" "}
                   <span className="tooltipContainer" style={{ marginLeft: 0 }}>
-                    <span 
-                      className="infoIcon" 
+                    <span
+                      className="infoIcon infoIcon--inline"
                       tabIndex={0} 
                       aria-label="Pc definition"
-                      style={{ padding: "4px 8px", minWidth: "auto", minHeight: "auto", fontSize: "0.95em", verticalAlign: "middle" }}
                     >ⓘ</span>
                     <div className="tooltipText">
                       <a href="#what-is-pc">Click to view the definition of Pc</a>
@@ -547,7 +542,7 @@ export default function CollisionWatchPage() {
               <div className="cw__sectionSubtitle">
                 Events are ordered by closest approach time by default. Use the controls to sort by probability of collision (Pc)
                 <span className="tooltipContainer" style={{ marginLeft: 0 }}>
-                  <span className="infoIcon" tabIndex={0} aria-label="Pc definition">ⓘ</span>
+                  <span className="infoIcon infoIcon--inline" tabIndex={0} aria-label="Pc definition">ⓘ</span>
                   <div className="tooltipText">
                       <a href="#what-is-pc">Click to view the definition of Pc</a>
                   </div>
@@ -584,8 +579,8 @@ export default function CollisionWatchPage() {
                 <line x1="12" y1="17" x2="12.01" y2="17" />
               </svg>
               {payload.lastUpdatedAt
-                ? `Fetch failed — showing the last refreshed conjunction data, from ${hoursAgo(payload.lastUpdatedAt)}. Countdown times shown are still calculated live against this data.`
-                : "No conjunction data currently available — cache may be empty."}
+                ? `Fetch failed. Showing the last refreshed conjunction data from ${hoursAgo(payload.lastUpdatedAt)}. Countdown times shown are still calculated live against this data.`
+                : "No conjunction data currently available. Cache may be empty."}
             </div>
           )}
 
@@ -685,7 +680,7 @@ export default function CollisionWatchPage() {
             </div>
             <p className="cw__explainerBody">
               <strong>Pc (probability of collision)</strong> is not the literal
-              chance two objects will collide — it's the modeled probability
+              chance two objects will collide. It's the modeled probability
               that both objects will pass within a specified combined distance of
               each other at time of closest approach, given known uncertainty in
               their tracked positions. It's deliberately conservative: when in
@@ -694,7 +689,7 @@ export default function CollisionWatchPage() {
             <div className="cw__explainerStat">
               <span className="cw__explainerStat__value">1×10⁻⁴ (0.01%)</span>
               <span className="cw__explainerStat__label">
-                Pc threshold considered operationally significant — typically
+                Pc threshold considered operationally significant, which typically
                 triggers avoidance maneuver planning
               </span>
             </div>
@@ -713,7 +708,7 @@ export default function CollisionWatchPage() {
               <li>
                 <strong>Poorly tracked objects</strong> can have a larger miss
                 distance but higher Pc, since their true position could plausibly
-                fall anywhere within a wider uncertainty region — some of which
+                fall anywhere within a wider uncertainty region, some of which
                 may overlap the collision zone even at a seemingly comfortable
                 distance.
               </li>
@@ -727,7 +722,7 @@ export default function CollisionWatchPage() {
             <p className="cw__explainerBody cw__explainerBody--note">
               This is why sorting by "Highest Risk" (Pc) on this page sometimes
               surfaces an event with a larger miss distance above one with a smaller
-              miss distance — that's expected behavior, not an error.
+              miss distance. That's expected behavior, not an error.
             </p>
             <div style={{ display: "flex", gap: "32px", marginTop: "24px", flexWrap: "wrap", justifyContent: "center" }}>
               <div style={{ flex: 1, minWidth: "200px" }}>

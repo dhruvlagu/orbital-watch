@@ -405,7 +405,7 @@ export default function PhysicsPage() {
       <section className="section physics-section section--cascade">
         <div className="container">
           <h2>The Cascade Effect</h2>
-          <p className="section-subtitle">Why debris doesn't just accumulate — it multiplies.</p>
+          <p className="section-subtitle">Why debris doesn't just accumulate. It multiplies.</p>
 
           <div className="cascadeFlow reveal-item">
             <div className="cascadeTimeline">

@@ -188,7 +188,7 @@ async function fetchAndCacheConjunctions(): Promise<ConjunctionResponse> {
   try {
     const response = await fetch("/api/spacetrack/conjunctions");
     if (response.status === 503) {
-      throw new Error("Conjunction data not yet available — updated 3x daily.");
+      throw new Error("Conjunction data not yet available. Updated 3x daily.");
     }
     if (!response.ok) {
       throw new Error(`Conjunctions request failed with status ${response.status}`);

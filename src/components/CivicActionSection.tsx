@@ -352,8 +352,8 @@ ZIP Code: ${zip.trim()}`;
                 <line x1="12" y1="8" x2="12" y2="12"/>
                 <line x1="12" y1="16" x2="12.01" y2="16"/>
               </svg>
-              Based on your zip code&apos;s most likely district (~
-              {Math.round(repResult.matchProportion * 100)}% match) — if this doesn&apos;t match your actual representative, you can look up your exact district at{" "}
+              This is the most likely district based on your zip code (~
+              {Math.round(repResult.matchProportion * 100)}% match). If this doesn&apos;t match your actual representative, you can look up your exact district at{" "}
               <a
                 href="https://www.house.gov/representatives/find-your-representative"
                 target="_blank"
@@ -375,7 +375,7 @@ ZIP Code: ${zip.trim()}`;
                 </svg>
               </span>
               <div className="nudgeText">
-                <strong>Personalization Recommended:</strong> Add a personal sentence before sending — congressional offices weigh personalized messages more heavily than form letters.
+                <strong>Personalization Recommended:</strong> Add a personal sentence before sending. Congressional offices weigh personalized messages more heavily than form letters.
               </div>
             </div>
           ) : null}
@@ -463,7 +463,7 @@ ZIP Code: ${zip.trim()}`;
                   Visit Official Website →
                 </a>
                 <span className="contextualNote">
-                  This office doesn&apos;t have a direct online contact form — copy your message below, then look for a &apos;Contact&apos; link on their official website.
+                  This office doesn&apos;t have a direct online contact form. Copy your message below, then look for a &apos;Contact&apos; link on their official website.
                 </span>
               </div>
             ) : (

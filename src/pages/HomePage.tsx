@@ -185,7 +185,7 @@ export default function HomePage() {
             <span className="homeExplore__label">RESEARCH PATHWAYS</span>
             <h2 className="homeExplore__title">Orbital Debris Research &amp; Action</h2>
             <p className="homeExplore__subtitle">
-              From live satellite tracking data and hypervelocity physics to international space law and direct civic advocacy—explore each pillar of the crisis.
+              From live satellite tracking data and hypervelocity physics to international space law and direct civic advocacy, explore each pillar of the crisis.
             </p>
           </div>
 
@@ -287,7 +287,7 @@ export default function HomePage() {
               </div>
               <h3 className="homeExploreCard__title">Solutions</h3>
               <p className="homeExploreCard__description">
-                From robotic arms to drag sails—explore active debris removal tech and the legal challenge of sovereign space salvage.
+                From robotic arms to drag sails, explore active debris removal tech and the legal challenge of sovereign space salvage.
               </p>
               <Link to="/solutions" className="btn btn--secondary homeExploreCard__btn">
                 Active Debris Removal Tech →

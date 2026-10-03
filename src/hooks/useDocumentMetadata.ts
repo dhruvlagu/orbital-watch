@@ -98,7 +98,7 @@ export function useDocumentMetadata(
     setMetaAttribute('meta[property="og:description"]', "property", "og:description", description);
     setMetaAttribute('meta[property="og:url"]', "property", "og:url", canonicalUrl);
     setMetaAttribute('meta[property="og:image"]', "property", "og:image", ogImage);
-    setMetaAttribute('meta[property="og:image:alt"]', "property", "og:image:alt", `${SITE_NAME} — ${title}`);
+    setMetaAttribute('meta[property="og:image:alt"]', "property", "og:image:alt", `${SITE_NAME} | ${title}`);
     setMetaAttribute('meta[property="article:author"]', "property", "article:author", SITE_AUTHOR);
 
     // Twitter / X
@@ -106,7 +106,7 @@ export function useDocumentMetadata(
     setMetaAttribute('meta[name="twitter:title"]', "name", "twitter:title", title);
     setMetaAttribute('meta[name="twitter:description"]', "name", "twitter:description", description);
     setMetaAttribute('meta[name="twitter:image"]', "name", "twitter:image", ogImage);
-    setMetaAttribute('meta[name="twitter:image:alt"]', "name", "twitter:image:alt", `${SITE_NAME} — ${title}`);
+    setMetaAttribute('meta[name="twitter:image:alt"]', "name", "twitter:image:alt", `${SITE_NAME} | ${title}`);
 
     // Dynamic Page JSON-LD Structured Data Schema
     let ldJsonScript = document.head.querySelector<HTMLScriptElement>('script[type="application/ld+json"]#page-schema');
