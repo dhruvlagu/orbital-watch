@@ -43,10 +43,10 @@ Upcoming predicted close-approach events between tracked objects, including miss
 User-adjustable mass and velocity sliders compute KE = ½mv² in real time, outputting energy in joules, TNT equivalent, and hand grenade equivalents. Danger classification updates live.
 
 **Kessler Cascade Simulator**
-Interactive 3D simulation with adjustable parameters (initial object count, orbital altitude, inclination spread) demonstrating how collision frequency increases with debris density. Features realistic orbital mechanics using Kepler's third law, 3D perspective rendering, and real-time collision detection to visualize cascade dynamics and the critical density threshold.
+Interactive 3D simulation with adjustable parameters (initial object count, orbital altitude band, inclination spread) demonstrating how collision frequency increases with debris density. Features realistic orbital mechanics using Kepler's third law (higher altitudes move slower), 3D perspective rendering, and real-time collision detection to visualize cascade dynamics and the critical density threshold.
 
 **Treaty Reform Simulator**
-Four policy toggles (binding IADC guidelines, ASAT ban, international ADR authority, global 5-year rule) with live recalculation of projected LEO object count by 2050. Baseline: 84,000. Best case with all reforms: 20,200 (achieved by enabling all four policy options: binding IADC guidelines, ASAT ban, international ADR authority, and global 5-year rule). Modeled on Liou et al. (2021) and ESA Space Environment Report, Issue 10.1 (2026).
+Four policy toggles (binding IADC guidelines, ASAT ban, international ADR authority, global 5-year rule) with live recalculation of projected LEO object count by 2050. Baseline: 84,000 objects. Best case with all reforms: 20,200 objects (achieved by enabling all four policy options). Individual reform impacts: binding IADC guidelines reduces by 13,400, ASAT ban reduces by 8,400, international ADR authority reduces by 25,200, global 5-year rule reduces by 16,800. This uses assumption-based estimates informed by published research, not a physical orbital propagation model. Modeled on Liou et al. (2021) and ESA Space Environment Report, Issue 10.1 (2026).
 
 **Country Scorecard**
 Sortable table rating USA, Russia, China, ESA, and India on debris mitigation compliance, ASAT test history, and ADR investment. Based on public records from ESA, NASA ODPO, and Secure World Foundation.
@@ -58,18 +58,24 @@ A three-step civic action flow: select one of five orbital-debris policy asks, e
 
 ## Data Architecture
 
-Orbital data isn't fetched live on every page load. Space-Track.org enforces strict API usage limits (SATCAT: at most once daily; public CDM: at most 3x daily), and fetching per-visitor would scale request volume with site traffic. That caused a temporary account suspension during development.
+Orbital data is not fetched live on every page load. Space-Track.org enforces strict API usage limits (SATCAT: at most once daily; public CDM: at most 3x daily), and fetching per-visitor would scale request volume with site traffic. That caused a temporary account suspension during development.
 
 Instead:
 - A **Vercel Cron Job** queries SATCAT once daily (18:12 UTC, offset from the hour per Space-Track's traffic guidance) and stores the result in Redis.
 - A **Cloudflare Worker**, running independently on its own schedule (13:14 / 21:14 / 05:14 UTC), triggers the CDM refresh. This works around Vercel's free-tier limit of one cron job per project while still respecting Space-Track's 3x/day cap.
-- SATCAT refreshes use Space-Track's file-number delta, fetching entries newer than the last stored file number; a full catalog fetch is blocked unless `SATCAT_ALLOW_BOOTSTRAP=true` is explicitly set. CDM refreshes query records created in the last 24 hours, then merge them with cached records, deduplicate, and discard past events.
+- SATCAT refreshes use Space-Track's file-number delta, fetching entries newer than the last stored file number. Decayed objects (those with a DECAY date) are filtered out when computing metrics. A full catalog fetch is blocked unless `SATCAT_ALLOW_BOOTSTRAP=true` is explicitly set.
+- CDM refreshes query records created in the last 24 hours, then merge them with cached records, deduplicate by satellite pair and TCA rounded to the nearest hour, and discard past events (TCA already passed).
 - Redis guards limit SATCAT to one refresh attempt per UTC day and CDM to three attempts per UTC day, with a seven-hour minimum interval between CDM attempts. Failed attempts consume their slot so retries do not exceed those limits.
-- User-facing endpoints (`/api/spacetrack/satcat`, `/api/spacetrack/conjunctions`) only ever read from this cached store. They never call Space-Track directly, regardless of how much traffic the site gets. Production endpoints use a 5-minute edge cache (s-maxage=300) to balance freshness with performance, while the development proxy uses longer caching for convenience.
+- User-facing endpoints (`/api/spacetrack/satcat`, `/api/spacetrack/conjunctions`) only ever read from this cached store. They never call Space-Track directly, regardless of how much traffic the site gets. Production endpoints use a 5-minute edge cache (s-maxage=300) to balance freshness with performance.
+- If Space-Track is down or returns an error, the scheduled job logs the failure and exits. The cached data remains available to users with its last-updated timestamp visible.
 
-The Contact Your Representative workflow uses a separate server-side lookup endpoint. It sends the entered ZIP code to Geocodio only from the server, identifies the House representative for the most likely congressional district, and returns the representative name, district number, and official contact options. It does not use or expose a legislator email address.
+The Contact Your Representative workflow uses a separate server-side lookup endpoint. It sends the entered ZIP code to Geocodio only from the server, identifies the House representative for the most likely congressional district, and returns the representative name, district number, and official contact options (contact form URL, official site, phone, mailing address). It does not use or expose a legislator email address.
 
-These server-side guards cap scheduled SATCAT and CDM data-query attempts at one and three per UTC day, respectively, regardless of visitor traffic. The real implementation, including refresh guards, session handling, the cached read path, cascade animation spawn logic, and civic-action lookup/message flow, is shown on the About page under [The Code Behind It](https://orbitalwatch.app/about#the-code).
+---
+
+## Limitations
+
+The Kessler cascade simulation caps at 150 objects per cascade. It demonstrates the cascade concept visually but is not a physical orbital propagation model. The treaty reform simulator uses assumption-based estimates informed by published research rather than a full debris environment propagation model.
 
 ---
 
@@ -91,6 +97,15 @@ These server-side guards cap scheduled SATCAT and CDM data-query attempts at one
 | Fonts | Space Grotesk, Inter (Google Fonts) |
 
 **Dependencies**
+- chart.js (data visualization)
+- katex (LaTeX rendering)
+- react (UI framework)
+- react-chartjs-2 (React wrapper for Chart.js)
+- react-dom (React DOM renderer)
+- react-katex (React wrapper for KaTeX)
+- react-router-dom (client-side routing)
+- redis (Redis client for caching)
+- dotenv (environment variable loading, dev only)
 
 ---
 
@@ -126,6 +141,7 @@ STORAGE_REDIS_URL=your_redis_connection_string
 CRON_SECRET=a_random_secret_used_to_authenticate_scheduled_jobs
 GEOCODIO_API_KEY=your_geocodio_api_key
 SATCAT_ALLOW_BOOTSTRAP=true (optional; only for an explicitly approved initial full catalog fetch)
+PORT=5173 (optional; dev server port)
 
 A free Space-Track.org account is required. Register at [space-track.org](https://www.space-track.org). `STORAGE_REDIS_URL` is provisioned automatically when connecting a Redis store via Vercel's Marketplace integration. `CRON_SECRET` must also be set identically in the separate Cloudflare Worker responsible for triggering the CDM refresh. `GEOCODIO_API_KEY` is used only by the server-side representative lookup endpoint and is never exposed to visitors.
 

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kessler Benchmark</title>
+  <style>
+    body {
+      font-family: monospace;
+      padding: 20px;
+      background: #0a0e1a;
+      color: #fff;
+    }
+    canvas {
+      width: 600px;
+      height: 400px;
+      border: 1px solid #333;
+      margin-top: 20px;
+    }
+    button {
+      padding: 8px 16px;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+    .results {
+      margin-top: 20px;
+      padding: 10px;
+      background: #111;
+      border: 1px solid #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>Kessler Simulation Benchmark</h1>
+  <div id="config"></div>
+  <div style="margin: 20px 0;">
+    <button id="resetBtn">Reset</button>
+    <button id="runBtn">Run Cascade</button>
+  </div>
+  <div id="status"></div>
+  <div id="results" class="results" style="display: none;"></div>
+  <canvas id="canvas"></canvas>
+
+  <script type="module">
+    // Parse URL params
+    const params = new URLSearchParams(window.location.search);
+    const config = {
+      maxDebrisCount: parseInt(params.get("maxDebrisCount") || "150"),
+      maxDebrisToCheck: params.get("maxDebrisToCheck") === "all" ? "all" : parseInt(params.get("maxDebrisToCheck") || "50"),
+      useRotatingWindow: params.get("useRotatingWindow") === "true",
+      throttleRate: parseFloat(params.get("throttleRate") || "1"),
+    };
+
+    document.getElementById('config').innerHTML = `
+      <p><strong>Config:</strong></p>
+      <p>maxDebrisCount: ${config.maxDebrisCount}</p>
+      <p>maxDebrisToCheck: ${config.maxDebrisToCheck}</p>
+      <p>useRotatingWindow: ${config.useRotatingWindow}</p>
+      <p>throttleRate: ${config.throttleRate}x</p>
+    `;
+
+    // Copy the simulation logic here (simplified version for benchmarking)
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let debris = [];
+    let isAnimating = false;
+    let rotatingWindowOffset = 0;
+
+    // Simulation parameters
+    const objectCount = 15;
+    const altitudeMin = 400;
+    const altitudeMax = 800;
+    const inclinationMinDeg = -23;
+    const inclinationMaxDeg = 23;
+
+    const kmToRadius = (km) => km / 2000;
+    const radiusMin = kmToRadius(altitudeMin);
+    const radiusMax = kmToRadius(altitudeMax);
+    const degToRad = (deg) => deg * (Math.PI / 180);
+    const inclinationMin = degToRad(inclinationMinDeg);
+    const inclinationMax = degToRad(inclinationMaxDeg);
+
+    function generateDebris(count, rMin, rMax, iMin, iMax) {
+      return Array.from({ length: count }, (_, i) => {
+        const angle = (i / count) * Math.PI * 2;
+        const radius = rMin + Math.random() * (rMax - rMin);
+        const inclination = iMin + Math.random() * (iMax - iMin);
+
+        const cosAngle = Math.cos(angle);
+        const sinAngle = Math.sin(angle);
+        const cosInc = Math.cos(inclination);
+        const sinInc = Math.sin(inclination);
+
+        const x3d = radius * cosAngle;
+        const y3d = radius * sinAngle * cosInc;
+        const z3d = radius * sinAngle * sinInc;
+
+        const keplerConstant = 0.0025;
+        const angularSpeed = keplerConstant / Math.pow(radius, 1.5);
+        const orbitalSpeed = angularSpeed * radius;
+        const vx = -orbitalSpeed * sinAngle;
+        const vy = orbitalSpeed * cosAngle * cosInc;
+        const vz = orbitalSpeed * cosAngle * sinInc;
+
+        return {
+          id: `d-${i}`,
+          angle,
+          radius,
+          inclination,
+          x: 0.5 + x3d,
+          y: 0.5 + y3d,
+          z: z3d,
+          vx,
+          vy,
+          vz,
+          size: 3,
+        };
+      });
+    }
+
+    function drawCanvas(debrisToDraw, rippleToDraw) {
+      canvas.width = canvas.offsetWidth * devicePixelRatio;
+      canvas.height = canvas.offsetHeight * devicePixelRatio;
+      ctx.scale(devicePixelRatio, devicePixelRatio);
+
+      const width = canvas.offsetWidth;
+      const height = canvas.offsetHeight;
+
+      ctx.fillStyle = "rgba(10, 14, 26, 0.95)";
+      ctx.fillRect(0, 0, width, height);
+
+      const centerX = width * 0.5;
+      const centerY = height * 0.5;
+      const earthRadius = 60;
+
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, earthRadius * 0.67, 0, Math.PI * 2);
+      ctx.fillStyle = "#0c152b";
+      ctx.fill();
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = "rgba(0, 212, 255, 0.5)";
+      ctx.stroke();
+
+      const focalLength = 2;
+      const sortedDebris = [...debrisToDraw].sort((a, b) => a.z - b.z);
+
+      sortedDebris.forEach((d) => {
+        const scale = focalLength / (focalLength + d.z);
+        const projectedX = centerX + (d.x - 0.5) * width * scale;
+        const projectedY = centerY + (d.y - 0.5) * height * scale;
+        const scaledSize = d.size * scale;
+        const depthOpacity = Math.max(0.3, Math.min(1, scale));
+
+        ctx.fillStyle = `rgba(0, 212, 255, ${depthOpacity})`;
+        ctx.beginPath();
+        ctx.arc(projectedX, projectedY, scaledSize, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      if (rippleToDraw.active) {
+        const rippleRadius = rippleToDraw.radius * Math.min(width, height);
+        const rippleOpacity = rippleToDraw.opacity;
+        const strokeWidth = 4 * (1 - rippleToDraw.radius * 2);
+
+        ctx.strokeStyle = `rgba(0, 212, 255, ${rippleOpacity})`;
+        ctx.lineWidth = Math.max(strokeWidth, 1);
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, rippleRadius, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    }
+
+    // Initialize debris
+    debris = generateDebris(objectCount, radiusMin, radiusMax, inclinationMin, inclinationMax);
+    drawCanvas(debris, { radius: 0, opacity: 0, active: false });
+
+    // Button handlers
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      debris = generateDebris(objectCount, radiusMin, radiusMax, inclinationMin, inclinationMax);
+      drawCanvas(debris, { radius: 0, opacity: 0, active: false });
+      document.getElementById('results').style.display = 'none';
+      document.getElementById('status').textContent = '';
+    });
+
+    document.getElementById('runBtn').addEventListener('click', () => {
+      if (isAnimating) return;
+
+      isAnimating = true;
+      rotatingWindowOffset = 0;
+      document.getElementById('status').textContent = 'Starting cascade...';
+
+      let time = 0;
+      const duration = 2500;
+      const maxDebrisCount = config.maxDebrisCount;
+      let debrisAddedInCascade = 0;
+      let collisionCount = 0;
+
+      const frameTimes = [];
+      let framesOver16ms = 0;
+      let framesOver33ms = 0;
+      let missedCollisions = 0;
+      let lastFrameTime = performance.now();
+
+      const ripple = { radius: 0, opacity: 0.6, active: true };
+
+      function animate() {
+        const frameStart = performance.now();
+        time += 16;
+        const progress = Math.min(time / duration, 1);
+
+        if (ripple.active) {
+          const rippleProgress = Math.min(time / 600, 1);
+          ripple.radius = rippleProgress * 0.5;
+          ripple.opacity = 0.6 * (1 - rippleProgress);
+          ripple.active = rippleProgress < 1;
+        }
+
+        if (progress < 1) {
+          let spawnedThisFrame = 0;
+          if (Math.random() < 0.4 && debrisAddedInCascade < maxDebrisCount) {
+            const newRadius = radiusMin + Math.random() * (radiusMax - radiusMin);
+            const newAngle = Math.random() * Math.PI * 2;
+            const newInclination = inclinationMin + Math.random() * (inclinationMax - inclinationMin);
+
+            const cosAngle = Math.cos(newAngle);
+            const sinAngle = Math.sin(newAngle);
+            const cosInc = Math.cos(newInclination);
+            const sinInc = Math.sin(newInclination);
+
+            const x3d = newRadius * cosAngle;
+            const y3d = newRadius * sinAngle * cosInc;
+            const z3d = newRadius * sinAngle * sinInc;
+
+            const keplerConstant = 0.0025;
+            const angularSpeed = keplerConstant / Math.pow(newRadius, 1.5);
+            const orbitalSpeed = angularSpeed * newRadius;
+            const vx = -orbitalSpeed * sinAngle;
+            const vy = orbitalSpeed * cosAngle * cosInc;
+            const vz = orbitalSpeed * cosAngle * sinInc;
+
+            const newDebris = {
+              id: `d-${Date.now()}-${Math.random()}`,
+              angle: newAngle,
+              radius: newRadius,
+              inclination: newInclination,
+              x: 0.5 + x3d,
+              y: 0.5 + y3d,
+              z: z3d,
+              vx,
+              vy,
+              vz,
+              size: 2 + Math.random() * 2,
+            };
+            debris.push(newDebris);
+            debrisAddedInCascade++;
+            spawnedThisFrame++;
+          }
+
+          const collisionThreshold = 0.04;
+          const newFragments = [];
+
+          const keplerConstant = 0.0025;
+          debris = debris.map((d) => {
+            const angularSpeed = keplerConstant / Math.pow(d.radius, 1.5);
+            const nextAngle = (d.angle + angularSpeed) % (Math.PI * 2);
+            const cosAngle = Math.cos(nextAngle);
+            const sinAngle = Math.sin(nextAngle);
+            const cosInc = Math.cos(d.inclination);
+            const sinInc = Math.sin(d.inclination);
+
+            const x3d = d.radius * cosAngle;
+            const y3d = d.radius * sinAngle * cosInc;
+            const z3d = d.radius * sinAngle * sinInc;
+
+            return {
+              ...d,
+              angle: nextAngle,
+              x: 0.5 + x3d,
+              y: 0.5 + y3d,
+              z: z3d,
+            };
+          });
+
+          // Offline full collision check
+          const allCollisions = new Set();
+          for (let i = 0; i < debris.length; i++) {
+            for (let j = i + 1; j < debris.length; j++) {
+              const d1 = debris[i];
+              const d2 = debris[j];
+              const dx = d1.x - d2.x;
+              const dy = d1.y - d2.y;
+              const dz = d1.z - d2.z;
+              const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+              if (distance < collisionThreshold) {
+                allCollisions.add(`${Math.min(i, j)}-${Math.max(i, j)}`);
+              }
+            }
+          }
+
+          // Limited collision check
+          let maxDebrisToCheck;
+          if (config.maxDebrisToCheck === "all") {
+            maxDebrisToCheck = debris.length;
+          } else {
+            maxDebrisToCheck = Math.min(debris.length, config.maxDebrisToCheck);
+          }
+
+          let startIndex = 0;
+          if (config.useRotatingWindow && config.maxDebrisToCheck !== "all") {
+            rotatingWindowOffset = (rotatingWindowOffset + 1) % debris.length;
+            startIndex = rotatingWindowOffset;
+          }
+
+          const checkedCollisions = new Set();
+          for (let i = startIndex; i < startIndex + maxDebrisToCheck; i++) {
+            const idx1 = i % debris.length;
+            for (let j = idx1 + 1; j < startIndex + maxDebrisToCheck; j++) {
+              const idx2 = j % debris.length;
+              if (idx1 >= idx2) continue;
+
+              const d1 = debris[idx1];
+              const d2 = debris[idx2];
+              const dx = d1.x - d2.x;
+              const dy = d1.y - d2.y;
+              const dz = d1.z - d2.z;
+              const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+              if (distance < collisionThreshold) {
+                checkedCollisions.add(`${Math.min(idx1, idx2)}-${Math.max(idx1, idx2)}`);
+              }
+            }
+          }
+
+          // Count missed collisions
+          allCollisions.forEach(collision => {
+            if (!checkedCollisions.has(collision)) {
+              missedCollisions++;
+            }
+          });
+
+          // Process actual collisions
+          for (let i = startIndex; i < startIndex + maxDebrisToCheck; i++) {
+            const idx1 = i % debris.length;
+            for (let j = idx1 + 1; j < startIndex + maxDebrisToCheck; j++) {
+              const idx2 = j % debris.length;
+              if (idx1 >= idx2) continue;
+
+              const d1 = debris[idx1];
+              const d2 = debris[idx2];
+              const dx = d1.x - d2.x;
+              const dy = d1.y - d2.y;
+              const dz = d1.z - d2.z;
+              const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+              if (distance < collisionThreshold) {
+                collisionCount++;
+                const fragmentCount = 2;
+                const remainingCap = maxDebrisCount - debrisAddedInCascade - newFragments.length;
+                if (
+                  remainingCap < fragmentCount ||
+                  debris[idx1].size === 0 ||
+                  debris[idx2].size === 0
+                ) {
+                  continue;
+                }
+
+                for (let f = 0; f < fragmentCount; f++) {
+                  newFragments.push({
+                    id: `frag-${Date.now()}-${Math.random()}`,
+                    x: d1.x,
+                    y: d1.y,
+                    z: d1.z,
+                    vx: 0, vy: 0, vz: 0,
+                    angle: d1.angle + (Math.random() - 0.5) * 0.5,
+                    radius: d1.radius * (0.9 + Math.random() * 0.2),
+                    inclination: d1.inclination + (Math.random() - 0.5) * 0.1,
+                    size: Math.max(1, d1.size * 0.7),
+                  });
+                }
+
+                debris[idx1] = { ...debris[idx1], size: 0 };
+                debris[idx2] = { ...debris[idx2], size: 0 };
+              }
+            }
+          }
+
+          debris = [...debris.filter((d) => d.size > 0), ...newFragments];
+          debrisAddedInCascade += newFragments.length;
+
+          drawCanvas(debris, ripple);
+
+          const frameEnd = performance.now();
+          const frameTime = frameEnd - lastFrameTime;
+          lastFrameTime = frameEnd;
+          frameTimes.push(frameTime);
+          if (frameTime > 16.7) framesOver16ms++;
+          if (frameTime > 33) framesOver33ms++;
+
+          requestAnimationFrame(animate);
+        } else {
+          isAnimating = false;
+          document.getElementById('status').textContent = `Complete: ${collisionCount} collisions, ${debris.length} objects`;
+
+          const resultsDiv = document.getElementById('results');
+          resultsDiv.style.display = 'block';
+          resultsDiv.innerHTML = `
+            <h3>Results:</h3>
+            <p>Total frames: ${frameTimes.length}</p>
+            <p>Avg frame time: ${(frameTimes.reduce((a, b) => a + b, 0) / frameTimes.length).toFixed(2)} ms</p>
+            <p>P95 frame time: ${frameTimes.sort((a, b) => a - b)[Math.floor(frameTimes.length * 0.95)].toFixed(2)} ms</p>
+            <p>Frames over 16.7ms: ${((framesOver16ms / frameTimes.length) * 100).toFixed(1)}%</p>
+            <p>Frames over 33ms: ${((framesOver33ms / frameTimes.length) * 100).toFixed(1)}%</p>
+            <p>Final object count: ${debris.length}</p>
+            <p>Total collisions: ${collisionCount}</p>
+            <p>Missed collisions: ${missedCollisions} (${(collisionCount + missedCollisions > 0 ? ((missedCollisions / (collisionCount + missedCollisions)) * 100).toFixed(1) : 0)}%)</p>
+          `;
+
+          drawCanvas(debris, ripple);
+        }
+      }
+
+      requestAnimationFrame(animate);
+    });
+  </script>
+</body>
+</html>

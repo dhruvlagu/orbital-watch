@@ -446,10 +446,9 @@ const triggerCascade = () => {
         };
       });
 
-      // Collision detection (optimized with early exit)
-      const maxDebrisToCheck = Math.min(currentDebrisRef.current.length, 50);
-      for (let i = 0; i < maxDebrisToCheck; i++) {
-        for (let j = i + 1; j < maxDebrisToCheck; j++) {
+      // Collision detection (checks all pairs)
+      for (let i = 0; i < currentDebrisRef.current.length; i++) {
+        for (let j = i + 1; j < currentDebrisRef.current.length; j++) {
           const d1 = currentDebrisRef.current[i];
           const d2 = currentDebrisRef.current[j];
 
